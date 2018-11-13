@@ -62,20 +62,6 @@ class GeometricElement(Element):
 # element substitutes
 #     requires implementation of self.z, self.shape, self.color, self.on_update()
 
-class Player(object):
-    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10):
-        self.world_size = (0.8, 0.5)
-        self.res = res
-        self.world_pos = initial_world_pos # world units are measured by res
-        self.world_vel = (0, 0)
-        self.z = z
-
-        self.element = TexturedElement(pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res), tag = "player", z = self.z, size = (self.res, self.res), texture_path = "graphics/player_stand.png")
-
-    def on_update(self, dt):
-        self.world_pos = (self.world_pos[0] + self.world_vel[0], self.world_pos[1] + self.world_vel[1])
-
-
 class ElementGroup(object):
     def __init__(self, elements = [], z = 0, color = None):
         self.elements = elements
@@ -130,25 +116,76 @@ class Terrain(object):
         self.shape = InstructionGroup()
         for x in range(len(self.map)):
             vertices = [
-                            x*self.res, 0, 0, 0,
-                            x*self.res, self.map[x]*self.res, 0, 0, 
-                            (x+0.1)*self.res, self.map[x]*self.res, 0, 0, 
-                            (x+0.9)*self.res, self.map[x]*self.res, 0, 0, 
-                            (x+1)*self.res, self.map[x]*self.res, 0, 0, 
-                            (x+1)*self.res, 0, 0, 0]
+                            x*self.res*retina_multiplier, 0, 0, 0,
+                            x*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
+                            (x+0.1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
+                            (x+0.9)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
+                            (x+1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
+                            (x+1)*self.res*retina_multiplier, 0, 0, 0]
             if x-1 > 0:
                 if self.map[x-1] < self.map[x]:
-                    vertices[5] += -self.res*0.1
+                    vertices[5] += -self.res*0.1*retina_multiplier
                 elif self.map[x-1] > self.map[x]:
-                    vertices[5] += self.res*0.1
+                    vertices[5] += self.res*0.1*retina_multiplier
             if x+1 < len(self.map):
                 if self.map[x+1] < self.map[x]:
-                    vertices[17] += -self.res*0.1
+                    vertices[17] += -self.res*0.1*retina_multiplier
                 elif self.map[x+1] > self.map[x]:
-                    vertices[17] += self.res*0.1
+                    vertices[17] += self.res*0.1*retina_multiplier
             indices = [0, 1, 2, 3, 4, 5]
             self.shape.add(Mesh(vertices=vertices, indices=indices, mode="triangle_fan"))
 
     def on_update(self, dt):
         pass
+
+
+# element-substitute world-coordinated objects, 
+#     requires implementation of self.world_pos, self.world_size
+
+class Player(object):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10):
+        self.world_size = (1.15, 1.0)
+        self.res = res
+        self.world_pos = initial_world_pos # world units are measured by res
+        self.world_vel = (0, 0)
+        self.z = z
+        self.direction = "left" # or "right"
+
+        self.element = TexturedElement(pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res), tag = "player", z = self.z, size = (self.res*2, self.res*2), texture_path = "graphics/player_stand.png")
+
+    def on_update(self, dt, ground_map, active_keys):
+
+        # position update
+        target_x_vel = 0
+        if active_keys["right"] == True:
+            target_x_vel += 9.0
+        if active_keys["left"] == True:
+            target_x_vel += -9.0
+
+        self.world_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*16.0*dt), self.world_vel[1] - (60.0*dt))
+        self.world_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
+
+        # ground collisions
+        if self.world_vel[1] < 0:
+            player_x_index = min(max(int(self.world_pos[0]), 0), len(ground_map)-1)
+            highest_ground = ground_map[player_x_index]
+
+            left_side = self.world_pos[0] - self.world_size[0]*0.5
+            right_side = self.world_pos[0] + self.world_size[0]*0.5
+            if player_x_index - 1 > 0 and left_side <= player_x_index-1:
+                highest_ground = max(highest_ground, ground_map[player_x_index - 1])
+            if player_x_index + 1 < len(ground_map) and right_side >= player_x_index+1:
+                highest_ground = max(highest_ground, ground_map[player_x_index + 1])
+
+            player_bottom = self.world_pos[1]-self.world_size[1]
+            if player_bottom < highest_ground:
+                self.world_pos = (self.world_pos[0], highest_ground+self.world_size[1])
+                if active_keys['spacebar'] == True:
+                    self.world_vel = (self.world_vel[0], 15.0)
+                else:
+                    self.world_vel = (self.world_vel[0], -self.world_vel[1]*0.25)
+
+        # visual update
+        self.element.pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res)
+
 

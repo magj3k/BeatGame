@@ -17,10 +17,10 @@ class SceneManager(InstructionGroup):
             self.current_scene_index = scene_index
             self.add(self.scenes[self.current_scene_index])
 
-    def on_update(self, dt):
+    def on_update(self, dt, active_keys):
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]
-            current_scene.on_update(dt)
+            current_scene.on_update(dt, active_keys)
 
             # loops over all objects in the current scene for rendering based on z positions
             objs_by_z_order = {} # tracks objects by non-zero z-order
@@ -68,16 +68,21 @@ class SceneManager(InstructionGroup):
 
 
 class Scene(InstructionGroup):
-    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = []):
         super(Scene, self).__init__()
         self.game_elements = initial_game_elements
         self.UI_elements = initial_UI_elements
         self.game_camera = game_camera
 
-        self.player = Player(res = 90.0, initial_world_pos = (1, 6))
+        self.player = Player(res = 45.0, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
 
-    def on_update(self, dt):
+        self.ground_map = ground_map
+
+    def on_update(self, dt, active_keys):
+        # updates player collisions
+        self.player.on_update(dt, self.ground_map, active_keys)
+
         for element in self.game_elements:
             element.on_update(dt)
 

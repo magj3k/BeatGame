@@ -16,8 +16,8 @@ scene_1_game_elements = [
                                                     Terrain(scene_1_ground_map,
                                                         z = 10,
                                                         color = Color(0, 0, 0),
-                                                        res = 90.0),
+                                                        res = 45.0),
                                                 ]
-scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [])
+scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map)
 
 scenes = [scene_1]
