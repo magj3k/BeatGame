@@ -12,6 +12,8 @@ class SceneManager(InstructionGroup):
 
     def switch_to_scene(self, scene_index):
         if len(self.scenes) > scene_index:
+            # TODO: remove current scene before switching
+
             self.current_scene_index = scene_index
             self.add(self.scenes[self.current_scene_index])
 
@@ -71,6 +73,9 @@ class Scene(InstructionGroup):
         self.game_elements = initial_game_elements
         self.UI_elements = initial_UI_elements
         self.game_camera = game_camera
+
+        self.player = Player(res = 90.0, initial_world_pos = (1, 6))
+        self.game_elements.append(self.player.element)
 
     def on_update(self, dt):
         for element in self.game_elements:
