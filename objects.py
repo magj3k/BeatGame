@@ -133,6 +133,7 @@ class Terrain(object):
                 elif self.map[x+1] > self.map[x]:
                     vertices[17] += self.res*0.1*retina_multiplier
             indices = [0, 1, 2, 3, 4, 5]
+            # self.shape.add(Mesh(vertices=vertices, indices=indices, mode="line_loop"))
             self.shape.add(Mesh(vertices=vertices, indices=indices, mode="triangle_fan"))
 
     def on_update(self, dt):
@@ -144,14 +145,60 @@ class Terrain(object):
 
 class Player(object):
     def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10):
-        self.world_size = (1.15, 1.0)
+        self.world_size = (1.0, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
         self.world_vel = (0, 0)
         self.z = z
         self.direction = "left" # or "right"
 
+        # animations
+        self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
+        self.animation_state = "standing"
+        self.animation_t = 0
+        self.animation_frame = 0
+        self.animation_frame_duration = 0.1
+
         self.element = TexturedElement(pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res), tag = "player", z = self.z, size = (self.res*2, self.res*2), texture_path = "graphics/player_stand.png")
+
+    def set_animation_state(self, new_state): # follow this call with self.process_animation()
+        if new_state in self.valid_animation_states and new_state != self.animation_state:
+            self.animation_state = new_state
+            self.animation_t = 0
+            self.animation_frame = -1
+
+            if self.animation_state == "standing" or self.animation_state == "jump_right" or self.animation_state == "jump_left":
+                self.animation_frame_duration = 30.0
+            elif self.animation_state == "run_right" or self.animation_state == "run_left":
+                self.animation_frame_duration = 0.075
+
+    def process_animation(self, dt):
+        self.animation_t += dt
+        next_frame = int(self.animation_t/self.animation_frame_duration)
+        if next_frame != self.animation_frame:
+            self.animation_frame = next_frame
+
+            # update texture
+            if self.animation_state == "run_right":
+                if self.animation_frame % 3 == 0:
+                    self.element.change_texture("graphics/player_run_1.png")
+                elif self.animation_frame % 3 == 1:
+                    self.element.change_texture("graphics/player_run_2.png")
+                elif self.animation_frame % 3 == 2:
+                    self.element.change_texture("graphics/player_run_3.png")
+            elif self.animation_state == "run_left":
+                if self.animation_frame % 3 == 0:
+                    self.element.change_texture("graphics/player_run_1_r.png")
+                elif self.animation_frame % 3 == 1:
+                    self.element.change_texture("graphics/player_run_2_r.png")
+                elif self.animation_frame % 3 == 2:
+                    self.element.change_texture("graphics/player_run_3_r.png")
+            elif self.animation_state == "jump_right":
+                self.element.change_texture("graphics/player_jump.png")
+            elif self.animation_state == "jump_left":
+                self.element.change_texture("graphics/player_jump_r.png")
+            else:
+                self.element.change_texture("graphics/player_stand.png")
 
     def on_update(self, dt, ground_map, active_keys):
 
@@ -159,33 +206,60 @@ class Player(object):
         target_x_vel = 0
         if active_keys["right"] == True:
             target_x_vel += 9.0
+            self.set_animation_state("run_right")
         if active_keys["left"] == True:
             target_x_vel += -9.0
+            self.set_animation_state("run_left")
+        if active_keys["left"] == False and active_keys["right"] == False:
+            self.set_animation_state("standing")
 
-        self.world_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*16.0*dt), self.world_vel[1] - (60.0*dt))
-        self.world_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
+        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] - (60.0*dt))
+        next_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
 
-        # ground collisions
-        if self.world_vel[1] < 0:
-            player_x_index = min(max(int(self.world_pos[0]), 0), len(ground_map)-1)
-            highest_ground = ground_map[player_x_index]
+        # ground & wall collisions
+        if self.world_vel[1] < 0 or self.world_vel[0] != 0:
+            current_player_x_index = min(max(int(self.world_pos[0]), 0), len(ground_map)-1)
+            next_player_x_index = min(max(int(next_pos[0]), 0), len(ground_map)-1)
+            highest_ground = ground_map[next_player_x_index]
 
-            left_side = self.world_pos[0] - self.world_size[0]*0.5
-            right_side = self.world_pos[0] + self.world_size[0]*0.5
-            if player_x_index - 1 > 0 and left_side <= player_x_index-1:
-                highest_ground = max(highest_ground, ground_map[player_x_index - 1])
-            if player_x_index + 1 < len(ground_map) and right_side >= player_x_index+1:
-                highest_ground = max(highest_ground, ground_map[player_x_index + 1])
+            left_side = next_pos[0] - self.world_size[0]*0.5
+            right_side = next_pos[0] + self.world_size[0]*0.5
+            left_height = ground_map[next_player_x_index]
+            right_height = ground_map[next_player_x_index]
+            next_player_height = next_pos[1]-self.world_size[1]
+            current_player_height = self.world_pos[1]-self.world_size[1]
 
-            player_bottom = self.world_pos[1]-self.world_size[1]
-            if player_bottom < highest_ground:
-                self.world_pos = (self.world_pos[0], highest_ground+self.world_size[1])
+            # ground collisions
+            if next_player_x_index - 1 > 0:
+                left_height = ground_map[next_player_x_index - 1]
+                if left_side < next_player_x_index and current_player_height >= left_height:
+                    highest_ground = max(highest_ground, ground_map[next_player_x_index - 1])
+            if next_player_x_index + 1 < len(ground_map):
+                right_height = ground_map[next_player_x_index + 1]
+                if right_side > next_player_x_index+1 and current_player_height >= right_height:
+                    highest_ground = max(highest_ground, ground_map[next_player_x_index + 1])
+
+            if next_player_height < highest_ground: # is true whenever resting on ground
+                next_pos = (next_pos[0], highest_ground+self.world_size[1])
                 if active_keys['spacebar'] == True:
-                    self.world_vel = (self.world_vel[0], 15.0)
+                    next_vel = (next_vel[0], 18.0)
                 else:
-                    self.world_vel = (self.world_vel[0], -self.world_vel[1]*0.25)
+                    next_vel = (next_vel[0], -next_vel[1]*0.15)
+
+            # wall collisions
+            if left_side < next_player_x_index and current_player_height < left_height:
+                next_pos = (next_player_x_index+self.world_size[0]*0.5, next_pos[1])
+                next_vel = (0, next_vel[1])
+            elif right_side > next_player_x_index+1 and current_player_height < right_height:
+                next_pos = (next_player_x_index+1-self.world_size[0]*0.5, next_pos[1])
+                next_vel = (0, next_vel[1])
+
+        # animations
+        self.process_animation(dt)
 
         # visual update
+        self.world_vel = next_vel
+        self.world_pos = next_pos
         self.element.pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res)
 
 

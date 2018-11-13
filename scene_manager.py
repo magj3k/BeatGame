@@ -74,7 +74,7 @@ class Scene(InstructionGroup):
         self.UI_elements = initial_UI_elements
         self.game_camera = game_camera
 
-        self.player = Player(res = 45.0, initial_world_pos = (2, 6))
+        self.player = Player(res = 30.0, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
 
         self.ground_map = ground_map
