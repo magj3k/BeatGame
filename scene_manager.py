@@ -131,18 +131,15 @@ class Camera(object):
     def __init__(self, initial_world_focus = (0, 0), initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0, bounds = None):
         self.world_focus = initial_world_focus
         self.world_target = initial_world_target
-        self.zoom_factor = zoom_factor
+        self.target_zoom_factor = zoom_factor
+        self.zoom_factor = 20.0
         self.speed = speed
         self.bounds = bounds
-
-        self.t = 0
 
     def update_target(self, new_target):
         self.world_target = (max(self.bounds[0][0], min(new_target[0], self.bounds[1][0])), max(self.bounds[0][1], min(new_target[1], self.bounds[1][1])))
 
     def on_update(self, dt):
-        self.t += dt
-        self.zoom_factor = 1.2+np.sin(self.t*4.0)*0.1
-
+        self.zoom_factor = self.zoom_factor + ((self.target_zoom_factor - self.zoom_factor)* dt * self.speed)
         self.world_focus = (self.world_focus[0] + ((self.world_target[0] - self.world_focus[0])  * dt * self.speed), self.world_focus[1] + ((self.world_target[1] - self.world_focus[1]) * dt * self.speed))
 
