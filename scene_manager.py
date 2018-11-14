@@ -3,6 +3,7 @@ from core import *
 from objects import *
 from kivy.graphics.instructions import InstructionGroup
 import numpy as np
+from math import *
 
 class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
@@ -104,7 +105,7 @@ class Scene(InstructionGroup):
             self.game_camera.on_update(dt)
 
             camera_scalar = self.game_camera.zoom_factor
-            camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+window_size[0], -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+window_size[1])
+            camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+(window_size[0]*0.5*retina_multiplier), -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+(window_size[1]*0.5*retina_multiplier))
 
         # updates player collisions
         self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller)
@@ -127,15 +128,21 @@ class Scene(InstructionGroup):
 
 
 class Camera(object):
-    def __init__(self, initial_world_focus = (0, 0), initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0):
+    def __init__(self, initial_world_focus = (0, 0), initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0, bounds = None):
         self.world_focus = initial_world_focus
         self.world_target = initial_world_target
         self.zoom_factor = zoom_factor
         self.speed = speed
+        self.bounds = bounds
+
+        self.t = 0
 
     def update_target(self, new_target):
-        self.world_target = new_target
+        self.world_target = (max(self.bounds[0][0], min(new_target[0], self.bounds[1][0])), max(self.bounds[0][1], min(new_target[1], self.bounds[1][1])))
 
     def on_update(self, dt):
+        self.t += dt
+        self.zoom_factor = 1.2+np.sin(self.t*4.0)*0.1
+
         self.world_focus = (self.world_focus[0] + ((self.world_target[0] - self.world_focus[0])  * dt * self.speed), self.world_focus[1] + ((self.world_target[1] - self.world_focus[1]) * dt * self.speed))
 
