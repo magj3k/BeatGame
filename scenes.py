@@ -33,7 +33,7 @@ scene_1_game_elements = [
                                                 ]
 
 
-scene_1_audio_controller = AudioController(level = 1, bpm = 120, elements = scene_1_game_elements)
+scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
 scene_1_camera = Camera(zoom_factor = 1.1, speed = 0.85)
 
 scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller)
