@@ -57,7 +57,7 @@ for i in range(25):
     new_tree = Backdrop(element = TexturedElement(pos = ((random.random()*2000) - 100, 100+(70*rand_size_coeff[1])),
                                                         z = 80,
                                                         size = (234*0.35*rand_size_coeff[0], 451*0.35*rand_size_coeff[1]),
-                                                        color = Color(0.45, 0.55, 0.3),
+                                                        color = Color(0.4, 0.47, 0.27),
                                                         texture_path = "graphics/tree_1.png"),
                                                         parallax_z = 1.1)
     scene_1_game_elements.append(new_tree)
