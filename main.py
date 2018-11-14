@@ -23,8 +23,9 @@ class MainWidget(BaseWidget):
 
     def on_key_down(self, keycode, modifiers):
         key = keycode[1]
-        print('down', key)
+        # print('down', key)
 
+        self.scene_manager.on_key_down(key)
         if key in self.active_keys:
             self.active_keys[key] = True
 
@@ -32,6 +33,7 @@ class MainWidget(BaseWidget):
         key = keycode[1]
         # print('up', key)
 
+        self.scene_manager.on_key_up(key)
         if key in self.active_keys:
             self.active_keys[key] = False
 

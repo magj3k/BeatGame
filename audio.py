@@ -8,3 +8,9 @@ class AudioController(object):
 
     def on_update(self, dt, player, active_keys):
         pass
+
+    def on_key_down(self, key):
+        pass
+
+    def on_key_up(self, key):
+        pass
