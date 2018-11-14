@@ -14,3 +14,6 @@ class AudioController(object):
 
     def on_key_up(self, key):
         pass
+
+    def jump(self):
+        pass

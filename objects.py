@@ -94,8 +94,9 @@ class Backdrop(object):
         self.musical = musical
 
     def on_update(self, dt, cam_scalar, cam_offset):
-        for element in self.elements:
-            element.on_update(dt, cam_scalar, cam_offset)
+        new_cam_scalar = cam_scalar*(1/(self.parallax_z+1))
+        new_cam_offset = (cam_offset[0]*new_cam_scalar + (window_size[0]*0.5*(1-new_cam_scalar)), cam_offset[1]*new_cam_scalar + (window_size[0]*0.5*(1-new_cam_scalar)))
+        self.element.on_update(dt, cam_scalar, new_cam_offset)
 
 
 class Terrain(object):
@@ -163,6 +164,7 @@ class Player(object):
         self.z = z
         self.direction = "left" # or "right"
         self.musical = False
+        self.on_ground = True
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
@@ -212,7 +214,7 @@ class Player(object):
             else:
                 self.element.change_texture("graphics/player_stand.png")
 
-    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset):
+    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller):
 
         # position update
         target_x_vel = 0
@@ -241,6 +243,11 @@ class Player(object):
             next_player_height = next_pos[1]-self.world_size[1]
             current_player_height = self.world_pos[1]-self.world_size[1]
 
+            if fabs(current_player_height - ground_map[current_player_x_index]) < 0.05:
+                self.on_ground = True
+            else:
+                self.on_ground = False
+
             # ground collisions
             if next_player_x_index - 1 > 0:
                 left_height = ground_map[next_player_x_index - 1]
@@ -255,6 +262,8 @@ class Player(object):
                 next_pos = (next_pos[0], highest_ground+self.world_size[1])
                 if active_keys['spacebar'] == True:
                     next_vel = (next_vel[0], 18.0)
+                    audio_controller.jump()
+                    self.on_ground = False
                 else:
                     next_vel = (next_vel[0], -next_vel[1]*0.15)
 

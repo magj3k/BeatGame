@@ -81,7 +81,7 @@ class SceneManager(InstructionGroup):
 
 
 class Scene(InstructionGroup):
-    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None):
         super(Scene, self).__init__()
         self.game_elements = initial_game_elements
         self.UI_elements = initial_UI_elements
@@ -89,7 +89,8 @@ class Scene(InstructionGroup):
         self.audio_controller = audio_controller
         self.res = res
 
-        self.player = Player(res = res, initial_world_pos = (2, 6))
+        self.player = player
+        if self.player == None: self.player = Player(res = res, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
 
         self.ground_map = ground_map
@@ -103,10 +104,10 @@ class Scene(InstructionGroup):
             self.game_camera.on_update(dt)
 
             camera_scalar = self.game_camera.zoom_factor
-            camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*2.0*self.res+window_size[0], -self.game_camera.world_focus[1]*camera_scalar*2.0*self.res+window_size[1])
+            camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+window_size[0], -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+window_size[1])
 
         # updates player collisions
-        self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset)
+        self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller)
         if self.game_camera != None: self.game_camera.update_target(self.player.world_pos)
 
         for element in self.game_elements:
