@@ -1,3 +1,4 @@
+from audio import *
 from core import *
 from objects import *
 from kivy.graphics.instructions import InstructionGroup
@@ -9,6 +10,18 @@ class SceneManager(InstructionGroup):
         self.scenes = scenes
         self.current_scene_index = 0
         self.switch_to_scene(initial_scene_index)
+
+    def on_key_down(self, key): # for audio controller
+        if len(self.scenes) > self.current_scene_index:
+            current_scene = self.scenes[self.current_scene_index]
+            if current_scene.audio_controller != None:
+                current_scene.audio_controller.on_key_down(key)
+
+    def on_key_up(self, key): # for audio controller
+        if len(self.scenes) > self.current_scene_index:
+            current_scene = self.scenes[self.current_scene_index]
+            if current_scene.audio_controller != None:
+                current_scene.audio_controller.on_key_up(key)
 
     def switch_to_scene(self, scene_index):
         if len(self.scenes) > scene_index:
@@ -74,6 +87,7 @@ class Scene(InstructionGroup):
         self.UI_elements = initial_UI_elements
         self.game_camera = game_camera
         self.audio_controller = audio_controller
+        self.res = res
 
         self.player = Player(res = res, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
@@ -89,7 +103,7 @@ class Scene(InstructionGroup):
             self.game_camera.on_update(dt)
 
             camera_scalar = self.game_camera.zoom_factor
-            camera_offset = (-self.game_camera.world_target[0]*camera_scalar*0.5, -self.game_camera.world_target[1]*camera_scalar*0.5)
+            camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*2.0*self.res+window_size[0], -self.game_camera.world_focus[1]*camera_scalar*2.0*self.res+window_size[1])
 
         # updates player collisions
         self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset)
@@ -102,7 +116,7 @@ class Scene(InstructionGroup):
             element.on_update(dt, camera_scalar, camera_offset)
 
         # audio controller update
-        self.audio_controller.on_update(dt, self.player, active_keys)
+        if self.audio_controller != None: self.audio_controller.on_update(dt, self.player, active_keys)
 
     def add_UI_element(self, element):
         self.UI_elements.append(element)
@@ -122,5 +136,5 @@ class Camera(object):
         self.world_target = new_target
 
     def on_update(self, dt):
-        self.world_focus = (self.world_focus[0] + ((self.world_target[0] - self.world_focus[0]) * dt * self.speed), self.world_focus[1] + ((self.world_target[1] - self.world_focus[1]) * dt * self.speed))
+        self.world_focus = (self.world_focus[0] + ((self.world_target[0] - self.world_focus[0])  * dt * self.speed), self.world_focus[1] + ((self.world_target[1] - self.world_focus[1]) * dt * self.speed))
 

@@ -6,12 +6,6 @@ from audio_controller import *
 
 middle = (window_size[0]/2, window_size[1]/2)
 
-class Platform(object):
-    def __init__(self, beats = [1, 3], measure_length = 4):
-        self.beats = beats
-        self.measure_length = measure_length
-        ...
-
 scene_1_ground_map = [6]*50
 scene_1_ground_map[5:10] = [7]*4
 scene_1_ground_map[14:18] = [4]*4
@@ -35,12 +29,13 @@ scene_1_game_elements = [
                                                     Terrain(scene_1_ground_map,
                                                         z = 10,
                                                         color = Color(0, 0, 0),
-                                                        res = scene_1_resolution),
-                                                    Platform(), Platform()
+                                                        res = scene_1_resolution)
                                                 ]
 
-scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
 
-scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map, res = scene_1_resolution, audio_controller = scene_1_audio_controller)
+scene_1_audio_controller = AudioController(level = 1, bpm = 120, elements = scene_1_game_elements)
+scene_1_camera = Camera(zoom_factor = 1.1, speed = 0.85)
+
+scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller)
 
 scenes = [scene_1]

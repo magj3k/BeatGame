@@ -18,13 +18,13 @@ class Element(object):
         if color == None:
             self.color = Color(1, 1, 1)
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt):
         self.pos = (self.pos[0]+self.vel[0]*dt, self.pos[1]+self.vel[1]*dt)
 
 
 class TexturedElement(Element):
-    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), texture_path = ""):
-        Element.__init__(self, pos, vel, tag, color, z)
+    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), texture_path = "", musical = False):
+        Element.__init__(self, pos, vel, tag, color, z, musical)
         self.size = size
         self.texture_path = texture_path
         self.shape = Rectangle(pos=((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier),size=(self.size[0]*retina_multiplier, self.size[1]*retina_multiplier))
@@ -39,13 +39,13 @@ class TexturedElement(Element):
 
     def on_update(self, dt, cam_scalar, cam_offset):
         super().on_update(dt)
-        self.shape.pos = ((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier)
-        self.shape.size = (self.size[0]*retina_multiplier, self.size[1]*retina_multiplier)
+        self.shape.pos = (((self.pos[0]-(self.size[0]/2))*retina_multiplier)*cam_scalar + cam_offset[0], ((self.pos[1]-(self.size[1]/2))*retina_multiplier)*cam_scalar + cam_offset[1])
+        self.shape.size = (self.size[0]*retina_multiplier*cam_scalar, self.size[1]*retina_multiplier*cam_scalar)
 
 
 class GeometricElement(Element):
-    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), shape = None):
-        Element.__init__(self, pos, vel, tag, color, z)
+    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), shape = None, musical = False):
+        Element.__init__(self, pos, vel, tag, color, z, musical)
         self.size = size
         self.shape = shape
         if self.shape == None:
@@ -56,16 +56,17 @@ class GeometricElement(Element):
 
     def on_update(self, dt, cam_scalar, cam_offset):
         super().on_update(dt)
-        self.shape.pos = ((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier)
-        self.shape.size = (self.size[0]*retina_multiplier, self.size[1]*retina_multiplier)
+        self.shape.pos = (((self.pos[0]-(self.size[0]/2))*retina_multiplier)*cam_scalar + cam_offset[0], ((self.pos[1]-(self.size[1]/2))*retina_multiplier)*cam_scalar + cam_offset[1])
+        self.shape.size = (self.size[0]*retina_multiplier*cam_scalar, self.size[1]*retina_multiplier*cam_scalar)
 
 
 # element substitutes
-#     requires implementation of self.z, self.shape, self.color, self.on_update()
+#     requires implementation of self.z, self.shape, self.color, self.on_update(), self.musical
 
 class ElementGroup(object):
-    def __init__(self, elements = [], z = 0, color = None):
+    def __init__(self, elements = [], z = 0, color = None, musical = False):
         self.elements = elements
+        self.musical = musical
         self.z = z
         self.color = color
         if color == None:
@@ -81,7 +82,7 @@ class ElementGroup(object):
 
 
 class Backdrop(object):
-    def __init__(self, element, parallax_z = 0, shading_function = None):
+    def __init__(self, element, parallax_z = 0, shading_function = None, musical = False):
         self.element = element
         self.shading_function = shading_function
         self.parallax_z = parallax_z
@@ -90,14 +91,11 @@ class Backdrop(object):
         self.z = self.element.z
         self.color = self.element.color
         self.shape = self.element.shape
-
-    def process_position(self, camera_parallax_z):
-        distance_factor = 1/max(math.fabs(camera_parallax_z - (self.parallax_z+1)), 1)
-        self.pos = (self.element.pos[0]*distance_factor + window_size[0]*0.5*(1-distance_factor), self.element.pos[1]*distance_factor + window_size[1]*0.5*(1-distance_factor))
+        self.musical = musical
 
     def on_update(self, dt, cam_scalar, cam_offset):
         for element in self.elements:
-            element.on_update(dt)
+            element.on_update(dt, cam_scalar, cam_offset)
 
 
 class Terrain(object):
@@ -105,6 +103,7 @@ class Terrain(object):
         self.type = type
         self.map = map # numpy height array
         self.res = res
+        self.musical = False
 
         # placeholder values
         self.z = z
@@ -115,6 +114,8 @@ class Terrain(object):
 
         # builds mesh
         self.shape = InstructionGroup()
+        self.mesh_vertices = []
+        self.meshes = []
         for x in range(len(self.map)):
             vertices = [
                             x*self.res*retina_multiplier, 0, 0, 0,
@@ -122,7 +123,8 @@ class Terrain(object):
                             (x+0.1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
                             (x+0.9)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
                             (x+1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
-                            (x+1)*self.res*retina_multiplier, 0, 0, 0]
+                            (x+1)*self.res*retina_multiplier, 0, 0, 0
+                            ]
             if x-1 > 0:
                 if self.map[x-1] < self.map[x]:
                     vertices[5] += -self.res*0.1*retina_multiplier
@@ -135,10 +137,18 @@ class Terrain(object):
                     vertices[17] += self.res*0.1*retina_multiplier
             indices = [0, 1, 2, 3, 4, 5]
             # self.shape.add(Mesh(vertices=vertices, indices=indices, mode="line_loop"))
-            self.shape.add(Mesh(vertices=vertices, indices=indices, mode="triangle_fan"))
+            self.mesh_vertices.append(vertices)
+            self.meshes.append(Mesh(vertices=vertices, indices=indices, mode="triangle_fan"))
+            self.shape.add(self.meshes[-1])
 
     def on_update(self, dt, cam_scalar, cam_offset):
-        pass
+        for i in range(len(self.meshes)):
+            processed_vertices = self.mesh_vertices[i][:]
+            for j in [0, 4, 8, 12, 16, 20]:
+                processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[0]
+            for j in [1, 5, 9, 13, 17, 21]:
+                processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[1]
+            self.meshes[i].vertices = processed_vertices
 
 
 # element-substitute world-coordinated objects, 
@@ -152,6 +162,7 @@ class Player(object):
         self.world_vel = (0, 0)
         self.z = z
         self.direction = "left" # or "right"
+        self.musical = False
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
