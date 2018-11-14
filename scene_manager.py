@@ -1,4 +1,4 @@
-from audio import *
+from audio_controller import *
 from core import *
 from objects import *
 from kivy.graphics.instructions import InstructionGroup

@@ -36,7 +36,7 @@ scene_1_game_elements = [
                                                         z = 1,
                                                         size = (window_size[0]*3.0, window_size[1]*0.4),
                                                         texture_path = "graphics/bg_2.png",
-                                                        color = Color(0.55, 0.5, 0.4)),
+                                                        color = Color(0.7, 0.55, 0.45)),
                                                         parallax_z = 20),
                                                     Terrain(scene_1_ground_map,
                                                         z = 100,
