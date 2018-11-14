@@ -2,6 +2,7 @@ from objects import *
 from core import *
 from scene_manager import *
 from kivy.core.window import Window
+from audio_controller import *
 
 middle = (window_size[0]/2, window_size[1]/2)
 
@@ -38,7 +39,7 @@ scene_1_game_elements = [
                                                     Platform(), Platform()
                                                 ]
 
-scene_1_audio_controller = AudioController(level = 1, bpm = 120, elements = scene_1_game_elements)
+scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
 
 scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map, res = scene_1_resolution, audio_controller = scene_1_audio_controller)
 
