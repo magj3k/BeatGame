@@ -5,6 +5,12 @@ from kivy.core.window import Window
 
 middle = (window_size[0]/2, window_size[1]/2)
 
+class Platform(object):
+    def __init__(self, beats = [1, 3], measure_length = 4):
+        self.beats = beats
+        self.measure_length = measure_length
+        ...
+
 scene_1_ground_map = [6]*50
 scene_1_ground_map[5:10] = [7]*4
 scene_1_ground_map[14:18] = [4]*4
@@ -17,7 +23,9 @@ scene_1_ground_map[27] = 12
 scene_1_ground_map[28:31] = [1]*3
 scene_1_ground_map[30:32] = [10]*2
 scene_1_ground_map[34:36] = [8]*2
+
 scene_1_resolution = 30.0
+
 scene_1_game_elements = [
                                                     TexturedElement(pos = middle,
                                                         z = 0,
@@ -27,7 +35,11 @@ scene_1_game_elements = [
                                                         z = 10,
                                                         color = Color(0, 0, 0),
                                                         res = scene_1_resolution),
+                                                    Platform(), Platform()
                                                 ]
-scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map, res = scene_1_resolution)
+
+scene_1_audio_controller = AudioController(level = 1, bpm = 120, elements = scene_1_game_elements)
+
+scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map, res = scene_1_resolution, audio_controller = scene_1_audio_controller)
 
 scenes = [scene_1]

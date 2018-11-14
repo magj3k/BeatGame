@@ -68,11 +68,12 @@ class SceneManager(InstructionGroup):
 
 
 class Scene(InstructionGroup):
-    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None):
         super(Scene, self).__init__()
         self.game_elements = initial_game_elements
         self.UI_elements = initial_UI_elements
         self.game_camera = game_camera
+        self.audio_controller = audio_controller
 
         self.player = Player(res = res, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
@@ -99,6 +100,9 @@ class Scene(InstructionGroup):
 
         for element in self.UI_elements:
             element.on_update(dt, camera_scalar, camera_offset)
+
+        # audio controller update
+        self.audio_controller.on_update(dt, self.player, active_keys)
 
     def add_UI_element(self, element):
         self.UI_elements.append(element)

@@ -6,18 +6,19 @@ from kivy.graphics.instructions import InstructionGroup
 
 
 class Element(object):
-    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0):
+    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, musical = False):
         self.pos = pos
         self.vel = vel
         self.tag = tag
         self.color = color
         self.z = z
         self.shape = None
+        self.musical = musical
 
         if color == None:
             self.color = Color(1, 1, 1)
 
-    def on_update(self, dt):
+    def on_update(self, dt, cam_scalar, cam_offset):
         self.pos = (self.pos[0]+self.vel[0]*dt, self.pos[1]+self.vel[1]*dt)
 
 
@@ -36,7 +37,7 @@ class TexturedElement(Element):
         if self.texture_path != "":
             self.shape.texture = Image(self.texture_path).texture
 
-    def on_update(self, dt):
+    def on_update(self, dt, cam_scalar, cam_offset):
         super().on_update(dt)
         self.shape.pos = ((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier)
         self.shape.size = (self.size[0]*retina_multiplier, self.size[1]*retina_multiplier)
@@ -53,7 +54,7 @@ class GeometricElement(Element):
     def change_shape(self, new_shape):
         self.shape = new_shape
 
-    def on_update(self, dt):
+    def on_update(self, dt, cam_scalar, cam_offset):
         super().on_update(dt)
         self.shape.pos = ((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier)
         self.shape.size = (self.size[0]*retina_multiplier, self.size[1]*retina_multiplier)
@@ -74,7 +75,7 @@ class ElementGroup(object):
         for element in self.elements:
             self.shape.add(element)
 
-    def on_update(self, dt):
+    def on_update(self, dt, cam_scalar, cam_offset):
         for element in self.elements:
             element.on_update(dt)
 
@@ -94,7 +95,7 @@ class Backdrop(object):
         distance_factor = 1/max(math.fabs(camera_parallax_z - (self.parallax_z+1)), 1)
         self.pos = (self.element.pos[0]*distance_factor + window_size[0]*0.5*(1-distance_factor), self.element.pos[1]*distance_factor + window_size[1]*0.5*(1-distance_factor))
 
-    def on_update(self, dt):
+    def on_update(self, dt, cam_scalar, cam_offset):
         for element in self.elements:
             element.on_update(dt)
 
@@ -136,7 +137,7 @@ class Terrain(object):
             # self.shape.add(Mesh(vertices=vertices, indices=indices, mode="line_loop"))
             self.shape.add(Mesh(vertices=vertices, indices=indices, mode="triangle_fan"))
 
-    def on_update(self, dt):
+    def on_update(self, dt, cam_scalar, cam_offset):
         pass
 
 
@@ -200,7 +201,7 @@ class Player(object):
             else:
                 self.element.change_texture("graphics/player_stand.png")
 
-    def on_update(self, dt, ground_map, active_keys):
+    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset):
 
         # position update
         target_x_vel = 0
