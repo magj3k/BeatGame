@@ -97,7 +97,7 @@ def run(widget):
             return widget()
 
     try:
-        Window.fullscreen = True
+        # Window.fullscreen = True
         Window.size = window_size
         MainApp().run()
     except:
