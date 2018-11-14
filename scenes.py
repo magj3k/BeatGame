@@ -9,6 +9,19 @@ from audio_controller import *
 middle = (window_size[0]/2, window_size[1]/2)
 far_z = 100000000
 
+keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
+                        z = 0,
+                        size = (166*0.2, 400*0.2),
+                        texture_path = "graphics/key_outline.png"), 
+                    TexturedElement(pos = (window_size[0]-95, window_size[1]-65),
+                        z = 0,
+                        size = (166*0.2, 400*0.2),
+                        texture_path = "graphics/key_outline.png"),
+                    TexturedElement(pos = (window_size[0]-145, window_size[1]-65),
+                        z = 0,
+                        size = (166*0.2, 400*0.2),
+                        texture_path = "graphics/key_outline.png")]
+
 scene_1_resolution = 30.0
 scene_1_elevation_offset = 6
 scene_1_ground_map = [0+scene_1_elevation_offset]*86
@@ -73,30 +86,11 @@ scene_1_game_elements = [
                                                         color = Color(0, 0, 0),
                                                         res = scene_1_resolution)
                                                 ]
-
-# background trees test
-# for i in range(15):
-#     rand_size_coeff = (random.random()*0.4 +0.8, random.random()*0.6 + 0.7)
-#     new_tree = Backdrop(element = TexturedElement(pos = ((random.random()*2800) - 150, 90+(100*rand_size_coeff[1])),
-#                                                         z = 90,
-#                                                         size = (234*0.6*rand_size_coeff[0], 451*0.6*rand_size_coeff[1]),
-#                                                         color = Color(0.3, 0.4, 0.2),
-#                                                         texture_path = "graphics/tree_1.png"),
-#                                                         parallax_z = 0.4)
-#     scene_1_game_elements.append(new_tree)
-# for i in range(25):
-#     rand_size_coeff = (random.random()*0.4 +0.8, random.random()*0.6 + 0.7)
-#     new_tree = Backdrop(element = TexturedElement(pos = ((random.random()*2000) - 100, 50+(70*rand_size_coeff[1])),
-#                                                         z = 80,
-#                                                         size = (234*0.35*rand_size_coeff[0], 451*0.35*rand_size_coeff[1]),
-#                                                         color = Color(0.4, 0.47, 0.27),
-#                                                         texture_path = "graphics/tree_1.png"),
-#                                                         parallax_z = 1.1)
-#     scene_1_game_elements.append(new_tree)
-
+scene_1_UI_elements = []
+scene_1_UI_elements.extend(keys_UI)
 
 scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
 scene_1_camera = Camera(zoom_factor = 1.1, speed = 0.85, bounds = scene_1_camera_bounds)
-scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = [], ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player)
+scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player)
 
 scenes = [scene_1]
