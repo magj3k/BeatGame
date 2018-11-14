@@ -145,7 +145,7 @@ class Terrain(object):
 
 class Player(object):
     def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10):
-        self.world_size = (1.0, 1.0)
+        self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
         self.world_vel = (0, 0)

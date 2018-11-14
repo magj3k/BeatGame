@@ -68,26 +68,37 @@ class SceneManager(InstructionGroup):
 
 
 class Scene(InstructionGroup):
-    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = []):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0):
         super(Scene, self).__init__()
         self.game_elements = initial_game_elements
         self.UI_elements = initial_UI_elements
         self.game_camera = game_camera
 
-        self.player = Player(res = 30.0, initial_world_pos = (2, 6))
+        self.player = Player(res = res, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
 
         self.ground_map = ground_map
 
     def on_update(self, dt, active_keys):
+
+        # gets important camera information
+        camera_scalar = None
+        camera_offset = None # in world units
+        if self.game_camera != None:
+            self.game_camera.on_update(dt)
+
+            camera_scalar = self.game_camera.zoom_factor
+            camera_offset = (-self.game_camera.world_target[0]*camera_scalar*0.5, -self.game_camera.world_target[1]*camera_scalar*0.5)
+
         # updates player collisions
-        self.player.on_update(dt, self.ground_map, active_keys)
+        self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset)
+        if self.game_camera != None: self.game_camera.update_target(self.player.world_pos)
 
         for element in self.game_elements:
-            element.on_update(dt)
+            element.on_update(dt, camera_scalar, camera_offset)
 
         for element in self.UI_elements:
-            element.on_update(dt)
+            element.on_update(dt, camera_scalar, camera_offset)
 
     def add_UI_element(self, element):
         self.UI_elements.append(element)
@@ -97,6 +108,15 @@ class Scene(InstructionGroup):
 
 
 class Camera(object):
-    def __init__(self):
-        pass
+    def __init__(self, initial_world_focus = (0, 0), initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0):
+        self.world_focus = initial_world_focus
+        self.world_target = initial_world_target
+        self.zoom_factor = zoom_factor
+        self.speed = speed
+
+    def update_target(self, new_target):
+        self.world_target = new_target
+
+    def on_update(self, dt):
+        self.world_focus = (self.world_focus[0] + ((self.world_target[0] - self.world_focus[0]) * dt * self.speed), self.world_focus[1] + ((self.world_target[1] - self.world_focus[1]) * dt * self.speed))
 
