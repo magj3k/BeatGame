@@ -10,22 +10,33 @@ middle = (window_size[0]/2, window_size[1]/2)
 far_z = 100000000
 
 scene_1_resolution = 30.0
-scene_1_elevation_offset = 0
-scene_1_ground_map = [6+scene_1_elevation_offset]*100
-scene_1_ground_map[25:30] = [7+scene_1_elevation_offset]*4
-scene_1_ground_map[34:38] = [4+scene_1_elevation_offset]*4
-scene_1_ground_map[41:43] = [7+scene_1_elevation_offset]*2
-scene_1_ground_map[53] = 8+scene_1_elevation_offset
-scene_1_ground_map[54] = 9+scene_1_elevation_offset
-scene_1_ground_map[55] = 10+scene_1_elevation_offset
-scene_1_ground_map[56] = 11+scene_1_elevation_offset
-scene_1_ground_map[57] = 12+scene_1_elevation_offset
-scene_1_ground_map[58:61] = [1+scene_1_elevation_offset]*3
-scene_1_ground_map[60:62] = [10+scene_1_elevation_offset]*2
-scene_1_ground_map[64:66] = [8+scene_1_elevation_offset]*2
-scene_1_camera_bounds = ((24, 6.5), (64, 24))
+scene_1_elevation_offset = 6
+scene_1_ground_map = [0+scene_1_elevation_offset]*86
+scene_1_ground_map[0:24] = [1+scene_1_elevation_offset]*24
+scene_1_ground_map[0:22] = [2+scene_1_elevation_offset]*22
+scene_1_ground_map[0:21] = [4+scene_1_elevation_offset]*21
+scene_1_ground_map[0:19] = [7+scene_1_elevation_offset]*19
+scene_1_ground_map[0:18] = [8+scene_1_elevation_offset]*18
+scene_1_ground_map[0:16] = [10+scene_1_elevation_offset]*16
+scene_1_ground_map[0:13] = [11+scene_1_elevation_offset]*13
+scene_1_ground_map[0:6] = [10+scene_1_elevation_offset]*6
+scene_1_ground_map[40:50] = [-1+scene_1_elevation_offset]*10
+scene_1_ground_map[57:65] = [1+scene_1_elevation_offset]*8
+scene_1_ground_map[80:86] = [4+scene_1_elevation_offset]*6
+# scene_1_ground_map[25:30] = [7+scene_1_elevation_offset]*4
+# scene_1_ground_map[34:38] = [4+scene_1_elevation_offset]*4
+# scene_1_ground_map[41:43] = [7+scene_1_elevation_offset]*2
+# scene_1_ground_map[53] = 8+scene_1_elevation_offset
+# scene_1_ground_map[54] = 9+scene_1_elevation_offset
+# scene_1_ground_map[55] = 10+scene_1_elevation_offset
+# scene_1_ground_map[56] = 11+scene_1_elevation_offset
+# scene_1_ground_map[57] = 12+scene_1_elevation_offset
+# scene_1_ground_map[58:61] = [1+scene_1_elevation_offset]*3
+# scene_1_ground_map[60:62] = [10+scene_1_elevation_offset]*2
+# scene_1_ground_map[64:66] = [8+scene_1_elevation_offset]*2
+scene_1_camera_bounds = ((24, 6.5), (64, 10))
 scene_1_resolution = 30.0
-scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (22, 6), z = 110)
+scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (25, 6), z = 110)
 
 scene_1_game_elements = [
                                                     Backdrop(element = TexturedElement(pos = (0, 0),
@@ -37,7 +48,7 @@ scene_1_game_elements = [
                                                         z = 1,
                                                         size = (window_size[0]*3.0, window_size[1]*0.8),
                                                         texture_path = "graphics/bg_2.png",
-                                                        color = Color(0.8, 0.8, 0.8)),
+                                                        color = Color(0.25, 0.45, 0.2)),
                                                         parallax_z = 60),
                                                     Backdrop(element = TexturedElement(pos = (-100, 50),
                                                         z = 5,
