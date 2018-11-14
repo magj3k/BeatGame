@@ -16,6 +16,7 @@ class AudioController(object):
     def __init__(self, level = 0, bpm = 120, elements = []):
         self.level = level
         self.bpm = bpm
+        self.note_grid = 240
 
         self.musical_elements = []
         for el in elements:
@@ -36,25 +37,29 @@ class AudioController(object):
 
         # create generators
         self.bg_gen = WaveGenerator(WaveFile(self.level_music['bg_music']), True)
-        self.bg_gen.set_gain(0.7)
+        self.bg_gen.set_gain(0.3)
         self.fg_gen = WaveGenerator(WaveFile(self.level_music['fg_music']), True)
         self.fg_gen.set_gain(0)
-        self.jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
-        self.jump_gen.set_gain(0.5)
-        self.walk_gen = WaveGenerator(WaveFile(self.level_music['walk_sfx'], True))
-        self.walk_gen.set_gain(0.5)
-        self.walk_gen.pause()
 
         # add generators to mixer
         self.mixer.add(self.sched)
         self.mixer.add(self.bg_gen)
         self.mixer.add(self.fg_gen)
-        self.mixer.add(self.walk_gen)
+
+        # walking
+        self.walk_ticks = set()
 
     def jump(self):
-        self.jump_gen.reset()
-        self.mixer.add(jump)
-        self.jump_gen.play()
+        jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
+        jump_gen.set_gain(0.5)
+        self.mixer.add(jump_gen)
+
+    def walk_once(self, tick, ignore):
+        if tick in self.walk_ticks:
+            walk_gen = WaveGenerator(WaveFile(self.level_music['walk_sfx']))
+            walk_gen.set_gain(0.5)
+            self.mixer.add(walk_gen)
+            self.walk_ticks.remove(tick)
 
     def on_key_down(self, keycode):
         pass
@@ -67,9 +72,17 @@ class AudioController(object):
 
         # play sound for continuous player movement
         if player.on_ground and (active_keys['left'] == True or active_keys['right'] == True):
-            self.walk_gen.play()
+            now = self.sched.get_tick()
+            next_beat = quantize_tick_up(now, self.note_grid)
+            if next_beat not in self.walk_ticks:
+                self.sched.post_at_tick(self.walk_once, next_beat)
+                self.walk_ticks.add(next_beat)
+        else:
+            now = self.sched.get_tick()
+            next_beat = quantize_tick_up(now, self.note_grid)
+            if next_beat in self.walk_ticks:
+                self.walk_ticks.remove(next_beat)
 
         # play foreground music when past few player moves have been on beat
 
         # play game element music based on proximity of player
-        
