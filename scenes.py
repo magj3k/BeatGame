@@ -9,21 +9,22 @@ from audio_controller import *
 middle = (window_size[0]/2, window_size[1]/2)
 far_z = 100000000
 
-scene_1_ground_map = [6]*50
-scene_1_ground_map[5:10] = [7]*4
-scene_1_ground_map[14:18] = [4]*4
-scene_1_ground_map[21:23] = [7]*2
-scene_1_ground_map[23] = 8
-scene_1_ground_map[24] = 9
-scene_1_ground_map[25] = 10
-scene_1_ground_map[26] = 11
-scene_1_ground_map[27] = 12
-scene_1_ground_map[28:31] = [1]*3
-scene_1_ground_map[30:32] = [10]*2
-scene_1_ground_map[34:36] = [8]*2
+scene_1_elevation_offset = 0
+scene_1_ground_map = [6+scene_1_elevation_offset]*100
+scene_1_ground_map[25:30] = [7+scene_1_elevation_offset]*4
+scene_1_ground_map[34:38] = [4+scene_1_elevation_offset]*4
+scene_1_ground_map[41:43] = [7+scene_1_elevation_offset]*2
+scene_1_ground_map[53] = 8+scene_1_elevation_offset
+scene_1_ground_map[54] = 9+scene_1_elevation_offset
+scene_1_ground_map[55] = 10+scene_1_elevation_offset
+scene_1_ground_map[56] = 11+scene_1_elevation_offset
+scene_1_ground_map[57] = 12+scene_1_elevation_offset
+scene_1_ground_map[58:61] = [1+scene_1_elevation_offset]*3
+scene_1_ground_map[60:62] = [10+scene_1_elevation_offset]*2
+scene_1_ground_map[64:66] = [8+scene_1_elevation_offset]*2
 
 scene_1_resolution = 30.0
-scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (2, 6), z = 110)
+scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (22, 6), z = 110)
 
 scene_1_game_elements = [
                                                     Backdrop(element = TexturedElement(pos = (0, 0),
@@ -31,19 +32,34 @@ scene_1_game_elements = [
                                                         size = (window_size[0]*3.0, window_size[1]*1.2),
                                                         texture_path = "graphics/bg_1.png"),
                                                         parallax_z = far_z),
+                                                    Backdrop(element = TexturedElement(pos = (0, -100),
+                                                        z = 1,
+                                                        size = (window_size[0]*3.0, window_size[1]*0.4),
+                                                        texture_path = "graphics/bg_2.png",
+                                                        color = Color(0.55, 0.5, 0.4)),
+                                                        parallax_z = 20),
                                                     Terrain(scene_1_ground_map,
                                                         z = 100,
                                                         color = Color(0, 0, 0),
                                                         res = scene_1_resolution)
                                                 ]
-for i in range(40):
-    rand_z = (random.random()*50)+25
-    new_tree = Backdrop(element = TexturedElement(pos = (random.random()*1300, random.random()*200),
-                                                        z = 100-rand_z,
-                                                        size = (234*0.8*(100-rand_z)/100, 451*0.8*(100-rand_z)/100),
-                                                        color = Color(0.6*rand_z/100, 0.4*rand_z/100, 0.25*rand_z/100),
+for i in range(15):
+    rand_size_coeff = (random.random()*0.4 +0.8, random.random()*0.6 + 0.7)
+    new_tree = Backdrop(element = TexturedElement(pos = ((random.random()*2800) - 150, 140+(100*rand_size_coeff[1])),
+                                                        z = 90,
+                                                        size = (234*0.6*rand_size_coeff[0], 451*0.6*rand_size_coeff[1]),
+                                                        color = Color(0.3, 0.4, 0.2),
                                                         texture_path = "graphics/tree_1.png"),
-                                                        parallax_z = 1.0+(rand_z/50))
+                                                        parallax_z = 0.4)
+    scene_1_game_elements.append(new_tree)
+for i in range(25):
+    rand_size_coeff = (random.random()*0.4 +0.8, random.random()*0.6 + 0.7)
+    new_tree = Backdrop(element = TexturedElement(pos = ((random.random()*2000) - 100, 100+(70*rand_size_coeff[1])),
+                                                        z = 80,
+                                                        size = (234*0.35*rand_size_coeff[0], 451*0.35*rand_size_coeff[1]),
+                                                        color = Color(0.45, 0.55, 0.3),
+                                                        texture_path = "graphics/tree_1.png"),
+                                                        parallax_z = 1.1)
     scene_1_game_elements.append(new_tree)
 
 

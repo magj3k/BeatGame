@@ -119,12 +119,12 @@ class Terrain(object):
         self.meshes = []
         for x in range(len(self.map)):
             vertices = [
-                            x*self.res*retina_multiplier, 0, 0, 0,
+                            x*self.res*retina_multiplier, -20*self.res*retina_multiplier, 0, 0,
                             x*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
                             (x+0.1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
                             (x+0.9)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
                             (x+1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
-                            (x+1)*self.res*retina_multiplier, 0, 0, 0
+                            (x+1)*self.res*retina_multiplier, -20*self.res*retina_multiplier, 0, 0
                             ]
             if x-1 > 0:
                 if self.map[x-1] < self.map[x]:
