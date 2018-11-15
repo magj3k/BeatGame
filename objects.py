@@ -118,39 +118,53 @@ class Terrain(object):
         self.shape = InstructionGroup()
         self.mesh_vertices = []
         self.meshes = []
-        for x in range(len(self.map)):
-            vertices = [
-                            x*self.res*retina_multiplier, -20*self.res*retina_multiplier, 0, 0,
-                            x*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
-                            (x+0.1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
-                            (x+0.9)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
-                            (x+1)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0, 
-                            (x+1)*self.res*retina_multiplier, -20*self.res*retina_multiplier, 0, 0
-                            ]
-            if x-1 > 0:
-                if self.map[x-1] < self.map[x]:
-                    vertices[5] += -self.res*0.1*retina_multiplier
-                elif self.map[x-1] > self.map[x]:
-                    vertices[5] += self.res*0.1*retina_multiplier
-            if x+1 < len(self.map):
-                if self.map[x+1] < self.map[x]:
-                    vertices[17] += -self.res*0.1*retina_multiplier
-                elif self.map[x+1] > self.map[x]:
-                    vertices[17] += self.res*0.1*retina_multiplier
-            indices = [0, 1, 2, 3, 4, 5]
-            # self.shape.add(Mesh(vertices=vertices, indices=indices, mode="line_loop"))
-            self.mesh_vertices.append(vertices)
-            self.meshes.append(Mesh(vertices=vertices, indices=indices, mode="triangle_fan"))
-            self.shape.add(self.meshes[-1])
+
+        last_height = -1
+        current_vertices = []
+        for x in range(len(self.map)+1):
+            if x < len(self.map) and last_height != self.map[x]:
+                if len(current_vertices) > 0: # saves preexisting mesh
+                    current_vertices.extend([
+                        (x)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
+                        (x)*self.res*retina_multiplier, 0, 0, 0])
+
+                    self.mesh_vertices.append(current_vertices[:])
+                    self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3], mode="triangle_fan"))
+                    self.shape.add(self.meshes[-1])
+
+                if self.map[x] != 0:
+                    current_vertices = [
+                        x*self.res*retina_multiplier, 0, 0, 0,
+                        x*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0]
+                    # if x-1 >= 0:
+                    #     if self.map[x-1] > self.map[x]:
+                    #         current_vertices[5] = (self.map[x]+0.15)*self.res*retina_multiplier
+                    #         current_vertices.extend([(x+0.15)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0])
+                last_height = self.map[x]
+            elif x == len(self.map) and len(current_vertices) > 0:
+                current_vertices.extend([
+                    (x)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
+                    (x)*self.res*retina_multiplier, 0, 0, 0])
+
+                self.mesh_vertices.append(current_vertices[:])
+                self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3], mode="triangle_fan"))
+                self.shape.add(self.meshes[-1])
 
     def on_update(self, dt, cam_scalar, cam_offset):
         for i in range(len(self.meshes)):
             processed_vertices = self.mesh_vertices[i][:]
-            for j in [0, 4, 8, 12, 16, 20]:
+            for j in [0, 4, 8, 12]:
                 processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[0]
-            for j in [1, 5, 9, 13, 17, 21]:
+            for j in [1, 5, 9, 13]:
                 processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[1]
             self.meshes[i].vertices = processed_vertices
+
+
+class Platform(object):
+    def __init__(self, cells, type = "dirt", musical = False):
+        self.type = type
+        if self.type == "mech":
+            musical = True
 
 
 # element-substitute world-coordinated objects, 

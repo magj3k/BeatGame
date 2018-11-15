@@ -24,6 +24,7 @@ keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
 
 scene_1_resolution = 30.0
 scene_1_elevation_offset = 6
+scene_1_water_map = [0]*86
 scene_1_ground_map = [0+scene_1_elevation_offset]*86
 scene_1_ground_map[0:24] = [1+scene_1_elevation_offset]*24
 scene_1_ground_map[0:22] = [2+scene_1_elevation_offset]*22
@@ -33,20 +34,10 @@ scene_1_ground_map[0:18] = [8+scene_1_elevation_offset]*18
 scene_1_ground_map[0:16] = [10+scene_1_elevation_offset]*16
 scene_1_ground_map[0:13] = [11+scene_1_elevation_offset]*13
 scene_1_ground_map[0:6] = [10+scene_1_elevation_offset]*6
-scene_1_ground_map[40:50] = [-1+scene_1_elevation_offset]*10
-scene_1_ground_map[57:65] = [1+scene_1_elevation_offset]*8
+scene_1_ground_map[38:51] = [-2+scene_1_elevation_offset]*13
+scene_1_water_map[38:51] = [-1+scene_1_elevation_offset]*13
+scene_1_ground_map[59:67] = [1+scene_1_elevation_offset]*8
 scene_1_ground_map[80:86] = [4+scene_1_elevation_offset]*6
-# scene_1_ground_map[25:30] = [7+scene_1_elevation_offset]*4
-# scene_1_ground_map[34:38] = [4+scene_1_elevation_offset]*4
-# scene_1_ground_map[41:43] = [7+scene_1_elevation_offset]*2
-# scene_1_ground_map[53] = 8+scene_1_elevation_offset
-# scene_1_ground_map[54] = 9+scene_1_elevation_offset
-# scene_1_ground_map[55] = 10+scene_1_elevation_offset
-# scene_1_ground_map[56] = 11+scene_1_elevation_offset
-# scene_1_ground_map[57] = 12+scene_1_elevation_offset
-# scene_1_ground_map[58:61] = [1+scene_1_elevation_offset]*3
-# scene_1_ground_map[60:62] = [10+scene_1_elevation_offset]*2
-# scene_1_ground_map[64:66] = [8+scene_1_elevation_offset]*2
 scene_1_camera_bounds = ((24, 6.5), (64, 10))
 scene_1_resolution = 30.0
 scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (25, 6), z = 110)
@@ -84,7 +75,12 @@ scene_1_game_elements = [
                                                     Terrain(scene_1_ground_map,
                                                         z = 100,
                                                         color = Color(0, 0, 0),
-                                                        res = scene_1_resolution)
+                                                        res = scene_1_resolution),
+                                                    Terrain(scene_1_water_map,
+                                                        z = 111,
+                                                        color = Color(0.3, 0.3, 0.8),
+                                                        res = scene_1_resolution,
+                                                        type = "water")
                                                 ]
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)
