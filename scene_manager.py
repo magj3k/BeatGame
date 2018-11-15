@@ -51,6 +51,7 @@ class Scene(InstructionGroup):
         self.game_elements.append(self.player.element)
 
         self.ground_map = ground_map
+        self.objs_by_z_order_old = {}
 
     def on_update(self, dt, active_keys):
 
@@ -95,25 +96,31 @@ class Scene(InstructionGroup):
         # applying z-order
         all_z_orders = list(objs_by_z_order.keys())
         all_z_orders.sort()
+        refresh_chained = False
+        if len(self.objs_by_z_order_old.keys()) == 0: refresh_chained = True
         for z in all_z_orders:
             object_inds_at_z = objs_by_z_order[z]
-            for ind in object_inds_at_z:
 
-                # removes and re-adds visual components to canvas
-                if z <= max_game_z:
-                    obj = self.game_elements[ind]
-                    self.remove(obj.color)
-                    self.add(obj.color)
-                    if obj.shape != None:
-                        self.remove(obj.shape)
-                        self.add(obj.shape)
-                else:
-                    obj = self.UI_elements[ind]
-                    self.remove(obj.color)
-                    self.add(obj.color)
-                    if obj.shape != None:
-                        self.remove(obj.shape)
-                        self.add(obj.shape)
+            if refresh_chained == True or self.objs_by_z_order_old[z] != object_inds_at_z:
+                refresh_chained = True
+                for ind in object_inds_at_z:
+
+                    # removes and re-adds visual components to canvas
+                    if z <= max_game_z:
+                        obj = self.game_elements[ind]
+                        self.remove(obj.color)
+                        self.add(obj.color)
+                        if obj.shape != None:
+                            self.remove(obj.shape)
+                            self.add(obj.shape)
+                    else:
+                        obj = self.UI_elements[ind]
+                        self.remove(obj.color)
+                        self.add(obj.color)
+                        if obj.shape != None:
+                            self.remove(obj.shape)
+                            self.add(obj.shape)
+        self.objs_by_z_order_old = objs_by_z_order
 
         # audio controller update
         if self.audio_controller != None: self.audio_controller.on_update(dt, self.player, active_keys)

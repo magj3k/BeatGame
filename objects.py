@@ -125,37 +125,49 @@ class Terrain(object):
             if x < len(self.map) and last_height != self.map[x]:
                 if len(current_vertices) > 0: # saves preexisting mesh
                     current_vertices.extend([
+                        (x-0.15)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
                         (x)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
                         (x)*self.res*retina_multiplier, 0, 0, 0])
 
+                    if last_height < self.map[x]:
+                        current_vertices[17] += 0.15*self.res*retina_multiplier
+                    elif last_height > self.map[x]:
+                        current_vertices[17] += -0.15*self.res*retina_multiplier
+                    if self.type == "water":
+                        current_vertices[12] += 0.35*self.res*retina_multiplier
+                        current_vertices[16] += 0.35*self.res*retina_multiplier
+                        current_vertices[20] += 0.35*self.res*retina_multiplier
+                    
                     self.mesh_vertices.append(current_vertices[:])
-                    self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3], mode="triangle_fan"))
+                    self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
                     self.shape.add(self.meshes[-1])
 
                 if self.map[x] != 0:
                     current_vertices = [
                         x*self.res*retina_multiplier, 0, 0, 0,
-                        x*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0]
-                    # if x-1 >= 0:
-                    #     if self.map[x-1] > self.map[x]:
-                    #         current_vertices[5] = (self.map[x]+0.15)*self.res*retina_multiplier
-                    #         current_vertices.extend([(x+0.15)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0])
+                        x*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0,
+                        (x+0.15)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0]
+                    if x-1 >= 0 and self.map[x-1] > self.map[x] and self.type == "dirt":
+                        current_vertices[5] += 0.15*self.res*retina_multiplier
+                    elif x-1 >= 0 and self.map[x-1] < self.map[x] and self.type == "dirt":
+                        current_vertices[5] += -0.15*self.res*retina_multiplier
                 last_height = self.map[x]
             elif x == len(self.map) and len(current_vertices) > 0:
                 current_vertices.extend([
+                    (x-0.15)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
                     (x)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
                     (x)*self.res*retina_multiplier, 0, 0, 0])
 
                 self.mesh_vertices.append(current_vertices[:])
-                self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3], mode="triangle_fan"))
+                self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
                 self.shape.add(self.meshes[-1])
 
     def on_update(self, dt, cam_scalar, cam_offset):
         for i in range(len(self.meshes)):
             processed_vertices = self.mesh_vertices[i][:]
-            for j in [0, 4, 8, 12]:
+            for j in [0, 4, 8, 12, 16, 20]:
                 processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[0]
-            for j in [1, 5, 9, 13]:
+            for j in [1, 5, 9, 13, 17, 21]:
                 processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[1]
             self.meshes[i].vertices = processed_vertices
 
