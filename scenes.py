@@ -10,20 +10,25 @@ middle = (window_size[0]/2, window_size[1]/2)
 far_z = 100000000
 
 keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
-                        z = 0,
+                        z = 1,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
                         tag = "k_1"), 
                     TexturedElement(pos = (window_size[0]-95, window_size[1]-65),
-                        z = 0,
+                        z = 1,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
                         tag = "k_2"),
                     TexturedElement(pos = (window_size[0]-145, window_size[1]-65),
-                        z = 0,
+                        z = 1,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
-                        tag = "k_3")]
+                        tag = "k_3"),
+                    TexturedElement(pos = (window_size[0]-66, window_size[1]-49),
+                        z = 0,
+                        color = Color(0, 0, 0, 0.5),
+                        size = (650*0.4, 450*0.4),
+                        texture_path = "graphics/rounded_box.png")]
 
 scene_1_resolution = 30.0
 scene_1_elevation_offset = 6
@@ -35,13 +40,13 @@ scene_1_ground_map[0:21] = [4+scene_1_elevation_offset]*21
 scene_1_ground_map[0:18] = [8+scene_1_elevation_offset]*18
 scene_1_ground_map[0:16] = [10+scene_1_elevation_offset]*16
 scene_1_ground_map[0:12] = [11+scene_1_elevation_offset]*12
-scene_1_ground_map[38:51] = [-2+scene_1_elevation_offset]*13
+scene_1_ground_map[38:51] = [-5+scene_1_elevation_offset]*13
 scene_1_water_map[38:51] = [-1+scene_1_elevation_offset]*13
 scene_1_ground_map[59:67] = [1+scene_1_elevation_offset]*8
 scene_1_ground_map[80:86] = [4+scene_1_elevation_offset]*6
 scene_1_camera_bounds = ((25, 6.5), (64, 9.5))
 scene_1_resolution = 30.0
-scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (25, 6), z = 110)
+scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (27.5, 8), z = 110)
 scene_1_door = TexturedElement(pos = (2445, 213),
                                 z = 101,
                                 size = (500*0.13, 500*0.13),
@@ -71,6 +76,18 @@ scene_1_game_elements = [   scene_1_door,
                                                         texture_path = "graphics/hill_1.png",
                                                         color = Color(0.35, 0.55, 0.3)),
                                                         parallax_z = 2),
+                                                    Backdrop(element = TexturedElement(pos = (-220, 40),
+                                                        z = 3,
+                                                        size = (-1466*0.3, 519*0.3),
+                                                        texture_path = "graphics/hill_1.png",
+                                                        color = Color(0.25, 0.45, 0.2)),
+                                                        parallax_z = 9),
+                                                    Backdrop(element = TexturedElement(pos = (350, 25),
+                                                        z = 3,
+                                                        size = (1466*0.28, 519*0.28),
+                                                        texture_path = "graphics/hill_1.png",
+                                                        color = Color(0.25, 0.45, 0.2)),
+                                                        parallax_z = 9),
                                                     Backdrop(element = TexturedElement(pos = (250, 0),
                                                         z = 4,
                                                         size = (1466*-0.6, 519*0.6),
@@ -89,9 +106,20 @@ scene_1_game_elements = [   scene_1_door,
                                                     Pickup(TexturedElement(pos = (65*scene_1_resolution, 295),
                                                         size = (166*0.091, 400*0.091),
                                                         texture_path = "graphics/key.png"), z = 110, radius = 20),
-                                                    Pickup(TexturedElement(pos = (45*scene_1_resolution, 302),
+                                                    Pickup(TexturedElement(pos = (44.8*scene_1_resolution, 302),
                                                         size = (166*0.091, 400*0.091),
-                                                        texture_path = "graphics/key.png"), z = 110, radius = 20)
+                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
+                                                    Pickup(TexturedElement(pos = (25*scene_1_resolution, 370),
+                                                        size = (166*0.091, 400*0.091),
+                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
+                                                    Platform(((41, 7), (42, 7)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        res = scene_1_resolution),
+                                                    Platform(((46.5, 7), (47.5, 7)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        res = scene_1_resolution)
                                                 ]
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)
