@@ -1,3 +1,5 @@
+import numpy as np
+import random
 from math import *
 from core import *
 from kivy.graphics import Rectangle, Ellipse, Color, Mesh
@@ -61,7 +63,7 @@ class GeometricElement(Element):
 
 
 # element substitutes
-#     requires implementation of self.z, self.shape, self.color, self.on_update(), self.musical
+#     requires implementation of self.z, self.shape, self.color, self.on_update(dt, cam_scalar, cam_offset), self.musical
 
 class ElementGroup(object):
     def __init__(self, elements = [], z = 0, color = None, musical = False):
@@ -93,6 +95,7 @@ class Backdrop(object):
         self.shape = self.element.shape
         self.musical = musical
 
+    # modifies camera-based scaling and offset depending on self.parallax_z
     def on_update(self, dt, cam_scalar, cam_offset):
         new_cam_scalar = cam_scalar*(1/(self.parallax_z+1))
         new_cam_offset_parts = ((cam_offset[0]-(window_size[0]*0.5*retina_multiplier))/cam_scalar, (cam_offset[1]-(window_size[1]*0.5*retina_multiplier))/cam_scalar)
@@ -100,7 +103,7 @@ class Backdrop(object):
         self.element.on_update(dt, cam_scalar, new_cam_offset)
 
 
-class Terrain(object):
+class Terrain(object): # mesh-based representation of a ground map
     def __init__(self, map, type = "dirt", z = 0, color = None, res = 20.0):
         self.type = type
         self.map = map # numpy height array
@@ -137,6 +140,8 @@ class Terrain(object):
                         current_vertices[12] += 0.35*self.res*retina_multiplier
                         current_vertices[16] += 0.35*self.res*retina_multiplier
                         current_vertices[20] += 0.35*self.res*retina_multiplier
+                        current_vertices[1] = -10*self.res*retina_multiplier
+                        current_vertices[21] = -10*self.res*retina_multiplier
                     
                     self.mesh_vertices.append(current_vertices[:])
                     self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
@@ -162,7 +167,17 @@ class Terrain(object):
                 self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
                 self.shape.add(self.meshes[-1])
 
+        # adds graphic under mesh
+        if self.type == "dirt":
+            self.under_ground = TexturedElement(pos = (len(self.map)*0.5*self.res, -5*self.res),
+                    z = self.z,
+                    size = (len(self.map)*self.res, 10*self.res),
+                    texture_path = "graphics/bg_2.png",
+                    color = Color(0, 0, 0))
+            self.shape.add(self.under_ground.shape)
+
     def on_update(self, dt, cam_scalar, cam_offset):
+        if self.type == "dirt": self.under_ground.on_update(dt, cam_scalar, cam_offset)
         for i in range(len(self.meshes)):
             processed_vertices = self.mesh_vertices[i][:]
             for j in [0, 4, 8, 12, 16, 20]:
@@ -177,6 +192,24 @@ class Platform(object):
         self.type = type
         if self.type == "mech":
             musical = True
+
+
+class Pickup(object):
+    def __init__(self, element, z = 10, radius = 10, musical = False): # self.z, self.shape, self.color, self.on_update(), self.musical
+        self.element = element
+        self.color = self.element.color
+        self.initial_pos = self.element.pos
+        self.z = z
+        self.shape = self.element.shape
+        self.radius = radius*retina_multiplier
+        self.t = random.random()*3.14159*2.0
+        self.musical = musical
+
+    def on_update(self, dt, cam_scalar, cam_offset):
+        self.t += dt
+        self.element.pos = (self.initial_pos[0], self.initial_pos[1] + (np.sin(self.t*6.5)*2*retina_multiplier))
+        self.element.on_update(dt, cam_scalar, cam_offset)
+
 
 
 # element-substitute world-coordinated objects, 
