@@ -63,7 +63,7 @@ class GeometricElement(Element):
 
 
 # element substitutes
-#     requires implementation of self.z, self.shape, self.color, self.on_update(), self.musical
+#     requires implementation of self.z, self.shape, self.color, self.on_update(dt, cam_scalar, cam_offset), self.musical
 
 class ElementGroup(object):
     def __init__(self, elements = [], z = 0, color = None, musical = False):
@@ -95,6 +95,7 @@ class Backdrop(object):
         self.shape = self.element.shape
         self.musical = musical
 
+    # modifies camera-based scaling and offset depending on self.parallax_z
     def on_update(self, dt, cam_scalar, cam_offset):
         new_cam_scalar = cam_scalar*(1/(self.parallax_z+1))
         new_cam_offset_parts = ((cam_offset[0]-(window_size[0]*0.5*retina_multiplier))/cam_scalar, (cam_offset[1]-(window_size[1]*0.5*retina_multiplier))/cam_scalar)
@@ -102,7 +103,7 @@ class Backdrop(object):
         self.element.on_update(dt, cam_scalar, new_cam_offset)
 
 
-class Terrain(object):
+class Terrain(object): # mesh-based representation of a ground map
     def __init__(self, map, type = "dirt", z = 0, color = None, res = 20.0):
         self.type = type
         self.map = map # numpy height array
@@ -166,7 +167,7 @@ class Terrain(object):
                 self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
                 self.shape.add(self.meshes[-1])
 
-        # adds graphic
+        # adds graphic under mesh
         if self.type == "dirt":
             self.under_ground = TexturedElement(pos = (len(self.map)*0.5*self.res, -5*self.res),
                     z = self.z,

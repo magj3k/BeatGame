@@ -12,15 +12,18 @@ far_z = 100000000
 keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         z = 0,
                         size = (166*0.2, 400*0.2),
-                        texture_path = "graphics/key_outline.png"), 
+                        texture_path = "graphics/key_outline.png",
+                        tag = "k_1"), 
                     TexturedElement(pos = (window_size[0]-95, window_size[1]-65),
                         z = 0,
                         size = (166*0.2, 400*0.2),
-                        texture_path = "graphics/key_outline.png"),
+                        texture_path = "graphics/key_outline.png",
+                        tag = "k_2"),
                     TexturedElement(pos = (window_size[0]-145, window_size[1]-65),
                         z = 0,
                         size = (166*0.2, 400*0.2),
-                        texture_path = "graphics/key_outline.png")]
+                        texture_path = "graphics/key_outline.png",
+                        tag = "k_3")]
 
 scene_1_resolution = 30.0
 scene_1_elevation_offset = 6
@@ -85,10 +88,10 @@ scene_1_game_elements = [   scene_1_door,
                                                         type = "water"),
                                                     Pickup(TexturedElement(pos = (65*scene_1_resolution, 295),
                                                         size = (166*0.091, 400*0.091),
-                                                        texture_path = "graphics/key.png"), z = 110, radius = 25),
+                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
                                                     Pickup(TexturedElement(pos = (45*scene_1_resolution, 302),
                                                         size = (166*0.091, 400*0.091),
-                                                        texture_path = "graphics/key.png"), z = 110, radius = 25)
+                                                        texture_path = "graphics/key.png"), z = 110, radius = 20)
                                                 ]
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)

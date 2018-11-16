@@ -46,12 +46,15 @@ class Scene(InstructionGroup):
         self.audio_controller = audio_controller
         self.res = res
 
+        # game scenes
         self.player = player
         if self.player == None: self.player = Player(res = res, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
 
         self.ground_map = ground_map
         self.objs_by_z_order_old = {}
+
+        self.num_keys_collected = 0
 
     def on_update(self, dt, active_keys):
 
@@ -71,10 +74,17 @@ class Scene(InstructionGroup):
         # loops over all objects in the current scene for rendering based on z positions
         objs_by_z_order = {} # tracks objects by non-zero z-order
         max_game_z = 0
-
+        object_indices_to_remove = [] # tracks which objcets need to be deleted
         for i in range(len(self.game_elements)):
             element = self.game_elements[i]
             element.on_update(dt, camera_scalar, camera_offset)
+
+            # collisions
+            if isinstance(element, Pickup):
+                hypo = np.sqrt(np.power(element.element.pos[0] - self.player.world_pos[0]*self.res, 2.0) + np.power(element.element.pos[1] - self.player.world_pos[1]*self.res, 2.0))
+                if hypo < element.radius:
+                    object_indices_to_remove.append(i)
+                    self.num_keys_collected += 1
 
             # tracks objects by z-order
             max_game_z = max(max_game_z, element.z)
@@ -86,6 +96,11 @@ class Scene(InstructionGroup):
         for i in range(len(self.UI_elements)):
             element = self.UI_elements[i]
             element.on_update(dt, 1.0, (0, 0))
+
+            # updating collected keys
+            if (element.tag == "k_1" and self.num_keys_collected >= 1) or (element.tag == "k_2" and self.num_keys_collected >= 2) or (element.tag == "k_3" and self.num_keys_collected >= 3):
+                element.change_texture("graphics/key.png")
+                element.tag = element.tag+"x"
 
             # tracks objects by z-order
             if element.z+1+max_game_z not in objs_by_z_order:
@@ -121,6 +136,13 @@ class Scene(InstructionGroup):
                             self.remove(obj.shape)
                             self.add(obj.shape)
         self.objs_by_z_order_old = objs_by_z_order
+
+        # deletes objects
+        for i in range(len(object_indices_to_remove)):
+            i_2 = len(object_indices_to_remove)-1-i
+            self.remove(self.game_elements[object_indices_to_remove[i_2]].color)
+            self.remove(self.game_elements[object_indices_to_remove[i_2]].shape)
+            del self.game_elements[object_indices_to_remove[i_2]]
 
         # audio controller update
         if self.audio_controller != None: self.audio_controller.on_update(dt, self.player, active_keys)
