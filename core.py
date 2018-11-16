@@ -19,7 +19,7 @@ import traceback
 
 
 window_size = (1440, 900)
-retina_multiplier = 2 # TODO, change later
+retina_multiplier = 1 # TODO, change later
 
 
 class BaseWidget(Widget):
