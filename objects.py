@@ -63,13 +63,14 @@ class GeometricElement(Element):
 
 
 # element substitutes
-#     requires implementation of self.z, self.shape, self.color, self.on_update(dt, cam_scalar, cam_offset), self.musical
+#     requires implementation of self.z, self.shape, self.color, self.on_update(dt, cam_scalar, cam_offset), self.musical, self.tag
 
 class ElementGroup(object):
-    def __init__(self, elements = [], z = 0, color = None, musical = False):
+    def __init__(self, elements = [], z = 0, color = None, musical = False, tag = ""):
         self.elements = elements
         self.musical = musical
         self.z = z
+        self.tag = tag
         self.color = color
         if color == None:
             self.color = Color(1, 1, 1)
@@ -84,10 +85,11 @@ class ElementGroup(object):
 
 
 class Backdrop(object):
-    def __init__(self, element, parallax_z = 0, shading_function = None, musical = False):
+    def __init__(self, element, parallax_z = 0, shading_function = None, musical = False, tag = ""):
         self.element = element
         self.shading_function = shading_function
         self.parallax_z = parallax_z
+        self.tag = tag
 
         self.pos = (self.element.pos[0], self.element.pos[1])
         self.z = self.element.z
@@ -104,11 +106,12 @@ class Backdrop(object):
 
 
 class Terrain(object): # mesh-based representation of a ground map
-    def __init__(self, map, type = "dirt", z = 0, color = None, res = 20.0):
+    def __init__(self, map, type = "dirt", z = 0, color = None, res = 20.0, tag = ""):
         self.type = type
         self.map = map # numpy height array
         self.res = res
         self.musical = False
+        self.tag = tag
 
         # placeholder values
         self.z = z
@@ -130,7 +133,7 @@ class Terrain(object): # mesh-based representation of a ground map
                     current_vertices.extend([
                         (x-0.15)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
                         (x)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
-                        (x)*self.res*retina_multiplier, 0, 0, 0])
+                        (x)*self.res*retina_multiplier, -10*self.res*retina_multiplier, 0, 0])
 
                     if last_height < self.map[x]:
                         current_vertices[17] += 0.15*self.res*retina_multiplier
@@ -140,8 +143,6 @@ class Terrain(object): # mesh-based representation of a ground map
                         current_vertices[12] += 0.35*self.res*retina_multiplier
                         current_vertices[16] += 0.35*self.res*retina_multiplier
                         current_vertices[20] += 0.35*self.res*retina_multiplier
-                        current_vertices[1] = -10*self.res*retina_multiplier
-                        current_vertices[21] = -10*self.res*retina_multiplier
                     
                     self.mesh_vertices.append(current_vertices[:])
                     self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
@@ -149,7 +150,7 @@ class Terrain(object): # mesh-based representation of a ground map
 
                 if self.map[x] != 0:
                     current_vertices = [
-                        x*self.res*retina_multiplier, 0, 0, 0,
+                        x*self.res*retina_multiplier, -10*self.res*retina_multiplier, 0, 0,
                         x*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0,
                         (x+0.15)*self.res*retina_multiplier, self.map[x]*self.res*retina_multiplier, 0, 0]
                     if x-1 >= 0 and self.map[x-1] > self.map[x] and self.type == "dirt":
@@ -161,23 +162,13 @@ class Terrain(object): # mesh-based representation of a ground map
                 current_vertices.extend([
                     (x-0.15)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
                     (x)*self.res*retina_multiplier, last_height*self.res*retina_multiplier, 0, 0,
-                    (x)*self.res*retina_multiplier, 0, 0, 0])
+                    (x)*self.res*retina_multiplier, -10*self.res*retina_multiplier, 0, 0])
 
                 self.mesh_vertices.append(current_vertices[:])
                 self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
                 self.shape.add(self.meshes[-1])
 
-        # adds graphic under mesh
-        if self.type == "dirt":
-            self.under_ground = TexturedElement(pos = (len(self.map)*0.5*self.res, -5*self.res),
-                    z = self.z,
-                    size = (len(self.map)*self.res, 10*self.res),
-                    texture_path = "graphics/bg_2.png",
-                    color = Color(0, 0, 0))
-            self.shape.add(self.under_ground.shape)
-
     def on_update(self, dt, cam_scalar, cam_offset):
-        if self.type == "dirt": self.under_ground.on_update(dt, cam_scalar, cam_offset)
         for i in range(len(self.meshes)):
             processed_vertices = self.mesh_vertices[i][:]
             for j in [0, 4, 8, 12, 16, 20]:
@@ -188,14 +179,55 @@ class Terrain(object): # mesh-based representation of a ground map
 
 
 class Platform(object):
-    def __init__(self, cells, type = "dirt", musical = False):
+    def __init__(self, cell_bounds, type = "dirt", z = 0, musical = False, beats = [1, 3], texture = "", res = 20.0, tag = ""):
         self.type = type
         if self.type == "mech":
             musical = True
+        self.musical = musical
+        self.beats = beats
+        self.texture = texture
+        self.cell_bounds = cell_bounds # in world_pos coordinate system
+        self.z = z
+        self.res = res
+        self.tag = tag
+
+        # musical elements
+        self.t = 0
+
+        # creates element for platform
+        self.element = None
+        if self.type == "dirt":
+            self.vertices = [
+                (self.cell_bounds[0][0])*self.res*retina_multiplier, (self.cell_bounds[0][1]+0.15)*self.res*retina_multiplier, 0, 0,
+                (self.cell_bounds[0][0])*self.res*retina_multiplier, (self.cell_bounds[0][1]+0.85)*self.res*retina_multiplier, 0, 0,
+                (self.cell_bounds[0][0]+0.15)*self.res*retina_multiplier, (self.cell_bounds[0][1]+1)*self.res*retina_multiplier, 0, 0,
+                (self.cell_bounds[1][0]+0.85)*self.res*retina_multiplier, (self.cell_bounds[1][1]+1)*self.res*retina_multiplier, 0, 0,
+                (self.cell_bounds[1][0]+1)*self.res*retina_multiplier, (self.cell_bounds[1][1]+0.85)*self.res*retina_multiplier, 0, 0,
+                (self.cell_bounds[1][0]+1)*self.res*retina_multiplier, (self.cell_bounds[1][1]+0.15)*self.res*retina_multiplier, 0, 0,
+                (self.cell_bounds[1][0]+0.85)*self.res*retina_multiplier, (self.cell_bounds[1][1])*self.res*retina_multiplier, 0, 0,
+                (self.cell_bounds[0][0]+0.15)*self.res*retina_multiplier, (self.cell_bounds[0][1])*self.res*retina_multiplier, 0, 0]
+            indices = [0, 1, 2, 3, 4, 5, 6, 7]
+            self.shape = Mesh(vertices=self.vertices, indices=indices, mode="triangle_fan")
+            self.color = Color(0, 0, 0)
+        elif self.type == "mech":
+            self.shape = self.element.shape
+            self.color = self.element.color
+
+    def on_update(self, dt, cam_scalar, cam_offset):
+        self.t += dt
+        if self.type != "dirt":
+            self.element.on_update(dt, cam_scalar, cam_offset)
+        else:
+            processed_vertices = self.vertices[:]
+            for j in [0, 4, 8, 12, 16, 20, 24, 28]:
+                processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[0]
+            for j in [1, 5, 9, 13, 17, 21, 25, 29]:
+                processed_vertices[j] = (processed_vertices[j]*cam_scalar) + cam_offset[1]
+            self.shape.vertices = processed_vertices
 
 
 class Pickup(object):
-    def __init__(self, element, z = 10, radius = 10, musical = False): # self.z, self.shape, self.color, self.on_update(), self.musical
+    def __init__(self, element, z = 10, radius = 10, musical = False, tag = ""): # self.z, self.shape, self.color, self.on_update(), self.musical
         self.element = element
         self.color = self.element.color
         self.initial_pos = self.element.pos
@@ -204,6 +236,7 @@ class Pickup(object):
         self.radius = radius*retina_multiplier
         self.t = random.random()*3.14159*2.0
         self.musical = musical
+        self.tag = tag
 
     def on_update(self, dt, cam_scalar, cam_offset):
         self.t += dt
@@ -216,7 +249,7 @@ class Pickup(object):
 #     requires implementation of self.world_pos, self.world_size
 
 class Player(object):
-    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = ""):
         self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
@@ -225,6 +258,9 @@ class Player(object):
         self.direction = "left" # or "right"
         self.musical = False
         self.on_ground = True
+        self.last_respawnable_x = self.world_pos[0]
+        self.controls_disabled = False
+        self.tag = tag
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
@@ -274,16 +310,17 @@ class Player(object):
             else:
                 self.element.change_texture("graphics/player_stand.png")
 
-    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller):
+    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = []):
 
         # position update
         target_x_vel = 0
-        if active_keys["right"] == True:
-            target_x_vel += 9.0
-            self.set_animation_state("run_right")
-        if active_keys["left"] == True:
-            target_x_vel += -9.0
-            self.set_animation_state("run_left")
+        if self.controls_disabled == False:
+            if active_keys["right"] == True:
+                target_x_vel += 9.0
+                self.set_animation_state("run_right")
+            if active_keys["left"] == True:
+                target_x_vel += -9.0
+                self.set_animation_state("run_left")
         if active_keys["left"] == False and active_keys["right"] == False:
             self.set_animation_state("standing")
 
@@ -305,6 +342,9 @@ class Player(object):
 
             if fabs(current_player_height - ground_map[current_player_x_index]) < 0.05:
                 self.on_ground = True
+                if current_player_height > 2.0:
+                    self.last_respawnable_x = current_player_x_index+0.5
+                self.controls_disabled = False
             else:
                 self.on_ground = False
 
@@ -317,6 +357,11 @@ class Player(object):
                 right_height = ground_map[next_player_x_index + 1]
                 if right_side > next_player_x_index+1 and current_player_height >= right_height:
                     highest_ground = max(highest_ground, ground_map[next_player_x_index + 1])
+
+            # platforms
+            for platform in platforms:
+                if right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
+                    highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
 
             if next_player_height < highest_ground: # is true whenever resting on ground
                 next_pos = (next_pos[0], highest_ground+self.world_size[1])
@@ -334,6 +379,12 @@ class Player(object):
             elif right_side > next_player_x_index+1 and current_player_height < right_height:
                 next_pos = (next_player_x_index+1-self.world_size[0]*0.5, next_pos[1])
                 next_vel = (0, next_vel[1])
+
+            # falling/respawning
+            if current_player_height <= 1.0:
+                next_pos = (self.last_respawnable_x, 40.0)
+                next_vel = (0, -0.001)
+                self.controls_disabled = True
 
         # animations
         self.process_animation(dt)

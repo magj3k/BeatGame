@@ -67,14 +67,11 @@ class Scene(InstructionGroup):
             camera_scalar = self.game_camera.zoom_factor
             camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+(window_size[0]*0.5*retina_multiplier), -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+(window_size[1]*0.5*retina_multiplier))
 
-        # updates player collisions
-        self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller)
-        if self.game_camera != None: self.game_camera.update_target(self.player.world_pos)
-
         # loops over all objects in the current scene for rendering based on z positions
         objs_by_z_order = {} # tracks objects by non-zero z-order
         max_game_z = 0
         object_indices_to_remove = [] # tracks which objcets need to be deleted
+        platforms = []
         for i in range(len(self.game_elements)):
             element = self.game_elements[i]
             element.on_update(dt, camera_scalar, camera_offset)
@@ -85,6 +82,18 @@ class Scene(InstructionGroup):
                 if hypo < element.radius:
                     object_indices_to_remove.append(i)
                     self.num_keys_collected += 1
+
+            # platforms
+            if isinstance(element, Platform):
+                platforms.append(element)
+
+            # door
+            if element.tag == "door" and self.num_keys_collected >= 3:
+                element.change_texture("graphics/door_open.png")
+
+            # removes invisible objects
+            if element.color.a < 0.01:
+                object_indices_to_remove.append(i)
 
             # tracks objects by z-order
             max_game_z = max(max_game_z, element.z)
@@ -144,6 +153,10 @@ class Scene(InstructionGroup):
             self.remove(self.game_elements[object_indices_to_remove[i_2]].shape)
             del self.game_elements[object_indices_to_remove[i_2]]
 
+        # updates player collisions
+        self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms)
+        if self.game_camera != None: self.game_camera.update_target(self.player.world_pos)
+
         # audio controller update
         if self.audio_controller != None: self.audio_controller.on_update(dt, self.player, active_keys)
 
@@ -167,6 +180,6 @@ class Camera(object):
         self.world_target = (max(self.bounds[0][0], min(new_target[0], self.bounds[1][0])), max(self.bounds[0][1], min(new_target[1], self.bounds[1][1])))
 
     def on_update(self, dt):
-        self.zoom_factor = self.zoom_factor + ((self.target_zoom_factor - self.zoom_factor)* dt * self.speed)
+        self.zoom_factor = max(0.5, self.zoom_factor + ((self.target_zoom_factor - self.zoom_factor)* dt * self.speed))
         self.world_focus = (self.world_focus[0] + ((self.world_target[0] - self.world_focus[0])  * dt * self.speed), self.world_focus[1] + ((self.world_target[1] - self.world_focus[1]) * dt * self.speed))
 
