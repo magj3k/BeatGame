@@ -8,6 +8,10 @@ from math import *
 class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
         super(SceneManager, self).__init__()
+        self.fade_rect = Rectangle(size = (window_size[0]*retina_multiplier, window_size[1]*retina_multiplier), pos = (0, 0))
+        self.fade_color = Color(0, 0, 0)
+        self.fading = "in" # or "out"
+
         self.scenes = scenes
         self.current_scene_index = 0
         self.switch_to_scene(initial_scene_index)
@@ -30,8 +34,14 @@ class SceneManager(InstructionGroup):
 
             self.current_scene_index = scene_index
             self.add(self.scenes[self.current_scene_index])
+            self.add(self.fade_color)
+            self.add(self.fade_rect)
 
     def on_update(self, dt, active_keys):
+        # fading
+        if self.fading == "in":
+            self.fade_color.a = self.fade_color.a*0.98
+
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]
             current_scene.on_update(dt, active_keys)
@@ -178,11 +188,11 @@ class Scene(InstructionGroup):
 
 
 class Camera(object):
-    def __init__(self, initial_world_focus = (0, 0), initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0, bounds = None):
-        self.world_focus = initial_world_focus
+    def __init__(self, initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0, bounds = None):
         self.world_target = initial_world_target
+        self.world_focus = initial_world_target
         self.target_zoom_factor = zoom_factor
-        self.zoom_factor = 20.0
+        self.zoom_factor = zoom_factor
         self.speed = speed
         self.bounds = bounds
 
