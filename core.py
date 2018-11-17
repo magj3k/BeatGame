@@ -18,8 +18,6 @@ from kivy.clock import Clock
 import traceback
 
 
-# window_size = (1440, 900)
-# retina_multiplier = 1 # TODO, change later
 window_size = (1340, 800) # recommended width is >= 1340
 retina_multiplier = Window._density
 
