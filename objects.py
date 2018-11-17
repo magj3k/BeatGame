@@ -63,13 +63,14 @@ class GeometricElement(Element):
 
 
 # element substitutes
-#     requires implementation of self.z, self.shape, self.color, self.on_update(dt, cam_scalar, cam_offset), self.musical
+#     requires implementation of self.z, self.shape, self.color, self.on_update(dt, cam_scalar, cam_offset), self.musical, self.tag
 
 class ElementGroup(object):
-    def __init__(self, elements = [], z = 0, color = None, musical = False):
+    def __init__(self, elements = [], z = 0, color = None, musical = False, tag = ""):
         self.elements = elements
         self.musical = musical
         self.z = z
+        self.tag = tag
         self.color = color
         if color == None:
             self.color = Color(1, 1, 1)
@@ -84,10 +85,11 @@ class ElementGroup(object):
 
 
 class Backdrop(object):
-    def __init__(self, element, parallax_z = 0, shading_function = None, musical = False):
+    def __init__(self, element, parallax_z = 0, shading_function = None, musical = False, tag = ""):
         self.element = element
         self.shading_function = shading_function
         self.parallax_z = parallax_z
+        self.tag = tag
 
         self.pos = (self.element.pos[0], self.element.pos[1])
         self.z = self.element.z
@@ -104,11 +106,12 @@ class Backdrop(object):
 
 
 class Terrain(object): # mesh-based representation of a ground map
-    def __init__(self, map, type = "dirt", z = 0, color = None, res = 20.0):
+    def __init__(self, map, type = "dirt", z = 0, color = None, res = 20.0, tag = ""):
         self.type = type
         self.map = map # numpy height array
         self.res = res
         self.musical = False
+        self.tag = tag
 
         # placeholder values
         self.z = z
@@ -176,7 +179,7 @@ class Terrain(object): # mesh-based representation of a ground map
 
 
 class Platform(object):
-    def __init__(self, cell_bounds, type = "dirt", z = 0, musical = False, beats = [1, 3], texture = "", res = 20.0):
+    def __init__(self, cell_bounds, type = "dirt", z = 0, musical = False, beats = [1, 3], texture = "", res = 20.0, tag = ""):
         self.type = type
         if self.type == "mech":
             musical = True
@@ -186,6 +189,7 @@ class Platform(object):
         self.cell_bounds = cell_bounds # in world_pos coordinate system
         self.z = z
         self.res = res
+        self.tag = tag
 
         # musical elements
         self.t = 0
@@ -223,7 +227,7 @@ class Platform(object):
 
 
 class Pickup(object):
-    def __init__(self, element, z = 10, radius = 10, musical = False): # self.z, self.shape, self.color, self.on_update(), self.musical
+    def __init__(self, element, z = 10, radius = 10, musical = False, tag = ""): # self.z, self.shape, self.color, self.on_update(), self.musical
         self.element = element
         self.color = self.element.color
         self.initial_pos = self.element.pos
@@ -232,6 +236,7 @@ class Pickup(object):
         self.radius = radius*retina_multiplier
         self.t = random.random()*3.14159*2.0
         self.musical = musical
+        self.tag = tag
 
     def on_update(self, dt, cam_scalar, cam_offset):
         self.t += dt
@@ -244,7 +249,7 @@ class Pickup(object):
 #     requires implementation of self.world_pos, self.world_size
 
 class Player(object):
-    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = ""):
         self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
@@ -254,6 +259,8 @@ class Player(object):
         self.musical = False
         self.on_ground = True
         self.last_respawnable_x = self.world_pos[0]
+        self.controls_disabled = False
+        self.tag = tag
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
@@ -307,12 +314,13 @@ class Player(object):
 
         # position update
         target_x_vel = 0
-        if active_keys["right"] == True:
-            target_x_vel += 9.0
-            self.set_animation_state("run_right")
-        if active_keys["left"] == True:
-            target_x_vel += -9.0
-            self.set_animation_state("run_left")
+        if self.controls_disabled == False:
+            if active_keys["right"] == True:
+                target_x_vel += 9.0
+                self.set_animation_state("run_right")
+            if active_keys["left"] == True:
+                target_x_vel += -9.0
+                self.set_animation_state("run_left")
         if active_keys["left"] == False and active_keys["right"] == False:
             self.set_animation_state("standing")
 
@@ -336,6 +344,7 @@ class Player(object):
                 self.on_ground = True
                 if current_player_height > 2.0:
                     self.last_respawnable_x = current_player_x_index+0.5
+                self.controls_disabled = False
             else:
                 self.on_ground = False
 
@@ -374,6 +383,8 @@ class Player(object):
             # falling/respawning
             if current_player_height <= 1.0:
                 next_pos = (self.last_respawnable_x, 40.0)
+                next_vel = (0, -0.001)
+                self.controls_disabled = True
 
         # animations
         self.process_animation(dt)

@@ -50,7 +50,8 @@ scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (27.5, 8),
 scene_1_door = TexturedElement(pos = (2445, 213),
                                 z = 101,
                                 size = (500*0.13, 500*0.13),
-                                texture_path = "graphics/door_closed.png")
+                                texture_path = "graphics/door_closed.png",
+                                tag = "door")
 
 scene_1_game_elements = [   scene_1_door,
                                                     Backdrop(element = TexturedElement(pos = (0, 0),

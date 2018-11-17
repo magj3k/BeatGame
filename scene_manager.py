@@ -87,6 +87,10 @@ class Scene(InstructionGroup):
             if isinstance(element, Platform):
                 platforms.append(element)
 
+            # door
+            if element.tag == "door" and self.num_keys_collected >= 3:
+                element.change_texture("graphics/door_open.png")
+
             # removes invisible objects
             if element.color.a < 0.01:
                 object_indices_to_remove.append(i)
