@@ -49,7 +49,6 @@ class AudioController(object):
         # walking
         self.walk_ticks = set()
 
-<<<<<<< HEAD
         # time/beat tracking
         self.t = 0
         self.beat = 0
@@ -57,11 +56,10 @@ class AudioController(object):
 
         # callbacks
         self.beat_callback = beat_callback
-=======
+
         # past 5 player moves
         self.move_times = []
         self.fg_gain = 0.5
->>>>>>> bfde8e0eda1031f3d864580e61542081a58d9bc1
 
     def jump(self):
         jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
