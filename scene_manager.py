@@ -8,6 +8,7 @@ from math import *
 class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
         super(SceneManager, self).__init__()
+        self.fade_rect_added = False
         self.fade_rect = Rectangle(size = (window_size[0]*retina_multiplier, window_size[1]*retina_multiplier), pos = (0, 0))
         self.fade_color = Color(0, 0, 0)
         self.fading = "in" # or "out"
@@ -36,11 +37,16 @@ class SceneManager(InstructionGroup):
             self.add(self.scenes[self.current_scene_index])
             self.add(self.fade_color)
             self.add(self.fade_rect)
+            self.fade_rect_added = True
 
     def on_update(self, dt, active_keys):
         # fading
         if self.fading == "in":
-            self.fade_color.a = self.fade_color.a*0.98
+            self.fade_color.a = self.fade_color.a*0.982
+            if self.fade_color.a < 0.005:
+                self.remove(self.fade_rect)
+                self.remove(self.fade_color)
+                self.fade_rect_added = False
 
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]
