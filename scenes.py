@@ -120,7 +120,8 @@ scene_1_game_elements = [   scene_1_door,
                                                     Platform(((46.5, 7), (47.5, 7)),
                                                         type = "dirt",
                                                         z = 100,
-                                                        res = scene_1_resolution)
+                                                        res = scene_1_resolution,
+                                                        active = False)
                                                 ]
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)

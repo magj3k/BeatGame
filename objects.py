@@ -179,7 +179,7 @@ class Terrain(object): # mesh-based representation of a ground map
 
 
 class Platform(object):
-    def __init__(self, cell_bounds, type = "dirt", z = 0, musical = False, beats = [1, 3], texture = "", res = 20.0, tag = ""):
+    def __init__(self, cell_bounds, type = "dirt", z = 0, musical = False, beats = [1, 3], texture = "", res = 20.0, tag = "", active = True):
         self.type = type
         if self.type == "mech":
             musical = True
@@ -190,6 +190,7 @@ class Platform(object):
         self.z = z
         self.res = res
         self.tag = tag
+        self.active = True
 
         # musical elements
         self.t = 0
@@ -212,6 +213,18 @@ class Platform(object):
         elif self.type == "mech":
             self.shape = self.element.shape
             self.color = self.element.color
+
+        if active == False:
+            self.toggle_active_state()
+
+    def toggle_active_state(self):
+        self.active = not self.active
+        if self.active:
+            if self.type == "dirt":
+                self.shape.mode="triangle_fan"
+        else:
+            if self.type == "dirt":
+                self.shape.mode="line_loop"
 
     def on_update(self, dt, cam_scalar, cam_offset):
         self.t += dt
@@ -360,7 +373,7 @@ class Player(object):
 
             # platforms
             for platform in platforms:
-                if right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
+                if platform.active == True and right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
                     highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
 
             if next_player_height < highest_ground: # is true whenever resting on ground

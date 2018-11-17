@@ -42,9 +42,12 @@ class Scene(InstructionGroup):
         super(Scene, self).__init__()
         self.game_elements = initial_game_elements
         self.UI_elements = initial_UI_elements
-        self.game_camera = game_camera
-        self.audio_controller = audio_controller
+        self.game_camera = game_camera        
         self.res = res
+
+        # sets up audio controller
+        self.audio_controller = audio_controller
+        self.audio_controller.beat_callback = self.on_beat
 
         # game scenes
         self.player = player
@@ -55,6 +58,13 @@ class Scene(InstructionGroup):
         self.objs_by_z_order_old = {}
 
         self.num_keys_collected = 0
+
+    def on_beat(self, beat):
+        for i in range(len(self.game_elements)):
+            element = self.game_elements[i]
+
+            if isinstance(element, Platform):
+                element.toggle_active_state()
 
     def on_update(self, dt, active_keys):
 

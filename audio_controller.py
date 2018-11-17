@@ -13,7 +13,7 @@ level_map = [
 ]
 
 class AudioController(object):
-    def __init__(self, level = 0, bpm = 120, elements = []):
+    def __init__(self, level = 0, bpm = 120, elements = [], beat_callback = None):
         self.level = level
         self.bpm = bpm
         self.note_grid = 240
@@ -49,6 +49,14 @@ class AudioController(object):
         # walking
         self.walk_ticks = set()
 
+        # time/beat tracking
+        self.t = 0
+        self.beat = 0
+        self.time_per_beat = 2
+
+        # callbacks
+        self.beat_callback = beat_callback
+
     def jump(self):
         jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
         jump_gen.set_gain(0.5)
@@ -69,6 +77,14 @@ class AudioController(object):
 
     def on_update(self, dt, player, active_keys):
         self.audio.on_update()
+        self.t += dt
+
+        # callbacks/beat tracking
+        if self.t // self.time_per_beat != self.beat:
+            self.beat = self.t // self.time_per_beat
+
+            if self.beat_callback != None:
+                self.beat_callback(self.beat)
 
         # play sound for continuous player movement
         if player.on_ground and (active_keys['left'] == True or active_keys['right'] == True):
