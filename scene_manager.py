@@ -60,6 +60,7 @@ class Scene(InstructionGroup):
         self.UI_elements = initial_UI_elements
         self.game_camera = game_camera        
         self.res = res
+        self.game_mode = "explore" # also "puzzle" and "fight"
 
         # sets up audio controller
         self.audio_controller = audio_controller
@@ -74,6 +75,23 @@ class Scene(InstructionGroup):
         self.objs_by_z_order_old = {}
 
         self.num_keys_collected = 0
+
+    def change_game_modes(self, new_mode):
+        self.game_mode = new_mode
+        if new_mode == "explore":
+            self.game_camera.bounds_enabled = True
+        elif new_mode == "puzzle":
+            self.game_camera.bounds_enabled = False
+
+            for i in range(len(self.game_elements)):
+                element = self.game_elements[i]
+                if element.tag == "door":
+                    self.game_camera.update_target((element.pos[0]/self.res, element.pos[1]/self.res))
+                    self.game_camera.target_zoom_factor = 2.4
+                    self.game_camera.speed = 1.4
+
+        elif new_mode == "fight":
+            self.game_camera.bounds_enabled = False
 
     def on_beat(self, beat):
         for i in range(len(self.game_elements)):
@@ -98,6 +116,8 @@ class Scene(InstructionGroup):
         max_game_z = 0
         object_indices_to_remove = [] # tracks which objcets need to be deleted
         platforms = []
+        door = None
+        door_warning = None
         for i in range(len(self.game_elements)):
             element = self.game_elements[i]
             element.on_update(dt, camera_scalar, camera_offset)
@@ -114,12 +134,17 @@ class Scene(InstructionGroup):
                 platforms.append(element)
 
             # door
-            if element.tag == "door" and self.num_keys_collected >= 3:
-                element.change_texture("graphics/door_open.png")
+            if element.tag == "door":
+                door = element
+                if self.num_keys_collected >= 3:
+                    element.change_texture("graphics/door_open.png")
 
-            # removes invisible objects
-            if element.color.a < 0.01:
-                object_indices_to_remove.append(i)
+            # door warning
+            if element.tag == "door_warning":
+                door_warning = element
+            else: # removes invisible objects
+                if element.color.a < 0.01:
+                    object_indices_to_remove.append(i)
 
             # tracks objects by z-order
             max_game_z = max(max_game_z, element.z)
@@ -180,8 +205,19 @@ class Scene(InstructionGroup):
             del self.game_elements[object_indices_to_remove[i_2]]
 
         # updates player collisions
-        self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms)
-        if self.game_camera != None: self.game_camera.update_target(self.player.world_pos)
+        self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms, door)
+        if self.game_camera != None and self.game_mode == "explore": self.game_camera.update_target(self.player.world_pos)
+
+        # door proximity & updates
+        if door_warning != None and self.game_mode != "puzzle":
+            target_warning_alpha = 0.0
+            if fabs(door.pos[0] - (self.player.world_pos[0]*self.player.res)) < 105.0:
+                if self.num_keys_collected < 3:
+                    target_warning_alpha = 1.0
+                else:
+                    # enters puzzle mode
+                    self.change_game_modes("puzzle")
+            door_warning.color.a = door_warning.color.a + ((target_warning_alpha - door_warning.color.a)*dt*8.0)
 
         # audio controller update
         if self.audio_controller != None: self.audio_controller.on_update(dt, self.player, active_keys)
@@ -201,9 +237,13 @@ class Camera(object):
         self.zoom_factor = zoom_factor
         self.speed = speed
         self.bounds = bounds
+        self.bounds_enabled = True
 
     def update_target(self, new_target):
-        self.world_target = (max(self.bounds[0][0], min(new_target[0], self.bounds[1][0])), max(self.bounds[0][1], min(new_target[1], self.bounds[1][1])))
+        if self.bounds_enabled:
+            self.world_target = (max(self.bounds[0][0], min(new_target[0], self.bounds[1][0])), max(self.bounds[0][1], min(new_target[1], self.bounds[1][1])))
+        else:
+            self.world_target = (new_target[0], new_target[1])
 
     def on_update(self, dt):
         self.zoom_factor = max(0.5, self.zoom_factor + ((self.target_zoom_factor - self.zoom_factor)* dt * self.speed))

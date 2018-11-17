@@ -323,7 +323,7 @@ class Player(object):
             else:
                 self.element.change_texture("graphics/player_stand.png")
 
-    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = []):
+    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None):
 
         # position update
         target_x_vel = 0
