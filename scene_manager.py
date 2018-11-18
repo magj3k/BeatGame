@@ -57,7 +57,9 @@ class Scene(InstructionGroup):
     def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None):
         super(Scene, self).__init__()
         self.game_elements = initial_game_elements
+        self.queued_game_elements = []
         self.UI_elements = initial_UI_elements
+        self.queued_UI_elements = []
         self.game_camera = game_camera        
         self.res = res
         self.game_mode = "explore" # also "puzzle" and "fight"
@@ -77,12 +79,19 @@ class Scene(InstructionGroup):
         self.num_keys_collected = 0
 
     def change_game_modes(self, new_mode):
+        self.audio_controller.change_game_modes(new_mode)
         self.game_mode = new_mode
         if new_mode == "explore":
             self.game_camera.bounds_enabled = True
         elif new_mode == "puzzle":
             self.game_camera.bounds_enabled = False
+            self.player.controls_disabled = True
 
+            # adds UI bg
+            new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
+            self.queued_UI_elements.append(new_bg)
+
+            # updates camera
             for i in range(len(self.game_elements)):
                 element = self.game_elements[i]
                 if element.tag == "door":
@@ -102,6 +111,14 @@ class Scene(InstructionGroup):
 
     def on_update(self, dt, active_keys):
 
+        # adds queued objects
+        for elm in self.queued_UI_elements:
+            self.UI_elements.append(elm)
+        for elm in self.queued_game_elements:
+            self.game_elements.append(elm)
+        self.queued_UI_elements = []
+        self.queued_game_elements = []
+
         # gets important camera information
         camera_scalar = None
         camera_offset = None # in world units
@@ -115,6 +132,7 @@ class Scene(InstructionGroup):
         objs_by_z_order = {} # tracks objects by non-zero z-order
         max_game_z = 0
         object_indices_to_remove = [] # tracks which objcets need to be deleted
+        UI_indices_to_remove = []
         platforms = []
         door = None
         door_warning = None
@@ -162,6 +180,26 @@ class Scene(InstructionGroup):
                 element.change_texture("graphics/key.png")
                 element.tag = element.tag+"x"
 
+            # puzzle mode
+            if self.game_mode == "puzzle":
+                if element.tag == "k_1x":
+                    element.target_pos = (window_size[0]*0.25, window_size[1]*(0.5+0.22))
+                    element.target_size = (166*0.34, 400*0.34)
+                elif element.tag == "k_2x":
+                    element.target_pos = (window_size[0]*0.25, window_size[1]*(0.5+0.0))
+                    element.target_size = (166*0.34, 400*0.34)
+                elif element.tag == "k_3x":
+                    element.target_pos = (window_size[0]*0.25, window_size[1]*(0.5-0.22))
+                    element.target_size = (166*0.34, 400*0.34)
+                elif element.tag == "keys_bg":
+                    element.color.a = element.color.a*0.85
+                elif element.tag == "UI_bg":
+                    element.color.a = element.color.a + ((0.8 - element.color.a) * 10.0 * dt)
+
+            # removes invisible objects
+            if element.color.a < 0.01:
+                UI_indices_to_remove.append(i)
+
             # tracks objects by z-order
             if element.z+1+max_game_z not in objs_by_z_order:
                 objs_by_z_order[element.z+1+max_game_z] = [i]
@@ -176,7 +214,8 @@ class Scene(InstructionGroup):
         for z in all_z_orders:
             object_inds_at_z = objs_by_z_order[z]
 
-            if refresh_chained == True or self.objs_by_z_order_old[z] != object_inds_at_z:
+            # print(self.objs_by_z_order_old[z])
+            if refresh_chained == True or z not in self.objs_by_z_order_old.keys() or len(self.objs_by_z_order_old[z]) != len(object_inds_at_z):
                 refresh_chained = True
                 for ind in object_inds_at_z:
 
@@ -203,6 +242,11 @@ class Scene(InstructionGroup):
             self.remove(self.game_elements[object_indices_to_remove[i_2]].color)
             self.remove(self.game_elements[object_indices_to_remove[i_2]].shape)
             del self.game_elements[object_indices_to_remove[i_2]]
+        for i in range(len(UI_indices_to_remove)):
+            i_2 = len(UI_indices_to_remove)-1-i
+            self.remove(self.UI_elements[UI_indices_to_remove[i_2]].color)
+            self.remove(self.UI_elements[UI_indices_to_remove[i_2]].shape)
+            del self.UI_elements[UI_indices_to_remove[i_2]]
 
         # updates player collisions
         self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms, door)
@@ -212,7 +256,7 @@ class Scene(InstructionGroup):
         if door_warning != None and self.game_mode != "puzzle":
             target_warning_alpha = 0.0
             if fabs(door.pos[0] - (self.player.world_pos[0]*self.player.res)) < 105.0:
-                if self.num_keys_collected < 3:
+                if self.num_keys_collected < 0: # TODO, change to 3
                     target_warning_alpha = 1.0
                 else:
                     # enters puzzle mode
