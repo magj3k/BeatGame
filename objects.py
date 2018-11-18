@@ -179,7 +179,7 @@ class Terrain(object): # mesh-based representation of a ground map
 
 
 class Platform(object):
-    def __init__(self, cell_bounds, type = "dirt", z = 0, musical = False, beats = [1, 3], texture = "", res = 20.0, tag = "", active = True):
+    def __init__(self, cell_bounds, type = "dirt", z = 0, musical = False, beats = [1, 3], texture = "", res = 20.0, tag = "", active = True, sound_path = ""):
         self.type = type
         if self.type == "mech":
             musical = True
@@ -191,6 +191,7 @@ class Platform(object):
         self.res = res
         self.tag = tag
         self.active = True
+        self.sound_path = sound_path
 
         # musical elements
         self.t = 0
