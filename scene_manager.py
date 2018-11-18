@@ -86,6 +86,7 @@ class Scene(InstructionGroup):
         elif new_mode == "puzzle":
             self.game_camera.bounds_enabled = False
             self.player.controls_disabled = True
+            self.player.set_animation_state("standing")
 
             # adds UI bg
             new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)

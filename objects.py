@@ -346,7 +346,7 @@ class Player(object):
         if active_keys["left"] == False and active_keys["right"] == False:
             self.set_animation_state("standing")
 
-        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] - (60.0*dt))
+        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] - (72.0*dt))
         next_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
 
         # ground & wall collisions
@@ -388,7 +388,7 @@ class Player(object):
             if next_player_height < highest_ground: # is true whenever resting on ground
                 next_pos = (next_pos[0], highest_ground+self.world_size[1])
                 if active_keys['spacebar'] == True and self.controls_disabled == False and self.spawning_freeze == False:
-                    next_vel = (next_vel[0], 18.0)
+                    next_vel = (next_vel[0], 18.6015*audio_controller.bpm/110)
                     audio_controller.jump()
                     self.on_ground = False
                 else:
