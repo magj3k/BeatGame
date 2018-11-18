@@ -256,7 +256,7 @@ class Scene(InstructionGroup):
         if door_warning != None and self.game_mode != "puzzle":
             target_warning_alpha = 0.0
             if fabs(door.pos[0] - (self.player.world_pos[0]*self.player.res)) < 105.0:
-                if self.num_keys_collected < 0: # TODO, change to 3
+                if self.num_keys_collected < 3: # TODO, change to 3
                     target_warning_alpha = 1.0
                 else:
                     # enters puzzle mode
