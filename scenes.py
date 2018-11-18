@@ -10,22 +10,22 @@ middle = (window_size[0]/2, window_size[1]/2)
 far_z = 100000000
 
 keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
-                        z = 1,
+                        z = 10,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
                         tag = "k_1"), 
                     TexturedElement(pos = (window_size[0]-95, window_size[1]-65),
-                        z = 1,
+                        z = 10,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
                         tag = "k_2"),
                     TexturedElement(pos = (window_size[0]-145, window_size[1]-65),
-                        z = 1,
+                        z = 10,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
                         tag = "k_3"),
                     TexturedElement(pos = (window_size[0]-66, window_size[1]-49),
-                        z = 0,
+                        z = 1,
                         color = Color(0, 0, 0, 0.5),
                         size = (650*0.4, 450*0.4),
                         texture_path = "graphics/rounded_box.png",
@@ -48,6 +48,7 @@ scene_1_ground_map[80:95] = [4+scene_1_elevation_offset]*15
 scene_1_camera_bounds = ((25, 6.5), (64, 9.5))
 scene_1_resolution = 30.0
 scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (27.5, 8), z = 110)
+# scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (60, 12), z = 110)
 scene_1_door = TexturedElement(pos = (2445, 213),
                                 z = 101,
                                 size = (500*0.13, 500*0.13),

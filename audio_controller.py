@@ -66,7 +66,7 @@ class AudioController(object):
     def get_key(self):
         pass
 
-    def change_game_modes(self):
+    def change_game_modes(self, game_mode):
         pass
 
     def get_key(self):

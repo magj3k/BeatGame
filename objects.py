@@ -281,6 +281,7 @@ class Player(object):
         self.on_ground = True
         self.last_respawnable_x = self.world_pos[0]
         self.controls_disabled = False
+        self.spawning_freeze = False
         self.tag = tag
 
         # animations
@@ -335,7 +336,7 @@ class Player(object):
 
         # position update
         target_x_vel = 0
-        if self.controls_disabled == False:
+        if self.controls_disabled == False and self.spawning_freeze == False:
             if active_keys["right"] == True:
                 target_x_vel += 9.0
                 self.set_animation_state("run_right")
@@ -365,7 +366,7 @@ class Player(object):
                 self.on_ground = True
                 if current_player_height > 2.0:
                     self.last_respawnable_x = current_player_x_index+0.5
-                self.controls_disabled = False
+                self.spawning_freeze = False
             else:
                 self.on_ground = False
 
@@ -386,7 +387,7 @@ class Player(object):
 
             if next_player_height < highest_ground: # is true whenever resting on ground
                 next_pos = (next_pos[0], highest_ground+self.world_size[1])
-                if active_keys['spacebar'] == True:
+                if active_keys['spacebar'] == True and self.controls_disabled == False and self.spawning_freeze == False:
                     next_vel = (next_vel[0], 18.0)
                     audio_controller.jump()
                     self.on_ground = False
@@ -405,7 +406,7 @@ class Player(object):
             if current_player_height <= 1.0:
                 next_pos = (self.last_respawnable_x, 40.0)
                 next_vel = (0, -0.001)
-                self.controls_disabled = True
+                self.spawning_freeze = True
 
         # animations
         self.process_animation(dt)
