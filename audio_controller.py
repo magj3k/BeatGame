@@ -4,6 +4,7 @@ from audio.clock import *
 from audio.mixer import *
 from audio.wavegen import *
 from audio.wavesrc import *
+import random
 
 level_map = [
                 {'bg_music': 'audio/electro_bg.wav',
@@ -78,13 +79,28 @@ class AudioController(object):
         self.lane = 0
 
         # create generators
-        self.puzzle_gens = {}
+        self.puzzle_gens = []
         for index, fg_track in enumerate(self.level_puzzle['fg_music']):
-            gen = WaveGenerator(WaveFile(fg_track))
+            file = WaveFile(fg_track)
+            gen = WaveGenerator(file, True)
             gen.pause()
-            gen.set_gain(0.5)
+            gen.set_gain(0.8)
 
-            self.puzzle_gens[index] = {'generator': gen, 'lane': index}
+            # tot num frames in generator
+            data = file.get_frames(0, 1000000000)
+            tot_frames = len(data) // 2 # for stereo
+
+            rand_offset = random.randint(-8, 7)
+            if rand_offset < 0:
+                rand_offset -= 2
+            else:
+                rand_offset += 3
+            self.puzzle_gens.append({'generator': gen, 'frames': tot_frames, 'lane': index, 'offset': rand_offset, 'started': False})
+
+        # frames per offset
+        self.frames_per_quarter_beat = int(44100 / (4 * self.bpm / 60))
+
+        self.play_ticks = {}
 
 
     def change_game_modes(self, mode):
@@ -97,16 +113,28 @@ class AudioController(object):
 
             # add generators to mixer
             self.mixer.add(self.sched)
+            self.mixer.remove(self.bg_gen)
             self.mixer.add(self.bg_gen)
             self.mixer.add(self.fg_gen)
 
+            self.bg_gen.set_gain(0.3)
+
         if mode == 'puzzle':
-            self.mixer.remove(self.bg_gen)
+            self.play_ticks = {}
+
             self.mixer.remove(self.fg_gen)
+            self.bg_gen.set_gain(0.5)
 
-            self.bg_gen.reset()
+            now = self.sched.get_tick()
+            next_downbeat = quantize_tick_up(now, self.note_grid*4)
 
-            self.mixer.add(self.bg_gen)
+            for gen_props in self.puzzle_gens:
+                play_tick = next_downbeat + gen_props['offset'] * self.note_grid/4
+                if play_tick < now:
+                    play_tick += self.note_grid*8
+
+                self.play_ticks[gen_props['lane']] = play_tick
+                self.sched.post_at_tick(self.play_track, play_tick, gen_props)
 
 
     ####################
@@ -138,6 +166,19 @@ class AudioController(object):
             self.mixer.add(obj_gen)
             self.object_ticks.pop(index)
 
+
+    ###############
+    # Puzzle Mode #
+    ###############
+
+    def play_track(self, tick, gen_props):
+        if gen_props['lane'] in self.play_ticks and self.play_ticks[gen_props['lane']] == tick and not gen_props['started']:
+            self.mixer.add(gen_props['generator'])
+            gen_props['generator'].play()
+            gen_props['started'] = True
+            self.play_ticks.pop(gen_props['lane'])
+
+
     #############
     # All Modes #
     #############
@@ -146,6 +187,33 @@ class AudioController(object):
         if self.mode == 'exploration':
             if keycode in ['left', 'right', 'spacebar']:
                 self.move_times.append(self.sched.get_tick())
+        
+        if self.mode == 'puzzle':
+            # change lanes
+            if keycode == 'up':
+                self.lane = max(0, self.lane - 1)
+            if keycode == 'down':
+                self.lane = min(len(self.puzzle_gens)-1, self.lane + 1)
+
+            # shift selected track
+            if keycode == 'left' or keycode == 'right':
+                offset = self.puzzle_gens[self.lane]['offset']
+                gen = self.puzzle_gens[self.lane]['generator']
+                tot_frames = self.puzzle_gens[self.lane]['frames']
+
+                current_frame = gen.frame
+                if current_frame + self.frames_per_quarter_beat < 0:
+                    gen.frame = tot_frames + current_frame + self.frames_per_quarter_beat
+                elif current_frame + self.frames_per_quarter_beat > tot_frames:
+                    gen.frame = (current_frame + self.frames_per_quarter_beat) % tot_frames
+                else:
+                    gen.frame = current_frame + self.frames_per_quarter_beat
+
+                if keycode == 'left':
+                    self.puzzle_gens[self.lane]['offset'] = offset - 1
+                if keycode == 'right':
+                    self.puzzle_gens[self.lane]['offset'] = offset + 1
+
 
     def on_key_up(self, keycode):
         pass
@@ -153,17 +221,15 @@ class AudioController(object):
     def on_update(self, dt, player, active_keys):
         self.audio.on_update()
         now = self.sched.get_tick()
+        # callbacks/beat tracking
+        if now // self.note_grid != self.beat:
+            self.beat = now // self.note_grid
+            if self.beat_callback != None:
+                self.beat_callback(self.beat)
 
         # Exploration Mode
         ##################
         if self.mode == 'exploration':
-            # callbacks/beat tracking
-            if now // self.note_grid != self.beat:
-                self.beat = now // self.note_grid
-
-                if self.beat_callback != None:
-                    self.beat_callback(self.beat)
-
             # play sound for continuous player movement
             if player.on_ground and (active_keys['left'] == True or active_keys['right'] == True):
                 next_beat = quantize_tick_up(now, self.note_grid/2)
