@@ -43,7 +43,7 @@ class SceneManager(InstructionGroup):
         # fading
         if self.fading == "in":
             self.fade_color.a = self.fade_color.a*0.982
-            if self.fade_color.a < 0.005:
+            if self.fade_color.a < 0.005 and self.fade_rect_added == True:
                 self.remove(self.fade_rect)
                 self.remove(self.fade_color)
                 self.fade_rect_added = False
@@ -87,7 +87,7 @@ class Scene(InstructionGroup):
                 element = self.game_elements[i]
                 if element.tag == "door":
                     self.game_camera.update_target((element.pos[0]/self.res, element.pos[1]/self.res))
-                    self.game_camera.target_zoom_factor = 2.4
+                    self.game_camera.target_zoom_factor = 2.5
                     self.game_camera.speed = 1.4
 
         elif new_mode == "fight":
