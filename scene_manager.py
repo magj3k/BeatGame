@@ -4,6 +4,7 @@ from objects import *
 from kivy.graphics.instructions import InstructionGroup
 import numpy as np
 from math import *
+import random
 
 class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
@@ -147,6 +148,18 @@ class Scene(InstructionGroup):
                 if hypo < element.radius:
                     object_indices_to_remove.append(i)
                     self.num_keys_collected += 1
+                    self.audio_controller.get_key()
+
+                    # creates particles
+                    for i in range(7):
+                        new_particle = Particle(GeometricElement(pos = element.element.pos,
+                            vel = (random.random()*150.0 - 75.0, random.random()*150.0 - 75.0),
+                            color = Color(1, 0.9, 0.7),
+                            size = (16, 16),
+                            shape = Ellipse(pos = element.element.pos, size = (0.01, 0.01))),
+                            z = self.player.z-1,
+                            resize_period = 0.5+(random.random()*0.8))
+                        self.game_elements.append(new_particle)
 
             # platforms
             if isinstance(element, Platform):
@@ -163,6 +176,11 @@ class Scene(InstructionGroup):
                 door_warning = element
             else: # removes invisible objects
                 if element.color.a < 0.01:
+                    object_indices_to_remove.append(i)
+
+            # particles
+            if element.tag == "particle":
+                if element.kill_me == True:
                     object_indices_to_remove.append(i)
 
             # tracks objects by z-order

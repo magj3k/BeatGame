@@ -41,8 +41,10 @@ scene_1_ground_map[0:21] = [4+scene_1_elevation_offset]*21
 scene_1_ground_map[0:18] = [8+scene_1_elevation_offset]*18
 scene_1_ground_map[0:16] = [10+scene_1_elevation_offset]*16
 scene_1_ground_map[0:12] = [11+scene_1_elevation_offset]*12
+scene_1_ground_map[36:38] = [1+scene_1_elevation_offset]*2
 scene_1_ground_map[38:51] = [-5+scene_1_elevation_offset]*13
 scene_1_water_map[38:51] = [-1+scene_1_elevation_offset]*13
+scene_1_ground_map[51:53] = [1+scene_1_elevation_offset]*2
 scene_1_ground_map[59:67] = [1+scene_1_elevation_offset]*8
 scene_1_ground_map[80:95] = [4+scene_1_elevation_offset]*15
 scene_1_camera_bounds = ((25, 6.5), (64, 9.5))
@@ -117,17 +119,17 @@ scene_1_game_elements = [   scene_1_door,
                                                     Pickup(TexturedElement(pos = (44.8*scene_1_resolution, 312),
                                                         size = (166*0.091, 400*0.091),
                                                         texture_path = "graphics/key.png"), z = 110, radius = 20),
-                                                    Pickup(TexturedElement(pos = (25*scene_1_resolution, 370),
+                                                    Pickup(TexturedElement(pos = (25*scene_1_resolution, 362),
                                                         size = (166*0.091, 400*0.091),
                                                         texture_path = "graphics/key.png"), z = 110, radius = 20),
-                                                    Platform(((41, 7), (42, 7)),
+                                                    Platform(((41, 6), (42, 6)),
                                                         type = "dirt",
                                                         z = 100,
                                                         musical = True,
                                                         beats = [1, 3],
                                                         res = scene_1_resolution,
                                                         sound_path = "audio/platform_sfx.wav"),
-                                                    Platform(((46.5, 7), (47.5, 7)),
+                                                    Platform(((46.5, 6), (47.5, 6)),
                                                         type = "dirt",
                                                         z = 100,
                                                         musical = True,
