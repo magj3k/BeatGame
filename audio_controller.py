@@ -10,6 +10,7 @@ level_map = [
                  'fg_music': 'audio/electro_fg.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
+                 'key_sfx': 'audio/key_sfx.wav',
                  'bpm': 110},
 ]
 
@@ -49,10 +50,8 @@ class AudioController(object):
         # walking
         self.walk_ticks = set()
 
-        # time/beat tracking
-        self.t = 0
+        # beat tracking
         self.beat = 0
-        self.time_per_beat = 2
 
         # callbacks
         self.beat_callback = beat_callback
@@ -63,6 +62,14 @@ class AudioController(object):
 
         # environment
         self.object_ticks = {}
+
+    def change_game_modes(self):
+        pass
+
+    def get_key(self):
+        key_gen = WaveGenerator(WaveFile(self.level_music['key_sfx']))
+        key_gen.set_gain(0.5)
+        self.mixer.add(key_gen)
 
     def jump(self):
         jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
@@ -95,11 +102,9 @@ class AudioController(object):
         self.audio.on_update()
         now = self.sched.get_tick()
 
-        self.t += dt
-
         # callbacks/beat tracking
-        if self.t // self.time_per_beat != self.beat:
-            self.beat = self.t // self.time_per_beat
+        if now // self.note_grid != self.beat:
+            self.beat = now // self.note_grid
 
             if self.beat_callback != None:
                 self.beat_callback(self.beat)
