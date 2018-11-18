@@ -19,6 +19,7 @@ import traceback
 
 
 window_size = (1340, 800) # recommended width is >= 1340
+# window_size = (1150, 650)
 retina_multiplier = Window._density
 
 
