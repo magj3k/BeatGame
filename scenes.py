@@ -28,7 +28,8 @@ keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         z = 0,
                         color = Color(0, 0, 0, 0.5),
                         size = (650*0.4, 450*0.4),
-                        texture_path = "graphics/rounded_box.png")]
+                        texture_path = "graphics/rounded_box.png",
+                        tag = "keys_bg")]
 
 scene_1_resolution = 30.0
 scene_1_elevation_offset = 6

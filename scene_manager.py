@@ -77,6 +77,7 @@ class Scene(InstructionGroup):
         self.num_keys_collected = 0
 
     def change_game_modes(self, new_mode):
+        self.audio_controller.change_game_modes(new_mode)
         self.game_mode = new_mode
         if new_mode == "explore":
             self.game_camera.bounds_enabled = True
@@ -115,6 +116,7 @@ class Scene(InstructionGroup):
         objs_by_z_order = {} # tracks objects by non-zero z-order
         max_game_z = 0
         object_indices_to_remove = [] # tracks which objcets need to be deleted
+        UI_indices_to_remove = []
         platforms = []
         door = None
         door_warning = None
@@ -162,6 +164,21 @@ class Scene(InstructionGroup):
                 element.change_texture("graphics/key.png")
                 element.tag = element.tag+"x"
 
+            # puzzle mode
+            if self.game_mode == "puzzle":
+                if element.tag == "k_1x":
+                    element.target_pos = (window_size[0]*0.5, window_size[1]*(0.5+0.2))
+                elif element.tag == "k_2x":
+                    element.target_pos = (window_size[0]*0.5, window_size[1]*(0.5+0.0))
+                elif element.tag == "k_3x":
+                    element.target_pos = (window_size[0]*0.5, window_size[1]*(0.5-0.2))
+                elif element.tag == "keys_bg":
+                    element.color.a = element.color.a*0.97
+
+            # removes invisible objects
+            if element.color.a < 0.01:
+                object_indices_to_remove.append(i)
+
             # tracks objects by z-order
             if element.z+1+max_game_z not in objs_by_z_order:
                 objs_by_z_order[element.z+1+max_game_z] = [i]
@@ -203,6 +220,11 @@ class Scene(InstructionGroup):
             self.remove(self.game_elements[object_indices_to_remove[i_2]].color)
             self.remove(self.game_elements[object_indices_to_remove[i_2]].shape)
             del self.game_elements[object_indices_to_remove[i_2]]
+        for i in range(len(UI_indices_to_remove)):
+            i_2 = len(UI_indices_to_remove)-1-i
+            self.remove(self.game_elements[UI_indices_to_remove[i_2]].color)
+            self.remove(self.game_elements[UI_indices_to_remove[i_2]].shape)
+            del self.game_elements[UI_indices_to_remove[i_2]]
 
         # updates player collisions
         self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms, door)

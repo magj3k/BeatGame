@@ -28,6 +28,8 @@ class TexturedElement(Element):
     def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), texture_path = "", musical = False):
         Element.__init__(self, pos, vel, tag, color, z, musical)
         self.size = size
+        self.target_pos = None
+        self.target_size = None
         self.texture_path = texture_path
         self.shape = Rectangle(pos=((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier),size=(self.size[0]*retina_multiplier, self.size[1]*retina_multiplier))
 
@@ -40,6 +42,11 @@ class TexturedElement(Element):
             self.shape.texture = Image(self.texture_path).texture
 
     def on_update(self, dt, cam_scalar, cam_offset):
+        if self.target_pos != None:
+            self.pos = (self.pos[0] + ((self.target_pos[0] - self.pos[0])*dt*10.0), self.pos[1] + ((self.target_pos[1] - self.pos[1])*dt*10.0))
+        if self.target_size != None:
+            self.size = (self.size[0] + ((self.target_size[0] - self.size[0])*dt*10.0), self.size[1] + ((self.target_size[1] - self.size[1])*dt*10.0))
+
         super().on_update(dt)
         self.shape.pos = (((self.pos[0]-(self.size[0]/2))*retina_multiplier)*cam_scalar + cam_offset[0], ((self.pos[1]-(self.size[1]/2))*retina_multiplier)*cam_scalar + cam_offset[1])
         self.shape.size = (self.size[0]*retina_multiplier*cam_scalar, self.size[1]*retina_multiplier*cam_scalar)

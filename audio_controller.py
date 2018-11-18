@@ -64,6 +64,9 @@ class AudioController(object):
         # environment
         self.object_ticks = {}
 
+    def get_key(self):
+        pass
+
     def jump(self):
         jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
         jump_gen.set_gain(0.5)
