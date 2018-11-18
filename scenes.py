@@ -32,7 +32,7 @@ keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
 
 scene_1_resolution = 30.0
 scene_1_elevation_offset = 6
-scene_1_water_map = [0]*86
+scene_1_water_map = [0]*95
 scene_1_ground_map = [0+scene_1_elevation_offset]*86
 scene_1_ground_map[0:24] = [1+scene_1_elevation_offset]*24
 scene_1_ground_map[0:22] = [2+scene_1_elevation_offset]*22
@@ -43,7 +43,7 @@ scene_1_ground_map[0:12] = [11+scene_1_elevation_offset]*12
 scene_1_ground_map[38:51] = [-5+scene_1_elevation_offset]*13
 scene_1_water_map[38:51] = [-1+scene_1_elevation_offset]*13
 scene_1_ground_map[59:67] = [1+scene_1_elevation_offset]*8
-scene_1_ground_map[80:86] = [4+scene_1_elevation_offset]*6
+scene_1_ground_map[80:95] = [4+scene_1_elevation_offset]*15
 scene_1_camera_bounds = ((25, 6.5), (64, 9.5))
 scene_1_resolution = 30.0
 scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (27.5, 8), z = 110)
@@ -54,16 +54,21 @@ scene_1_door = TexturedElement(pos = (2445, 213),
                                 tag = "door")
 
 scene_1_game_elements = [   scene_1_door,
+                                                    TexturedElement(pos = (2350, 280),
+                                                        z = 99,
+                                                        size = (458*0.17, 490*0.17),
+                                                        texture_path = "graphics/not_enough_keys.png",
+                                                        tag = "door_warning"),
                                                     Backdrop(element = TexturedElement(pos = (0, 0),
                                                         z = 0,
                                                         size = (window_size[0]*3.0, window_size[1]*1.2),
                                                         texture_path = "graphics/bg_1.png"),
                                                         parallax_z = far_z),
-                                                    Backdrop(element = TexturedElement(pos = (0, -340),
+                                                    Backdrop(element = TexturedElement(pos = (0, -300),
                                                         z = 1,
                                                         size = (window_size[0]*3.0, window_size[1]*0.8),
                                                         texture_path = "graphics/bg_2.png",
-                                                        color = Color(0.25, 0.45, 0.2)),
+                                                        color = Color(0.2, 0.4, 0.15)),
                                                         parallax_z = 60),
                                                     Backdrop(element = TexturedElement(pos = (-100, 50),
                                                         z = 5,
@@ -126,13 +131,14 @@ scene_1_game_elements = [   scene_1_door,
                                                         musical = True,
                                                         beats = [2, 4],
                                                         res = scene_1_resolution,
+                                                        active = False,
                                                         sound_path = "audio/snare.wav")
                                                 ]
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)
 
 scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
-scene_1_camera = Camera(zoom_factor = 1.1, speed = 0.85, bounds = scene_1_camera_bounds)
+scene_1_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_1_player.world_pos, speed = 0.85, bounds = scene_1_camera_bounds)
 scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player)
 
 scenes = [scene_1]
