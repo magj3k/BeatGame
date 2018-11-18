@@ -126,7 +126,7 @@ scene_1_game_elements = [   scene_1_door,
                                                         musical = True,
                                                         beats = [1, 3],
                                                         res = scene_1_resolution,
-                                                        sound_path = "audio/snare.wav"),
+                                                        sound_path = "audio/platform_sfx.wav"),
                                                     Platform(((46.5, 7), (47.5, 7)),
                                                         type = "dirt",
                                                         z = 100,
@@ -134,7 +134,7 @@ scene_1_game_elements = [   scene_1_door,
                                                         beats = [2, 4],
                                                         res = scene_1_resolution,
                                                         active = False,
-                                                        sound_path = "audio/snare.wav")
+                                                        sound_path = "audio/platform_sfx.wav")
                                                 ]
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)

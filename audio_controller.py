@@ -115,12 +115,12 @@ class AudioController(object):
 
     def get_key(self):
         key_gen = WaveGenerator(WaveFile(self.level_music['key_sfx']))
-        key_gen.set_gain(0.5)
+        key_gen.set_gain(0.4)
         self.mixer.add(key_gen)
 
     def jump(self):
         jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
-        jump_gen.set_gain(0.5)
+        jump_gen.set_gain(0.6)
         self.mixer.add(jump_gen)
 
     def walk_once(self, tick, ignore):
@@ -131,12 +131,12 @@ class AudioController(object):
             self.walk_ticks.remove(tick)
 
     def object_sound(self, tick, object_props):
-        gain, sound, index = object_props
+        index, sound = object_props
         if tick in self.object_ticks[index]:
             obj_gen = WaveGenerator(WaveFile(sound))
-            obj_gen.set_gain(gain)
+            obj_gen.set_gain(self.object_ticks[index][tick])
             self.mixer.add(obj_gen)
-            self.object_ticks[index].remove(tick)
+            self.object_ticks.pop(index)
 
     #############
     # All Modes #
@@ -197,16 +197,15 @@ class AudioController(object):
 
             # play game element music based on proximity of player
             player_pos = player.world_pos
-
             for index, element in enumerate(self.musical_elements):
                 cell_bounds = element.cell_bounds
                 x_dist = min(abs(player_pos[0] - cell_bounds[0][0]), abs(player_pos[0] - cell_bounds[1][0]))
                 y_dist = min(abs(player_pos[1] - cell_bounds[0][1]), abs(player_pos[1] - cell_bounds[1][1]))
                 dist = (x_dist**2 + y_dist**2)**0.5
                 dist = max(0, dist - 2)
-                # max gain 0.6
+                # max gain 0.8
                 # you start hearing things when you're less than 16 dist away
-                gain = 0.6 * max(0, (16 - dist)) / 16
+                gain = 0.2 * max(0, (14 - dist)) / 14
                 obj_sound = element.sound_path
 
                 # find closest beat to now
@@ -224,14 +223,13 @@ class AudioController(object):
                             next_tick = tick
 
                 if next_tick < prev_beat + 8*self.note_grid:
-                    if index in self.object_ticks and next_tick in self.object_ticks[index]:
-                        pass
-                    else:
-                        if index not in self.object_ticks:
-                            self.object_ticks[index] = set()
+                    if index not in self.object_ticks:
+                        self.object_ticks[index] = {}
 
-                        self.sched.post_at_tick(self.object_sound, next_tick, (gain, obj_sound, index))
-                        self.object_ticks[index].add(next_tick)
+                    if next_tick not in self.object_ticks[index]:
+                        self.sched.post_at_tick(self.object_sound, next_tick, (index, obj_sound))
+
+                    self.object_ticks[index][next_tick] = gain
 
         # Puzzle Mode
         #############
