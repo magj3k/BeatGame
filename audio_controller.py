@@ -77,6 +77,7 @@ class AudioController(object):
         # Puzzle
         ########
         self.lane = 0
+        self.solved = False
 
         # create generators
         self.puzzle_gens = []
@@ -84,13 +85,13 @@ class AudioController(object):
             file = WaveFile(fg_track)
             gen = WaveGenerator(file, True)
             gen.pause()
-            gen.set_gain(0.8)
+            gen.set_gain(1)
 
             # tot num frames in generator
             data = file.get_frames(0, 1000000000)
             tot_frames = len(data) // 2 # for stereo
 
-            rand_offset = random.randint(-8, 7)
+            rand_offset = random.randint(-4, 3)
             if rand_offset < 0:
                 rand_offset -= 2
             else:
@@ -98,7 +99,7 @@ class AudioController(object):
             self.puzzle_gens.append({'generator': gen, 'frames': tot_frames, 'lane': index, 'offset': rand_offset, 'started': False})
 
         # frames per offset
-        self.frames_per_quarter_beat = int(44100 / (4 * self.bpm / 60))
+        self.frames_per_frac_beat = int(44100 / (2 * self.bpm / 60))
 
         self.play_ticks = {}
 
@@ -126,10 +127,10 @@ class AudioController(object):
             self.bg_gen.set_gain(0.5)
 
             now = self.sched.get_tick()
-            next_downbeat = quantize_tick_up(now, self.note_grid*4)
+            next_downbeat = quantize_tick_up(now, self.note_grid * 8)
 
             for gen_props in self.puzzle_gens:
-                play_tick = next_downbeat + gen_props['offset'] * self.note_grid/4
+                play_tick = next_downbeat - gen_props['offset'] * self.note_grid/2
                 if play_tick < now:
                     play_tick += self.note_grid*8
 
@@ -189,30 +190,34 @@ class AudioController(object):
                 self.move_times.append(self.sched.get_tick())
         
         if self.mode == 'puzzle':
-            # change lanes
-            if keycode == 'up':
-                self.lane = max(0, self.lane - 1)
-            if keycode == 'down':
-                self.lane = min(len(self.puzzle_gens)-1, self.lane + 1)
+            if not self.solved:
+                # change lanes
+                if keycode == 'up':
+                    self.lane = max(0, self.lane - 1)
+                if keycode == 'down':
+                    self.lane = min(len(self.puzzle_gens), self.lane + 1)
 
-            # shift selected track
-            if keycode == 'left' or keycode == 'right':
-                offset = self.puzzle_gens[self.lane]['offset']
-                gen = self.puzzle_gens[self.lane]['generator']
-                tot_frames = self.puzzle_gens[self.lane]['frames']
-
-                current_frame = gen.frame
-                if current_frame + self.frames_per_quarter_beat < 0:
-                    gen.frame = tot_frames + current_frame + self.frames_per_quarter_beat
-                elif current_frame + self.frames_per_quarter_beat > tot_frames:
-                    gen.frame = (current_frame + self.frames_per_quarter_beat) % tot_frames
-                else:
-                    gen.frame = current_frame + self.frames_per_quarter_beat
-
+                # shift selected track
                 if keycode == 'left':
+                    offset = self.puzzle_gens[self.lane]['offset']
+                    gen = self.puzzle_gens[self.lane]['generator']
+                    tot_frames = self.puzzle_gens[self.lane]['frames']
+
+                    current_frame = gen.frame
+                    gen.frame = (current_frame - self.frames_per_frac_beat) % tot_frames
+
                     self.puzzle_gens[self.lane]['offset'] = offset - 1
+
                 if keycode == 'right':
+                    offset = self.puzzle_gens[self.lane]['offset']
+                    gen = self.puzzle_gens[self.lane]['generator']
+                    tot_frames = self.puzzle_gens[self.lane]['frames']
+
+                    current_frame = gen.frame
+                    gen.frame = (current_frame + self.frames_per_frac_beat) % tot_frames
+
                     self.puzzle_gens[self.lane]['offset'] = offset + 1
+                    
 
 
     def on_key_up(self, keycode):
@@ -300,4 +305,8 @@ class AudioController(object):
         # Puzzle Mode
         #############
         if self.mode == 'puzzle':
-            pass
+            solved = True
+            for gen_props in self.puzzle_gens:
+                if gen_props['offset'] % 32 != 0:
+                    solved = False
+            self.solved = solved
