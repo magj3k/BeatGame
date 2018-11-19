@@ -127,12 +127,12 @@ class AudioController(object):
             self.bg_gen.set_gain(0.5)
 
             now = self.sched.get_tick()
-            next_downbeat = quantize_tick_up(now, self.note_grid * 8)
+            next_downbeat = quantize_tick_up(now, self.note_grid * 16)
 
             for gen_props in self.puzzle_gens:
                 play_tick = next_downbeat - gen_props['offset'] * self.note_grid/2
                 if play_tick < now:
-                    play_tick += self.note_grid*8
+                    play_tick += self.note_grid*16
 
                 self.play_ticks[gen_props['lane']] = play_tick
                 self.sched.post_at_tick(self.play_track, play_tick, gen_props)
@@ -144,7 +144,7 @@ class AudioController(object):
 
     def get_key(self):
         key_gen = WaveGenerator(WaveFile(self.level_music['key_sfx']))
-        key_gen.set_gain(0.4)
+        key_gen.set_gain(0.15)
         self.mixer.add(key_gen)
 
     def jump(self):
