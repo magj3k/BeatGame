@@ -265,6 +265,33 @@ class Pickup(object):
         self.element.on_update(dt, cam_scalar, cam_offset)
 
 
+class Particle(object):
+    def __init__(self, element, z = 10, resize_period = 2.0, musical = False, tag = "particle"): # self.z, self.shape, self.color, self.on_update(), self.musical
+        self.element = element
+        self.color = self.element.color
+        self.initial_pos = self.element.pos
+        self.z = z
+        self.shape = self.element.shape
+        self.initial_size = self.element.size
+        self.musical = musical
+        self.tag = tag
+        self.kill_me = False
+
+        # animations
+        self.t = random.random()*0.35
+        self.resize_period = resize_period
+
+    def on_update(self, dt, cam_scalar, cam_offset):
+        self.t += dt
+
+        # updates size
+        coeff = ((-cos(self.t * 2 * 3.14159/self.resize_period)+1)*0.5)
+        self.element.size = (self.initial_size[0] * coeff, self.initial_size[1] * coeff)
+        if coeff <= 0.01 and self.t/self.resize_period >= 1.0:
+            self.kill_me = True
+
+        self.element.on_update(dt, cam_scalar, cam_offset)
+
 
 # element-substitute world-coordinated objects, 
 #     requires implementation of self.world_pos, self.world_size
@@ -283,6 +310,7 @@ class Player(object):
         self.controls_disabled = False
         self.spawning_freeze = False
         self.tag = tag
+        self.jump_used = False
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
@@ -345,8 +373,10 @@ class Player(object):
                 self.set_animation_state("run_left")
         if active_keys["left"] == False and active_keys["right"] == False:
             self.set_animation_state("standing")
+        if active_keys["spacebar"] == False:
+            self.jump_used = False
 
-        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] - (60.0*dt))
+        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] - (72.0*dt))
         next_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
 
         # ground & wall collisions
@@ -387,10 +417,11 @@ class Player(object):
 
             if next_player_height < highest_ground: # is true whenever resting on ground
                 next_pos = (next_pos[0], highest_ground+self.world_size[1])
-                if active_keys['spacebar'] == True and self.controls_disabled == False and self.spawning_freeze == False:
-                    next_vel = (next_vel[0], 18.0)
+                if active_keys['spacebar'] == True and self.jump_used == False and self.controls_disabled == False and self.spawning_freeze == False:
+                    next_vel = (next_vel[0], 18.6015*audio_controller.bpm/110)
                     audio_controller.jump()
                     self.on_ground = False
+                    self.jump_used = True
                 else:
                     next_vel = (next_vel[0], -next_vel[1]*0.15)
 
