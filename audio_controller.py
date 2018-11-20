@@ -195,7 +195,7 @@ class AudioController(object):
                 if keycode == 'up':
                     self.lane = max(0, self.lane - 1)
                 if keycode == 'down':
-                    self.lane = min(len(self.puzzle_gens), self.lane + 1)
+                    self.lane = min(len(self.puzzle_gens)-1, self.lane + 1)
 
                 # shift selected track
                 if keycode == 'left':
