@@ -8,7 +8,7 @@ from kivy.graphics.instructions import InstructionGroup
 
 
 class Element(object):
-    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, musical = False):
+    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, musical = False, target_alpha = None):
         self.pos = pos
         self.vel = vel
         self.tag = tag
@@ -16,17 +16,20 @@ class Element(object):
         self.z = z
         self.shape = None
         self.musical = musical
+        self.target_alpha = target_alpha
 
         if color == None:
             self.color = Color(1, 1, 1)
 
     def on_update(self, dt):
         self.pos = (self.pos[0]+self.vel[0]*dt, self.pos[1]+self.vel[1]*dt)
+        if self.target_alpha != None:
+            self.color.a = self.color.a + ((self.target_alpha - self.color.a)*10.0*dt)
 
 
 class TexturedElement(Element):
-    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), texture_path = "", musical = False):
-        Element.__init__(self, pos, vel, tag, color, z, musical)
+    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), texture_path = "", musical = False, target_alpha = None):
+        Element.__init__(self, pos, vel, tag, color, z, musical, target_alpha)
         self.size = size
         self.target_pos = None
         self.target_size = None
@@ -53,8 +56,8 @@ class TexturedElement(Element):
 
 
 class GeometricElement(Element):
-    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), shape = None, musical = False):
-        Element.__init__(self, pos, vel, tag, color, z, musical)
+    def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), shape = None, musical = False, target_alpha = None):
+        Element.__init__(self, pos, vel, tag, color, z, musical, target_alpha)
         self.size = size
         self.shape = shape
         if self.shape == None:
