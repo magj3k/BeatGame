@@ -315,6 +315,7 @@ class Player(object):
         self.spawning_freeze = False
         self.tag = tag
         self.jump_used = False
+        self.collisions_enabled = True
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
@@ -364,84 +365,92 @@ class Player(object):
             else:
                 self.element.change_texture("graphics/player_stand.png")
 
-    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None):
+    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None, override_target_x_vel = None):
 
         # position update
         target_x_vel = 0
-        if self.controls_disabled == False and self.spawning_freeze == False:
-            if active_keys["right"] == True:
-                target_x_vel += 9.0
-                self.set_animation_state("run_right")
-            if active_keys["left"] == True:
-                target_x_vel += -9.0
-                self.set_animation_state("run_left")
-        if active_keys["left"] == False and active_keys["right"] == False:
-            self.set_animation_state("standing")
-        if active_keys["spacebar"] == False:
-            self.jump_used = False
+        if audio_controller.solved == False:
+            if self.controls_disabled == False and self.spawning_freeze == False:
+                if active_keys["right"] == True:
+                    target_x_vel += 9.0
+                    self.set_animation_state("run_right")
+                if active_keys["left"] == True:
+                    target_x_vel += -9.0
+                    self.set_animation_state("run_left")
+            if active_keys["left"] == False and active_keys["right"] == False:
+                self.set_animation_state("standing")
+            if active_keys["spacebar"] == False:
+                self.jump_used = False
 
-        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] - (72.0*dt))
+        accel = -72.0*dt
+        if override_target_x_vel != None:
+            target_x_vel = override_target_x_vel
+        if self.collisions_enabled == False:
+            accel = 0
+            self.world_vel = (self.world_vel[0], 0)
+        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] + accel)
         next_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
 
         # ground & wall collisions
-        if self.world_vel[1] < 0 or self.world_vel[0] != 0:
-            current_player_x_index = min(max(int(self.world_pos[0]), 0), len(ground_map)-1)
-            next_player_x_index = min(max(int(next_pos[0]), 0), len(ground_map)-1)
-            highest_ground = ground_map[next_player_x_index]
+        if self.collisions_enabled == True:
+            if self.world_vel[1] < 0 or self.world_vel[0] != 0:
+                current_player_x_index = min(max(int(self.world_pos[0]), 0), len(ground_map)-1)
+                next_player_x_index = min(max(int(next_pos[0]), 0), len(ground_map)-1)
+                highest_ground = ground_map[next_player_x_index]
 
-            left_side = next_pos[0] - self.world_size[0]*0.5
-            right_side = next_pos[0] + self.world_size[0]*0.5
-            left_height = ground_map[next_player_x_index]
-            right_height = ground_map[next_player_x_index]
-            next_player_height = next_pos[1]-self.world_size[1]
-            current_player_height = self.world_pos[1]-self.world_size[1]
+                left_side = next_pos[0] - self.world_size[0]*0.5
+                right_side = next_pos[0] + self.world_size[0]*0.5
+                left_height = ground_map[next_player_x_index]
+                right_height = ground_map[next_player_x_index]
+                next_player_height = next_pos[1]-self.world_size[1]
+                current_player_height = self.world_pos[1]-self.world_size[1]
 
-            if fabs(current_player_height - ground_map[current_player_x_index]) < 0.05:
-                self.on_ground = True
-                if current_player_height > 2.0:
-                    self.last_respawnable_x = current_player_x_index+0.5
-                self.spawning_freeze = False
-            else:
-                self.on_ground = False
-
-            # ground collisions
-            if next_player_x_index - 1 > 0:
-                left_height = ground_map[next_player_x_index - 1]
-                if left_side < next_player_x_index and current_player_height >= left_height:
-                    highest_ground = max(highest_ground, ground_map[next_player_x_index - 1])
-            if next_player_x_index + 1 < len(ground_map):
-                right_height = ground_map[next_player_x_index + 1]
-                if right_side > next_player_x_index+1 and current_player_height >= right_height:
-                    highest_ground = max(highest_ground, ground_map[next_player_x_index + 1])
-
-            # platforms
-            for platform in platforms:
-                if platform.active == True and right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
-                    highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
-
-            if next_player_height < highest_ground: # is true whenever resting on ground
-                next_pos = (next_pos[0], highest_ground+self.world_size[1])
-                if active_keys['spacebar'] == True and self.jump_used == False and self.controls_disabled == False and self.spawning_freeze == False:
-                    next_vel = (next_vel[0], 18.6015*audio_controller.bpm/110)
-                    audio_controller.jump()
-                    self.on_ground = False
-                    self.jump_used = True
+                if fabs(current_player_height - ground_map[current_player_x_index]) < 0.05:
+                    self.on_ground = True
+                    if current_player_height > 2.0:
+                        self.last_respawnable_x = current_player_x_index+0.5
+                    self.spawning_freeze = False
                 else:
-                    next_vel = (next_vel[0], -next_vel[1]*0.15)
+                    self.on_ground = False
 
-            # wall collisions
-            if left_side < next_player_x_index and current_player_height < left_height:
-                next_pos = (next_player_x_index+self.world_size[0]*0.5, next_pos[1])
-                next_vel = (0, next_vel[1])
-            elif right_side > next_player_x_index+1 and current_player_height < right_height:
-                next_pos = (next_player_x_index+1-self.world_size[0]*0.5, next_pos[1])
-                next_vel = (0, next_vel[1])
+                # ground collisions
+                if next_player_x_index - 1 > 0:
+                    left_height = ground_map[next_player_x_index - 1]
+                    if left_side < next_player_x_index and current_player_height >= left_height:
+                        highest_ground = max(highest_ground, ground_map[next_player_x_index - 1])
+                if next_player_x_index + 1 < len(ground_map):
+                    right_height = ground_map[next_player_x_index + 1]
+                    if right_side > next_player_x_index+1 and current_player_height >= right_height:
+                        highest_ground = max(highest_ground, ground_map[next_player_x_index + 1])
 
-            # falling/respawning
-            if current_player_height <= 1.0:
-                next_pos = (self.last_respawnable_x, 40.0)
-                next_vel = (0, -0.001)
-                self.spawning_freeze = True
+                # platforms
+                for platform in platforms:
+                    if platform.active == True and right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
+                        highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
+
+                if next_player_height < highest_ground: # is true whenever resting on ground
+                    next_pos = (next_pos[0], highest_ground+self.world_size[1])
+                    if active_keys['spacebar'] == True and self.jump_used == False and self.controls_disabled == False and self.spawning_freeze == False:
+                        next_vel = (next_vel[0], 18.6015*audio_controller.bpm/110)
+                        audio_controller.jump()
+                        self.on_ground = False
+                        self.jump_used = True
+                    else:
+                        next_vel = (next_vel[0], -next_vel[1]*0.15)
+
+                # wall collisions
+                if left_side < next_player_x_index and current_player_height < left_height:
+                    next_pos = (next_player_x_index+self.world_size[0]*0.5, next_pos[1])
+                    next_vel = (0, next_vel[1])
+                elif right_side > next_player_x_index+1 and current_player_height < right_height:
+                    next_pos = (next_player_x_index+1-self.world_size[0]*0.5, next_pos[1])
+                    next_vel = (0, next_vel[1])
+
+                # falling/respawning
+                if current_player_height <= 1.0:
+                    next_pos = (self.last_respawnable_x, 40.0)
+                    next_vel = (0, -0.001)
+                    self.spawning_freeze = True
 
         # animations
         self.process_animation(dt)
