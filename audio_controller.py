@@ -77,6 +77,7 @@ class AudioController(object):
         # Puzzle
         ########
         self.lane = 0
+        self.num_lanes = self.level_puzzle['lanes']
         self.solved = False
 
         # create generators
@@ -179,6 +180,10 @@ class AudioController(object):
             gen_props['started'] = True
             self.play_ticks.pop(gen_props['lane'])
 
+    def get_offsets(self):
+        offsets = [gen_props['offset'] for gen_props in self.puzzle_gens]
+        return offsets
+
 
     #############
     # All Modes #
@@ -195,7 +200,7 @@ class AudioController(object):
                 if keycode == 'up':
                     self.lane = max(0, self.lane - 1)
                 if keycode == 'down':
-                    self.lane = min(len(self.puzzle_gens)-1, self.lane + 1)
+                    self.lane = min(self.num_lanes, self.lane + 1)
 
                 # shift selected track
                 if keycode == 'left':
