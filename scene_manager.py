@@ -93,6 +93,9 @@ class Scene(InstructionGroup):
             new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
             self.queued_UI_elements.append(new_bg)
 
+            # adds gem data
+            
+
             # updates camera
             for i in range(len(self.game_elements)):
                 element = self.game_elements[i]
