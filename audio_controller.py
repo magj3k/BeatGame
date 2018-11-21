@@ -195,7 +195,7 @@ class AudioController(object):
                 if keycode == 'up':
                     self.lane = max(0, self.lane - 1)
                 if keycode == 'down':
-                    self.lane = min(len(self.puzzle_gens), self.lane + 1)
+                    self.lane = min(len(self.puzzle_gens)-1, self.lane + 1)
 
                 # shift selected track
                 if keycode == 'left':
@@ -276,7 +276,7 @@ class AudioController(object):
                 dist = max(0, dist - 2)
                 # max gain 0.8
                 # you start hearing things when you're less than 16 dist away
-                gain = 0.2 * max(0, (14 - dist)) / 14
+                gain = 0.2 * max(0, (16 - dist)) / 16
                 obj_sound = element.sound_path
 
                 # find closest beat to now
