@@ -78,6 +78,7 @@ class Scene(InstructionGroup):
         self.objs_by_z_order_old = {}
 
         self.num_keys_collected = 0
+        self.puzzle_key_initial_offsets = []
 
     def change_game_modes(self, new_mode):
         self.audio_controller.change_game_modes(new_mode)
@@ -92,6 +93,13 @@ class Scene(InstructionGroup):
             # adds UI bg
             new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
             self.queued_UI_elements.append(new_bg)
+
+            # adds lines to BG and stores key offsets
+            self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
+            for i in range(3):
+                offset_y = (window_size[1]*0.22)*(-i+1)
+                new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], window_size[1]*0.008))
+                self.queued_UI_elements.append(new_line)
 
             # updates camera
             for i in range(len(self.game_elements)):
@@ -200,18 +208,35 @@ class Scene(InstructionGroup):
             # puzzle mode
             if self.game_mode == "puzzle":
                 if element.tag == "k_1x":
-                    element.target_pos = (window_size[0]*0.25, window_size[1]*(0.5+0.22))
+                    offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]*0.03
+                    element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.22))
                     element.target_size = (166*0.34, 400*0.34)
                 elif element.tag == "k_2x":
-                    element.target_pos = (window_size[0]*0.25, window_size[1]*(0.5+0.0))
+                    offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]*0.03
+                    element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.0))
                     element.target_size = (166*0.34, 400*0.34)
                 elif element.tag == "k_3x":
-                    element.target_pos = (window_size[0]*0.25, window_size[1]*(0.5-0.22))
+                    offset = 0
+                    element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5-0.22))
                     element.target_size = (166*0.34, 400*0.34)
                 elif element.tag == "keys_bg":
                     element.color.a = element.color.a*0.85
                 elif element.tag == "UI_bg":
                     element.color.a = element.color.a + ((0.8 - element.color.a) * 10.0 * dt)
+
+                # keys
+                if element.tag[:2] == "k_":
+                    if element.tag == "k_"+str(self.audio_controller.lane + 1)+"x":
+                        element.change_texture("graphics/key_selected.png")
+                    else:
+                        element.change_texture("graphics/key.png")
+
+                # bg lines
+                if element.tag[:12] == "puzzle_line_":
+                    if element.tag == "puzzle_line_"+str(self.audio_controller.lane):
+                        element.target_alpha = 1.0
+                    else:
+                        element.target_alpha = 0.6
 
             # removes invisible objects
             if element.color.a < 0.01:

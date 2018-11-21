@@ -40,9 +40,10 @@ class TexturedElement(Element):
             self.shape.texture = Image(texture_path).texture
 
     def change_texture(self, new_texture_path):
-        self.texture_path = new_texture_path
-        if self.texture_path != "":
-            self.shape.texture = Image(self.texture_path).texture
+        if new_texture_path != self.texture_path:
+            self.texture_path = new_texture_path
+            if self.texture_path != "":
+                self.shape.texture = Image(self.texture_path).texture
 
     def on_update(self, dt, cam_scalar, cam_offset):
         if self.target_pos != None:
