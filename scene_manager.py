@@ -168,8 +168,6 @@ class Scene(InstructionGroup):
             # door
             if element.tag == "door":
                 door = element
-                if self.num_keys_collected >= 3:
-                    element.change_texture("graphics/door_open.png")
 
             # door warning
             if element.tag == "door_warning":
