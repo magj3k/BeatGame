@@ -181,7 +181,7 @@ class Scene(InstructionGroup):
                 self.puzzle_solved_timer += dt
                 if self.puzzle_solved_started != True:
                     self.puzzle_solved_started = True
-                    self.puzzle_solved_animation_duration = 3.5
+                    self.puzzle_solved_animation_duration = 5.5
                     self.player.collisions_enabled = False
 
                     # creates particle effects
