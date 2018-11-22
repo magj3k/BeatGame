@@ -201,7 +201,7 @@ class AudioController(object):
                     self.lane = max(0, self.lane - 1)
                 if keycode == 'down':
                     self.lane = min(self.num_lanes-1, self.lane + 1)
-
+                
                 # shift selected track
                 if keycode == 'left':
                     offset = self.puzzle_gens[self.lane]['offset']
