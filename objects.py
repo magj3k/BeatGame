@@ -305,6 +305,7 @@ class Player(object):
         self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
+        self.target_world_pos = None
         self.world_vel = (0, 0)
         self.z = z
         self.musical = False
@@ -445,7 +446,7 @@ class Player(object):
                 next_vel = (0, next_vel[1])
 
             # falling/respawning
-            if current_player_height <= 1.0:
+            if current_player_height <= 1.1:
                 next_pos = (self.last_respawnable_x, 40.0)
                 next_vel = (0, -0.001)
                 self.spawning_freeze = True
@@ -454,16 +455,21 @@ class Player(object):
         self.process_animation(dt)
 
         # visual update
-        self.world_vel = next_vel
-        self.world_pos = next_pos
+        if self.target_world_pos != None:
+            self.world_vel = ((self.target_world_pos[0] - self.world_pos[0])*12.0, (self.target_world_pos[1] - self.world_pos[1])*12.0)
+            self.world_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
+        else:
+            self.world_vel = next_vel
+            self.world_pos = next_pos
         self.element.pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res)
 
 
 class Enemy(object):
-    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "", moves_per_beat = ["stop"], color = None, radius = 15.0):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "", moves_per_beat = ["stop"], color = None, radius = 25.0):
         self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
+        self.target_world_pos = None
         self.world_vel = (0, 0)
         self.z = z
         self.musical = False
@@ -480,6 +486,7 @@ class Enemy(object):
 
         # fighting
         self.health = 5
+        self.in_fight = False
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right"]
@@ -527,21 +534,24 @@ class Enemy(object):
                 self.element.change_texture("graphics/enemy_stand.png")
 
     def advance_moves(self):
-        self.current_move_index += 1
-        if self.current_move_index >= len(self.moves_per_beat):
-            self.current_move_index = 0
+        if self.in_fight == False:
+            self.current_move_index += 1
+            if self.current_move_index >= len(self.moves_per_beat):
+                self.current_move_index = 0
 
-        # applies movement rules for each move type
-        next_move = self.moves_per_beat[self.current_move_index]
-        if next_move == "stop":
-            self.target_velocity = (0, 0)
-            self.set_animation_state("standing")
-        elif next_move == "left":
-            self.target_velocity = (-3.5, 0)
-            self.set_animation_state("run_left")
-        elif next_move == "right":
-            self.target_velocity = (3.5, 0)
-            self.set_animation_state("run_right")
+            # applies movement rules for each move type
+            next_move = self.moves_per_beat[self.current_move_index]
+            if next_move == "stop":
+                self.target_velocity = (0, 0)
+                self.set_animation_state("standing")
+            elif next_move == "left":
+                self.target_velocity = (-3.5, 0)
+                self.set_animation_state("run_left")
+            elif next_move == "right":
+                self.target_velocity = (3.5, 0)
+                self.set_animation_state("run_right")
+        else:
+            self.current_move_index = 0
 
     def on_update(self, dt, cam_scalar, cam_offset):
 
@@ -549,7 +559,10 @@ class Enemy(object):
         self.process_animation(dt)
 
         # visual update
-        self.world_vel = (self.world_vel[0]+((self.target_velocity[0] - self.world_vel[0])*18.0*dt), self.world_vel[1]+((self.target_velocity[1] - self.world_vel[1])*18.0*dt))
+        if self.target_world_pos != None:
+            self.world_vel = ((self.target_world_pos[0] - self.world_pos[0])*12.0, (self.target_world_pos[1] - self.world_pos[1])*12.0)
+        else:
+            self.world_vel = (self.world_vel[0]+((self.target_velocity[0] - self.world_vel[0])*18.0*dt), self.world_vel[1]+((self.target_velocity[1] - self.world_vel[1])*18.0*dt))
         self.world_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
         self.element.pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res)
         self.element.on_update(dt, cam_scalar, cam_offset)
