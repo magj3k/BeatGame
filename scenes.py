@@ -57,6 +57,8 @@ scene_1_door = TexturedElement(pos = (2445, 213),
                                 texture_path = "graphics/door_closed.png",
                                 tag = "door")
 
+scene_1_enemies = [ Enemy(res = scene_1_resolution, initial_world_pos = (73, 7), z = 110, moves_per_beat = ["stop", "left", "stop", "right", "stop", "right", "stop", "left"]) ]
+
 scene_1_game_elements = [   scene_1_door,
                                                     TexturedElement(pos = (2350, 280),
                                                         z = 99,
@@ -138,6 +140,7 @@ scene_1_game_elements = [   scene_1_door,
                                                         active = False,
                                                         sound_path = "audio/platform_sfx.wav")
                                                 ]
+scene_1_game_elements.extend(scene_1_enemies)
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)
 

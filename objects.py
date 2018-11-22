@@ -307,7 +307,6 @@ class Player(object):
         self.world_pos = initial_world_pos # world units are measured by res
         self.world_vel = (0, 0)
         self.z = z
-        self.direction = "left" # or "right"
         self.musical = False
         self.on_ground = True
         self.last_respawnable_x = self.world_pos[0]
@@ -315,6 +314,7 @@ class Player(object):
         self.spawning_freeze = False
         self.tag = tag
         self.jump_used = False
+        self.collisions_enabled = True
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
@@ -364,27 +364,34 @@ class Player(object):
             else:
                 self.element.change_texture("graphics/player_stand.png")
 
-    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None):
+    def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None, override_target_x_vel = None):
 
         # position update
         target_x_vel = 0
-        if self.controls_disabled == False and self.spawning_freeze == False:
-            if active_keys["right"] == True:
-                target_x_vel += 9.0
-                self.set_animation_state("run_right")
-            if active_keys["left"] == True:
-                target_x_vel += -9.0
-                self.set_animation_state("run_left")
-        if active_keys["left"] == False and active_keys["right"] == False:
-            self.set_animation_state("standing")
-        if active_keys["spacebar"] == False:
-            self.jump_used = False
+        if audio_controller.solved == False:
+            if self.controls_disabled == False and self.spawning_freeze == False:
+                if active_keys["right"] == True:
+                    target_x_vel += 9.0
+                    self.set_animation_state("run_right")
+                if active_keys["left"] == True:
+                    target_x_vel += -9.0
+                    self.set_animation_state("run_left")
+            if active_keys["left"] == False and active_keys["right"] == False:
+                self.set_animation_state("standing")
+            if active_keys["spacebar"] == False:
+                self.jump_used = False
 
-        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] - (72.0*dt))
+        accel = -72.0*dt
+        if override_target_x_vel != None:
+            target_x_vel = override_target_x_vel
+        if self.collisions_enabled == False:
+            accel = 0
+            self.world_vel = (self.world_vel[0], 0)
+        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] + accel)
         next_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
 
         # ground & wall collisions
-        if self.world_vel[1] < 0 or self.world_vel[0] != 0:
+        if self.collisions_enabled == True:
             current_player_x_index = min(max(int(self.world_pos[0]), 0), len(ground_map)-1)
             next_player_x_index = min(max(int(next_pos[0]), 0), len(ground_map)-1)
             highest_ground = ground_map[next_player_x_index]
@@ -640,3 +647,99 @@ class BeatMatchDisplay(InstructionGroup):
                         self.onscreen_gem_end += 1
                 else:
                     break
+
+
+class Enemy(object):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "", moves_per_beat = ["stop"], color = None, radius = 15.0):
+        self.world_size = (0.9, 1.0)
+        self.res = res
+        self.world_pos = initial_world_pos # world units are measured by res
+        self.world_vel = (0, 0)
+        self.z = z
+        self.musical = False
+        self.tag = tag        
+        self.color = color
+        if color == None:
+            self.color = Color(0, 0, 0)
+        self.radius = radius
+
+        # movement
+        self.moves_per_beat = moves_per_beat # e.g. ["stop", "left", "stop", "right"]
+        self.current_move_index = 0 # assumes first state is always "stop"
+        self.target_velocity = (0, 0)
+
+        # fighting
+        self.health = 5
+
+        # animations
+        self.valid_animation_states = ["standing", "run_left", "run_right"]
+        self.animation_state = "standing"
+        self.animation_t = 0
+        self.animation_frame = 0
+        self.animation_frame_duration = 0.1
+
+        self.element = TexturedElement(pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res), tag = "enemy", z = self.z, size = (self.res*2, self.res*2), texture_path = "graphics/enemy_stand.png")
+        self.shape = self.element.shape
+
+    def set_animation_state(self, new_state): # follow this call with self.process_animation()
+        if new_state in self.valid_animation_states and new_state != self.animation_state:
+            self.animation_state = new_state
+            self.animation_t = 0
+            self.animation_frame = -1
+
+            if self.animation_state == "standing":
+                self.animation_frame_duration = 30.0
+            elif self.animation_state == "run_right" or self.animation_state == "run_left":
+                self.animation_frame_duration = 0.075
+
+    def process_animation(self, dt):
+        self.animation_t += dt
+        next_frame = int(self.animation_t/self.animation_frame_duration)
+        if next_frame != self.animation_frame:
+            self.animation_frame = next_frame
+
+            # update texture
+            if self.animation_state == "run_right":
+                if self.animation_frame % 3 == 0:
+                    self.element.change_texture("graphics/enemy_run_1.png")
+                elif self.animation_frame % 3 == 1:
+                    self.element.change_texture("graphics/enemy_run_2.png")
+                elif self.animation_frame % 3 == 2:
+                    self.element.change_texture("graphics/enemy_run_3.png")
+            elif self.animation_state == "run_left":
+                if self.animation_frame % 3 == 0:
+                    self.element.change_texture("graphics/enemy_run_1_r.png")
+                elif self.animation_frame % 3 == 1:
+                    self.element.change_texture("graphics/enemy_run_2_r.png")
+                elif self.animation_frame % 3 == 2:
+                    self.element.change_texture("graphics/enemy_run_3_r.png")
+            else:
+                self.element.change_texture("graphics/enemy_stand.png")
+
+    def advance_moves(self):
+        self.current_move_index += 1
+        if self.current_move_index >= len(self.moves_per_beat):
+            self.current_move_index = 0
+
+        # applies movement rules for each move type
+        next_move = self.moves_per_beat[self.current_move_index]
+        if next_move == "stop":
+            self.target_velocity = (0, 0)
+            self.set_animation_state("standing")
+        elif next_move == "left":
+            self.target_velocity = (-3.5, 0)
+            self.set_animation_state("run_left")
+        elif next_move == "right":
+            self.target_velocity = (3.5, 0)
+            self.set_animation_state("run_right")
+
+    def on_update(self, dt, cam_scalar, cam_offset):
+
+        # animations
+        self.process_animation(dt)
+
+        # visual update
+        self.world_vel = (self.world_vel[0]+((self.target_velocity[0] - self.world_vel[0])*18.0*dt), self.world_vel[1]+((self.target_velocity[1] - self.world_vel[1])*18.0*dt))
+        self.world_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
+        self.element.pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res)
+        self.element.on_update(dt, cam_scalar, cam_offset)
