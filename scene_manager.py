@@ -155,6 +155,8 @@ class Scene(InstructionGroup):
 
             if isinstance(element, Platform):
                 element.toggle_active_state()
+            elif isinstance(element, Enemy):
+                element.advance_moves()
 
     def on_update(self, dt, active_keys):
         if self.scene_cleared == False:
@@ -215,23 +217,42 @@ class Scene(InstructionGroup):
                 element = self.game_elements[i]
                 element.on_update(dt, camera_scalar, camera_offset)
 
-                # collisions
-                if isinstance(element, Pickup):
+                # collisions w/ pickups and enemies
+                if isinstance(element, Pickup) or isinstance(element, Enemy):
                     hypo = np.sqrt(np.power(element.element.pos[0] - self.player.world_pos[0]*self.res, 2.0) + np.power(element.element.pos[1] - self.player.world_pos[1]*self.res, 2.0))
                     if hypo < element.radius:
-                        object_indices_to_remove.append(i)
-                        self.num_keys_collected += 1
-                        self.audio_controller.get_key()
+                        if isinstance(element, Pickup): # pickups
+                            object_indices_to_remove.append(i)
+                            self.num_keys_collected += 1
+                            self.audio_controller.get_key()
 
+                            # creates particles
+                            for i in range(7):
+                                new_particle = Particle(GeometricElement(pos = element.element.pos,
+                                    vel = (random.random()*150.0 - 75.0, random.random()*150.0 - 75.0),
+                                    color = Color(1, 0.9, 0.7),
+                                    size = (16, 16),
+                                    shape = Ellipse(pos = element.element.pos, size = (0.01, 0.01))),
+                                    z = self.player.z-1,
+                                    resize_period = 0.5+(random.random()*0.8))
+                                self.game_elements.append(new_particle)
+                        elif isinstance(element, Enemy): # enemies
+                            element.health = 0
+
+                # enemies
+                if isinstance(element, Enemy):
+                    if element.health <= 0:
+                        object_indices_to_remove.append(i)
+                                
                         # creates particles
-                        for i in range(7):
+                        for i in range(12):
                             new_particle = Particle(GeometricElement(pos = element.element.pos,
-                                vel = (random.random()*150.0 - 75.0, random.random()*150.0 - 75.0),
-                                color = Color(1, 0.9, 0.7),
-                                size = (16, 16),
+                                vel = (random.random()*100.0 - 50.0, random.random()*65.0 - 15.0),
+                                color = Color(0, 0, 0),
+                                size = (30, 30),
                                 shape = Ellipse(pos = element.element.pos, size = (0.01, 0.01))),
-                                z = self.player.z-1,
-                                resize_period = 0.5+(random.random()*0.8))
+                                z = element.z,
+                                resize_period = 0.5+(random.random()*1.6))
                             self.game_elements.append(new_particle)
 
                 # platforms
