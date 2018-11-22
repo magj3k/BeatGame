@@ -108,6 +108,9 @@ class Scene(InstructionGroup):
         self.puzzle_solved_animation_duration = 0
         self.puzzle_solved_door_front_created = False
 
+        # fights
+        self.fight_enemy = None
+
     def clear(self):
         self.scene_cleared = True
         self.player = None
@@ -119,10 +122,10 @@ class Scene(InstructionGroup):
 
     def change_game_modes(self, new_mode):
         self.audio_controller.change_game_modes(new_mode)
-        self.game_mode = new_mode
         if new_mode == "explore":
             self.game_camera.bounds_enabled = True
-        elif new_mode == "puzzle":
+            self.player.controls_disabled = False
+        elif new_mode == "puzzle" and self.game_mode == "explore":
             self.game_camera.bounds_enabled = False
             self.player.controls_disabled = True
             self.player.set_animation_state("standing")
@@ -146,8 +149,13 @@ class Scene(InstructionGroup):
                     self.game_camera.target_zoom_factor = 2.5
                     self.game_camera.speed = 1.4
 
-        elif new_mode == "fight":
-            self.game_camera.bounds_enabled = False
+        elif new_mode == "fight" and self.game_mode == "explore":
+            if self.fight_enemy != None:
+                self.game_camera.bounds_enabled = False
+                self.player.controls_disabled = True
+                # TODO...
+
+        self.game_mode = new_mode
 
     def on_beat(self, beat):
         for i in range(len(self.game_elements)):
