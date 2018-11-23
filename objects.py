@@ -365,6 +365,20 @@ class Player(object):
             else:
                 self.element.change_texture("graphics/player_stand.png")
 
+    def get_highest_ground(self, ground_map, platforms = []):
+        next_pos = (self.world_pos[0], self.world_pos[1])
+        next_player_x_index = min(max(int(next_pos[0]), 0), len(ground_map)-1)
+        highest_ground = ground_map[next_player_x_index]
+
+        # platforms
+        left_side = next_pos[0] - self.world_size[0]*0.5
+        right_side = next_pos[0] + self.world_size[0]*0.5
+        for platform in platforms:
+            if platform.active == True and right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
+                highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
+
+        return highest_ground
+
     def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None, override_target_x_vel = None):
 
         # position update
