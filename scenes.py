@@ -9,6 +9,11 @@ from audio_controller import *
 middle = (window_size[0]/2, window_size[1]/2)
 far_z = 100000000
 
+#   SCENE CONSTRUCTION NOTE:
+# Objects for each scene need to be
+# specifically created for each scene,
+# NOT copied
+
 keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         z = 10,
                         size = (166*0.2, 400*0.2),
@@ -31,6 +36,57 @@ keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         texture_path = "graphics/rounded_box.png",
                         tag = "keys_bg")]
 
+fight_UI = [
+    TexturedElement(pos = (window_size[0]*(1-0.052), window_size[1]),
+        z = 1,
+        color = Color(0, 0, 0, 0),
+        size = (650*0.6, 450*0.45),
+        texture_path = "graphics/rounded_box.png",
+        tag = "h_bge"),
+    TexturedElement(pos = (window_size[0]*0.052, window_size[1]),
+        z = 1,
+        color = Color(0, 0, 0, 0),
+        size = (650*0.6, 450*0.45),
+        texture_path = "graphics/rounded_box.png",
+        tag = "h_bg"),
+    TexturedElement(pos = (50, window_size[1]-50),
+        z = 11,
+        size = (206*0.3, 204*0.3),
+        texture_path = "graphics/heart.png",
+        tag = "h_1",
+        color = Color(1, 1, 1, 0)),
+    TexturedElement(pos = (130, window_size[1]-50),
+        z = 11,
+        size = (206*0.3, 204*0.3),
+        texture_path = "graphics/heart.png",
+        tag = "h_2",
+        color = Color(1, 1, 1, 0)),
+    TexturedElement(pos = (210, window_size[1]-50),
+        z = 11,
+        size = (206*0.3, 204*0.3),
+        texture_path = "graphics/heart.png",
+        tag = "h_3",
+        color = Color(1, 1, 1, 0)),
+    TexturedElement(pos = (window_size[0]-50, window_size[1]-50),
+        z = 11,
+        size = (206*0.3, 204*0.3),
+        texture_path = "graphics/heart.png",
+        tag = "h_1e",
+        color = Color(1, 1, 1, 0)),
+    TexturedElement(pos = (window_size[0]-130, window_size[1]-50),
+        z = 11,
+        size = (206*0.3, 204*0.3),
+        texture_path = "graphics/heart.png",
+        tag = "h_2e",
+        color = Color(1, 1, 1, 0)),
+    TexturedElement(pos = (window_size[0]-210, window_size[1]-50),
+        z = 11,
+        size = (206*0.3, 204*0.3),
+        texture_path = "graphics/heart.png",
+        tag = "h_3e",
+        color = Color(1, 1, 1, 0))
+]
+
 scene_1_resolution = 30.0
 scene_1_elevation_offset = 6
 scene_1_water_map = [0]*95
@@ -50,14 +106,16 @@ scene_1_ground_map[80:95] = [4+scene_1_elevation_offset]*15
 scene_1_camera_bounds = ((25, 6.5), (64, 9.5))
 scene_1_resolution = 30.0
 scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (27.5, 8), z = 110)
-# scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (60, 12), z = 110)
 scene_1_door = TexturedElement(pos = (2445, 213),
                                 z = 101,
                                 size = (500*0.13, 500*0.13),
                                 texture_path = "graphics/door_closed.png",
                                 tag = "door")
 
-scene_1_enemies = [ Enemy(res = scene_1_resolution, initial_world_pos = (73, 7), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right", "stop", "right", "stop", "left"]) ]
+scene_1_enemies = [
+    Enemy(res = scene_1_resolution, initial_world_pos = (73, 7), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right", "stop", "right", "stop", "left"]),
+    Enemy(res = scene_1_resolution, initial_world_pos = (64, 8), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right"])
+]
 
 scene_1_game_elements = [   scene_1_door,
                                                     TexturedElement(pos = (2350, 280),
@@ -143,9 +201,18 @@ scene_1_game_elements = [   scene_1_door,
 scene_1_game_elements.extend(scene_1_enemies)
 scene_1_UI_elements = []
 scene_1_UI_elements.extend(keys_UI)
+scene_1_UI_elements.extend(fight_UI)
 
 scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
 scene_1_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_1_player.world_pos, speed = 0.85, bounds = scene_1_camera_bounds)
 scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player)
+
+# SCENE 2 IS A TEST, currently it copies objects from scene 1, which DOES NOT WORK
+
+scene_2_resolution = 30.0
+scene_2_player = Player(res = scene_2_resolution, initial_world_pos = (27.5, 8), z = 110)
+scene_2_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements[:])
+scene_2_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_2_player.world_pos, speed = 0.85, bounds = scene_1_camera_bounds)
+scene_2 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_2_camera, res = scene_2_resolution, audio_controller = scene_2_audio_controller, player = scene_2_player)
 
 scenes = [scene_1]

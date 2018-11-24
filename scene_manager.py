@@ -5,6 +5,7 @@ from kivy.graphics.instructions import InstructionGroup
 import numpy as np
 from math import *
 import random
+import copy
 
 class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
@@ -14,8 +15,9 @@ class SceneManager(InstructionGroup):
         self.fade_color = Color(0, 0, 0)
         self.fading = "in" # or "out"
 
-        self.scenes = scenes
-        self.current_scene_index = 0
+        self.original_scenes = scenes[:]
+        self.scenes = scenes[:]
+        self.current_scene_index = -1
         self.switch_to_scene(initial_scene_index)
 
     def on_key_down(self, key): # for audio controller
@@ -35,16 +37,23 @@ class SceneManager(InstructionGroup):
         self.remove(self.scenes[self.current_scene_index])
 
     def switch_to_scene(self, scene_index):
-        if len(self.scenes) > scene_index:
+        if len(self.scenes) > scene_index and scene_index > self.current_scene_index:
+            self.add(self.scenes[scene_index])
             self.current_scene_index = scene_index
-            self.add(self.scenes[self.current_scene_index])
+            if self.fade_rect_added != False:
+                self.remove(self.fade_color)
+                self.remove(self.fade_rect)
+                self.fade_rect_added = False
 
+            # fades in
+            self.fading = "in"
             if self.fade_rect_added == False:
                 self.add(self.fade_color)
                 self.add(self.fade_rect)
                 self.fade_rect_added = True
 
     def on_update(self, dt, active_keys):
+
         # fading
         if self.fading == "in":
             self.fade_color.a = self.fade_color.a*0.982
@@ -63,8 +72,7 @@ class SceneManager(InstructionGroup):
 
                 # switches to next scene
                 self.remove_current_scene() # TODO, follow with self.switch_to_scene
-                print("Switch to next scene")
-
+                self.switch_to_scene(1)
 
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]
@@ -78,9 +86,11 @@ class SceneManager(InstructionGroup):
 class Scene(InstructionGroup):
     def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None):
         super(Scene, self).__init__()
-        self.game_elements = initial_game_elements
+
+        # general setup
+        self.game_elements = initial_game_elements[:]
         self.queued_game_elements = []
-        self.UI_elements = initial_UI_elements
+        self.UI_elements = initial_UI_elements[:]
         self.queued_UI_elements = []
         self.game_camera = game_camera        
         self.res = res
@@ -92,7 +102,7 @@ class Scene(InstructionGroup):
         self.audio_controller = audio_controller
         self.audio_controller.beat_callback = self.on_beat
 
-        # game scenes
+        # player and game elements
         self.player = player
         if self.player == None: self.player = Player(res = res, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
@@ -113,8 +123,9 @@ class Scene(InstructionGroup):
         self.fight_t = 0
         self.fight_enemy_sword = None
         self.fight_player_sword = None
+        self.fight_end_timer = -1
 
-    def clear(self):
+    def clear(self): # called when the scene is finished and faded out
         self.scene_cleared = True
         self.player = None
         self.game_elements = []
@@ -128,7 +139,18 @@ class Scene(InstructionGroup):
             self.audio_controller.change_game_modes(new_mode)
             if new_mode == "explore":
                 self.game_camera.bounds_enabled = True
+                self.game_camera.target_zoom_factor = self.game_camera.initial_target_zoom_factor
+                self.game_camera.speed = self.game_camera.initial_speed
                 self.player.controls_disabled = False
+                self.player.target_world_pos = None
+
+                # safely removes sword objects if needed
+                if self.fight_player_sword != None:
+                    self.fight_player_sword.target_alpha = 0.0
+                    self.fight_player_sword = None
+                if self.fight_enemy_sword != None:
+                    self.fight_enemy_sword.target_alpha = 0.0
+                    self.fight_enemy_sword = None
             elif new_mode == "puzzle" and self.game_mode == "explore":
                 self.game_camera.bounds_enabled = False
                 self.player.controls_disabled = True
@@ -169,17 +191,19 @@ class Scene(InstructionGroup):
                 self.player.controls_disabled = True
                 self.player.set_animation_state("standing")
                 self.player.target_world_pos = (self.player.world_pos[0]-0.25, self.player.get_highest_ground(self.ground_map, platforms)+self.player.world_size[1])
+                self.player.fight_pos = self.player.target_world_pos
                 
                 # updates enemy
                 self.fight_enemy.in_fight = True
                 self.fight_enemy.target_velocity = (0, 0)
                 self.fight_enemy.set_animation_state("standing")
-                self.fight_enemy.target_world_pos = (self.player.target_world_pos[0]+2.5, self.player.target_world_pos[1])
+                self.fight_enemy.target_world_pos = (self.player.target_world_pos[0]+2.0, self.player.target_world_pos[1])
+                self.fight_enemy.fight_pos = self.fight_enemy.target_world_pos
 
                 # updates camera
                 self.game_camera.bounds_enabled = False
-                self.game_camera.update_target( ((self.player.target_world_pos[0] + self.fight_enemy.target_world_pos[0])/2, 0.75+((self.player.target_world_pos[1] + self.fight_enemy.target_world_pos[1])/2)) )
-                self.game_camera.target_zoom_factor = 5.0
+                self.game_camera.update_target( ((self.player.target_world_pos[0] + self.fight_enemy.target_world_pos[0])/2, 0.85+((self.player.target_world_pos[1] + self.fight_enemy.target_world_pos[1])/2)) )
+                self.game_camera.target_zoom_factor = 5.5
                 self.game_camera.speed = 4.0
 
             self.game_mode = new_mode
@@ -244,7 +268,88 @@ class Scene(InstructionGroup):
             if self.game_mode == "fight":
                 self.fight_t += dt
 
-                if self.fight_t > 0.9:
+                if self.fight_t > 1.25: # fight gameplay
+
+                    # attacking and defending
+                    if self.fight_enemy.health > 0 and self.player.health > 0:
+                        if active_keys["1"] == True and self.player.fight_keys_available["attack_1"] == True: # attack lane 1
+                            self.player.fight_keys_available["attack_1"] = False
+                            self.player.attack()
+                            self.fight_player_sword.misc_t = 0.6
+                            self.fight_player_sword.change_texture("graphics/sword_1_right_down.png")
+
+                            self.fight_enemy.hit()
+                        elif active_keys["1"] == False:
+                            self.player.fight_keys_available["attack_1"] = True
+
+                        if active_keys["3"] == True and self.player.fight_keys_available["hit_1"] == True: # hit lane 1
+                            self.player.fight_keys_available["hit_1"] = False
+                            self.player.hit()
+
+                            self.fight_enemy.attack()
+                            self.fight_enemy_sword.misc_t = 0.6
+                            self.fight_enemy_sword.change_texture("graphics/sword_1_left_down.png")
+                        elif active_keys["3"] == False:
+                            self.player.fight_keys_available["hit_1"] = True
+
+                    # resets sword graphics
+                    if self.fight_player_sword != None and self.fight_player_sword.misc_flag == True:
+                        self.fight_player_sword.misc_flag = False
+                        self.fight_player_sword.change_texture("graphics/sword_1_right_up.png")
+
+                    if self.fight_enemy_sword != None and self.fight_enemy_sword.misc_flag == True:
+                        self.fight_enemy_sword.misc_flag = False
+                        self.fight_enemy_sword.change_texture("graphics/sword_1_left_up.png")
+
+                    # enemy death
+                    if self.fight_enemy.health <= 0 and self.fight_enemy_sword != None:
+                        self.fight_end_timer = 1.75
+
+                        # removes enemy sword
+                        self.game_elements.remove(self.fight_enemy_sword)
+                        self.remove(self.fight_enemy_sword.color)
+                        self.remove(self.fight_enemy_sword.shape)
+                        self.fight_enemy_sword = None
+
+                    # player death
+                    if self.player.health <= 0 and self.fight_player_sword != None:
+                        self.fight_end_timer = 1.75
+
+                        # removes player sword
+                        self.game_elements.remove(self.fight_player_sword)
+                        self.remove(self.fight_player_sword.color)
+                        self.remove(self.fight_player_sword.shape)
+                        self.fight_player_sword = None
+
+                        # creates particles
+                        for i in range(12):
+                            new_particle = Particle(GeometricElement(pos = self.player.element.pos,
+                                vel = (random.random()*100.0 - 50.0, random.random()*65.0 - 15.0),
+                                color = Color(0, 0, 0),
+                                size = (30, 30),
+                                shape = Ellipse(pos = self.player.element.pos, size = (0.01, 0.01))),
+                                z = self.player.z,
+                                resize_period = 0.5+(random.random()*1.6))
+                            self.game_elements.append(new_particle)
+
+                    # fight end timer
+                    if self.fight_end_timer > 0:
+                        self.fight_end_timer += -dt
+                    elif self.fight_end_timer != -1:
+                        self.fight_end_timer = -1
+                        self.change_game_modes("explore")
+
+                        # respawns player if necessary
+                        if self.player.health <= 0:
+                            self.player.world_pos = self.player.initial_world_pos
+                            self.player.health = 3
+                            self.player.fight_hit_animation_t = 0
+
+                            # resets enemy
+                            self.fight_enemy.in_fight = False
+                            self.fight_enemy.target_world_pos = None
+
+                elif self.fight_t > 0.9: # creates swords
                     if self.fight_player_sword == None:
                         self.fight_player_sword = TexturedElement(pos = ((self.player.world_pos[0]+0.5)*self.res, self.player.world_pos[1]*self.res),
                             z = self.player.z+1,
@@ -272,8 +377,8 @@ class Scene(InstructionGroup):
             platforms = []
             door = None
             door_warning = None
-            for i in range(len(self.game_elements)):
-                element = self.game_elements[i]
+            for k in range(len(self.game_elements)):
+                element = self.game_elements[k]
                 element.on_update(dt, camera_scalar, camera_offset)
 
                 # collisions w/ pickups and enemies
@@ -281,7 +386,7 @@ class Scene(InstructionGroup):
                     hypo = np.sqrt(np.power(element.element.pos[0] - self.player.world_pos[0]*self.res, 2.0) + np.power(element.element.pos[1] - self.player.world_pos[1]*self.res, 2.0))
                     if hypo < element.radius:
                         if isinstance(element, Pickup): # pickups
-                            object_indices_to_remove.append(i)
+                            object_indices_to_remove.append(k)
                             self.num_keys_collected += 1
                             self.audio_controller.get_key()
 
@@ -296,15 +401,14 @@ class Scene(InstructionGroup):
                                     resize_period = 0.5+(random.random()*0.8))
                                 self.game_elements.append(new_particle)
                         elif isinstance(element, Enemy) and self.player.on_ground == True: # enemies
-                            # element.health = 0
-                            # enters puzzle mode
+                            # enters fight mode
                             self.fight_enemy = element
                             self.change_game_modes("fight")
 
                 # enemies
                 if isinstance(element, Enemy):
                     if element.health <= 0:
-                        object_indices_to_remove.append(i)
+                        object_indices_to_remove.append(k)
                                 
                         # creates particles
                         for i in range(12):
@@ -340,24 +444,24 @@ class Scene(InstructionGroup):
                 # door warning
                 if element.tag == "door_warning":
                     door_warning = element
-                else: # removes invisible objects
+                elif element.tag != "player": # removes invisible objects
                     if element.color.a < 0.01:
-                        object_indices_to_remove.append(i)
+                        object_indices_to_remove.append(k)
 
                 # particles
                 if element.tag == "particle":
                     if element.kill_me == True:
-                        object_indices_to_remove.append(i)
+                        object_indices_to_remove.append(k)
 
                 # tracks objects by z-order
                 max_game_z = max(max_game_z, element.z)
                 if element.z not in objs_by_z_order:
-                    objs_by_z_order[element.z] = [i]
+                    objs_by_z_order[element.z] = [k]
                 else:
-                    objs_by_z_order[element.z].append(i)
+                    objs_by_z_order[element.z].append(k)
 
-            for i in range(len(self.UI_elements)):
-                element = self.UI_elements[i]
+            for j in range(len(self.UI_elements)):
+                element = self.UI_elements[j]
                 element.on_update(dt, 1.0, (0, 0))
 
                 # updating collected keys
@@ -368,7 +472,30 @@ class Scene(InstructionGroup):
                 # particles
                 if element.tag == "particle":
                     if element.kill_me == True:
-                        UI_indices_to_remove.append(i)
+                        UI_indices_to_remove.append(j)
+
+                # health UI elements
+                if element.tag[:2] == "h_":
+                    if self.game_mode == "fight":
+                        if element.tag[:4] == "h_bg": # bg
+                            element.target_alpha = 0.5
+                        else: # hearts
+                            element.target_alpha = 1.0
+
+                            for i in range(3):
+                                if element.tag == "h_"+str(i+1): # changing texture for player hearts
+                                    if self.player.health >= i+1:
+                                        element.change_texture("graphics/heart.png")
+                                    else:
+                                        element.change_texture("graphics/heart_outline.png")
+                                if element.tag == "h_"+str(i+1)+"e": # changing texture for enemy hearts
+                                    if self.fight_enemy != None:
+                                        if self.fight_enemy.health >= i+1:
+                                            element.change_texture("graphics/heart.png")
+                                        else:
+                                            element.change_texture("graphics/heart_outline.png")
+                    else:
+                        element.target_alpha = 0.0
 
                 # puzzle mode
                 if self.game_mode == "puzzle":
@@ -387,9 +514,9 @@ class Scene(InstructionGroup):
                     
                     if self.audio_controller.solved == False:
                         if element.tag == "keys_bg":
-                            element.color.a = element.color.a*0.85
+                            element.target_alpha = 0.0
                         elif element.tag == "UI_bg":
-                            element.color.a = element.color.a + ((0.8 - element.color.a) * 10.0 * dt)
+                            element.target_alpha = 0.8
 
                         # keys
                         if element.tag[:2] == "k_":
@@ -414,27 +541,31 @@ class Scene(InstructionGroup):
                             element.change_texture("graphics/key.png")
                 elif self.game_mode == "fight": # fight mode
                     if element.tag[:2] == "k_" or element.tag == "keys_bg":
-                        element.color.a = element.color.a*0.85
+                        element.target_alpha = 0.0
+                elif self.game_mode == "explore": # fight mode
+                    if element.tag[:2] == "k_" and element.target_alpha != 1.0:
+                        element.target_alpha = 1.0
+                    if element.tag == "keys_bg" and element.target_alpha != 0.5:
+                        element.target_alpha = 0.5
 
-                # removes invisible objects
-                if self.game_mode != "fight" and element.color.a < 0.01:
-                    UI_indices_to_remove.append(i)
+                # removes invisible objects, TODO maybe not necessary
+                # if self.game_mode != "fight" and element.color.a < 0.01:
+                #     UI_indices_to_remove.append(i)
 
                 # tracks objects by z-order
-                if element.z+1+max_game_z not in objs_by_z_order:
-                    objs_by_z_order[element.z+1+max_game_z] = [i]
+                if element.z+100+max_game_z not in objs_by_z_order:
+                    objs_by_z_order[element.z+100+max_game_z] = [j]
                 else:
-                    objs_by_z_order[element.z+1+max_game_z].append(i)
+                    objs_by_z_order[element.z+100+max_game_z].append(j)
 
             # applying z-order
             all_z_orders = list(objs_by_z_order.keys())
             all_z_orders.sort()
-            refresh_chained = False
+            refresh_chained = False # should always be set to False here
             if len(self.objs_by_z_order_old.keys()) == 0: refresh_chained = True
             for z in all_z_orders:
                 object_inds_at_z = objs_by_z_order[z]
 
-                # print(self.objs_by_z_order_old[z])
                 if refresh_chained == True or z not in self.objs_by_z_order_old.keys() or len(self.objs_by_z_order_old[z]) != len(object_inds_at_z):
                     refresh_chained = True
                     for ind in object_inds_at_z:
@@ -505,8 +636,10 @@ class Camera(object):
     def __init__(self, initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0, bounds = None):
         self.world_target = initial_world_target
         self.world_focus = initial_world_target
+        self.initial_target_zoom_factor = zoom_factor
         self.target_zoom_factor = zoom_factor
         self.zoom_factor = zoom_factor
+        self.initial_speed = speed
         self.speed = speed
         self.bounds = bounds
         self.bounds_enabled = True
