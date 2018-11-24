@@ -108,6 +108,12 @@ class Scene(InstructionGroup):
         self.puzzle_solved_animation_duration = 0
         self.puzzle_solved_door_front_created = False
 
+        # fights
+        self.fight_enemy = None
+        self.fight_t = 0
+        self.fight_enemy_sword = None
+        self.fight_player_sword = None
+
     def clear(self):
         self.scene_cleared = True
         self.player = None
@@ -118,38 +124,65 @@ class Scene(InstructionGroup):
         self.audio_controller = None
 
     def change_game_modes(self, new_mode):
-        self.audio_controller.change_game_modes(new_mode)
-        self.game_mode = new_mode
-        if new_mode == "explore":
-            self.game_camera.bounds_enabled = True
-        elif new_mode == "puzzle":
-            self.game_camera.bounds_enabled = False
-            self.player.controls_disabled = True
-            self.player.set_animation_state("standing")
+        if new_mode != self.game_mode:
+            self.audio_controller.change_game_modes(new_mode)
+            if new_mode == "explore":
+                self.game_camera.bounds_enabled = True
+                self.player.controls_disabled = False
+            elif new_mode == "puzzle" and self.game_mode == "explore":
+                self.game_camera.bounds_enabled = False
+                self.player.controls_disabled = True
+                self.player.set_animation_state("standing")
 
-            # adds UI bg
-            new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
-            self.queued_UI_elements.append(new_bg)
+                # adds UI bg
+                new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
+                self.queued_UI_elements.append(new_bg)
 
-            # adds gem data
-            
-            # adds lines to BG and stores key offsets
-            self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
-            for i in range(3):
-                offset_y = (window_size[1]*0.22)*(-i+1)
-                new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], window_size[1]*0.008))
-                self.queued_UI_elements.append(new_line)
+                # adds gems
 
-            # updates camera
-            for i in range(len(self.game_elements)):
-                element = self.game_elements[i]
-                if element.tag == "door":
-                    self.game_camera.update_target((element.pos[0]/self.res, element.pos[1]/self.res))
-                    self.game_camera.target_zoom_factor = 2.5
-                    self.game_camera.speed = 1.4
+                # adds lines to BG and stores key offsets
+                self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
+                for i in range(3):
+                    offset_y = (window_size[1]*0.22)*(-i+1)
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], window_size[1]*0.008))
+                    self.queued_UI_elements.append(new_line)
 
-        elif new_mode == "fight":
-            self.game_camera.bounds_enabled = False
+                # updates camera
+                for i in range(len(self.game_elements)):
+                    element = self.game_elements[i]
+                    if element.tag == "door":
+                        self.game_camera.update_target((element.pos[0]/self.res, element.pos[1]/self.res))
+                        self.game_camera.target_zoom_factor = 2.5
+                        self.game_camera.speed = 1.4
+
+            elif new_mode == "fight" and self.game_mode == "explore" and self.fight_enemy != None:
+
+                # updates related variables
+                self.fight_t = 0
+                platforms = []
+                for i in range(len(self.game_elements)):
+                    element = self.game_elements[i]
+                    if isinstance(element, Platform):
+                        platforms.append(element)
+
+                # updates player
+                self.player.controls_disabled = True
+                self.player.set_animation_state("standing")
+                self.player.target_world_pos = (self.player.world_pos[0]-0.25, self.player.get_highest_ground(self.ground_map, platforms)+self.player.world_size[1])
+                
+                # updates enemy
+                self.fight_enemy.in_fight = True
+                self.fight_enemy.target_velocity = (0, 0)
+                self.fight_enemy.set_animation_state("standing")
+                self.fight_enemy.target_world_pos = (self.player.target_world_pos[0]+2.5, self.player.target_world_pos[1])
+
+                # updates camera
+                self.game_camera.bounds_enabled = False
+                self.game_camera.update_target( ((self.player.target_world_pos[0] + self.fight_enemy.target_world_pos[0])/2, 0.75+((self.player.target_world_pos[1] + self.fight_enemy.target_world_pos[1])/2)) )
+                self.game_camera.target_zoom_factor = 5.0
+                self.game_camera.speed = 4.0
+
+            self.game_mode = new_mode
 
     def on_beat(self, beat):
         for i in range(len(self.game_elements)):
@@ -207,6 +240,30 @@ class Scene(InstructionGroup):
                     if self.puzzle_solved_timer >= self.puzzle_solved_animation_duration+1.5:
                         self.scene_finished = True
 
+            # fight mode
+            if self.game_mode == "fight":
+                self.fight_t += dt
+
+                if self.fight_t > 0.9:
+                    if self.fight_player_sword == None:
+                        self.fight_player_sword = TexturedElement(pos = ((self.player.world_pos[0]+0.5)*self.res, self.player.world_pos[1]*self.res),
+                            z = self.player.z+1,
+                            size = (500*0.1, 500*0.1),
+                            color = Color(1, 1, 1, 0),
+                            target_alpha = 1.0,
+                            texture_path = "graphics/sword_1_right_up.png",
+                            tag = "sword_player")
+                        self.game_elements.append(self.fight_player_sword)
+                    if self.fight_enemy_sword == None and self.fight_enemy != None:
+                        self.fight_enemy_sword = TexturedElement(pos = ((self.fight_enemy.world_pos[0]-0.5)*self.res, self.fight_enemy.world_pos[1]*self.res),
+                            z = self.fight_enemy.z-1,
+                            size = (500*0.1, 500*0.1),
+                            color = Color(1, 1, 1, 0),
+                            target_alpha = 1.0,
+                            texture_path = "graphics/sword_1_left_up.png",
+                            tag = "sword_enemy")
+                        self.game_elements.append(self.fight_enemy_sword)
+
             # loops over all objects in the current scene for rendering based on z positions
             objs_by_z_order = {} # tracks objects by non-zero z-order
             max_game_z = 0
@@ -238,8 +295,11 @@ class Scene(InstructionGroup):
                                     z = self.player.z-1,
                                     resize_period = 0.5+(random.random()*0.8))
                                 self.game_elements.append(new_particle)
-                        elif isinstance(element, Enemy): # enemies
-                            element.health = 0
+                        elif isinstance(element, Enemy) and self.player.on_ground == True: # enemies
+                            # element.health = 0
+                            # enters puzzle mode
+                            self.fight_enemy = element
+                            self.change_game_modes("fight")
 
                 # enemies
                 if isinstance(element, Enemy):
@@ -324,7 +384,7 @@ class Scene(InstructionGroup):
                         offset = 0
                         element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5-0.22))
                         element.target_size = (166*0.34, 400*0.34)
-
+                    
                     if self.audio_controller.solved == False:
                         if element.tag == "keys_bg":
                             element.color.a = element.color.a*0.85
@@ -352,9 +412,12 @@ class Scene(InstructionGroup):
                             element.target_alpha = 1.0
                         elif element.tag[:2] == "k_":
                             element.change_texture("graphics/key.png")
+                elif self.game_mode == "fight": # fight mode
+                    if element.tag[:2] == "k_" or element.tag == "keys_bg":
+                        element.color.a = element.color.a*0.85
 
                 # removes invisible objects
-                if element.color.a < 0.01:
+                if self.game_mode != "fight" and element.color.a < 0.01:
                     UI_indices_to_remove.append(i)
 
                 # tracks objects by z-order
@@ -410,6 +473,12 @@ class Scene(InstructionGroup):
             if self.audio_controller.solved and self.puzzle_solved_timer >= self.puzzle_solved_animation_duration: override_x_velocity = 3.5
             self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms, door, override_x_velocity)
             if self.game_camera != None and self.game_mode == "explore": self.game_camera.update_target(self.player.world_pos)
+
+            # swords
+            if self.fight_player_sword != None:
+                self.fight_player_sword.pos = ((self.player.world_pos[0]+0.5)*self.res, self.player.world_pos[1]*self.res)
+            if self.fight_enemy_sword != None and self.fight_enemy != None:
+                self.fight_enemy_sword.pos = ((self.fight_enemy.world_pos[0]-0.5)*self.res, self.fight_enemy.world_pos[1]*self.res)
 
             # door proximity & updates
             if door_warning != None and self.game_mode != "puzzle":
