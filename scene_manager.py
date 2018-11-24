@@ -291,7 +291,7 @@ class Scene(InstructionGroup):
 
                     # enemy death
                     if self.fight_enemy.health <= 0 and self.fight_enemy_sword != None:
-                        self.fight_end_timer = 1.5
+                        self.fight_end_timer = 1.75
 
                         # removes enemy sword
                         self.game_elements.remove(self.fight_enemy_sword)
@@ -417,8 +417,8 @@ class Scene(InstructionGroup):
                 else:
                     objs_by_z_order[element.z].append(i)
 
-            for i in range(len(self.UI_elements)):
-                element = self.UI_elements[i]
+            for j in range(len(self.UI_elements)):
+                element = self.UI_elements[j]
                 element.on_update(dt, 1.0, (0, 0))
 
                 # updating collected keys
@@ -430,6 +430,29 @@ class Scene(InstructionGroup):
                 if element.tag == "particle":
                     if element.kill_me == True:
                         UI_indices_to_remove.append(i)
+
+                # health UI elements
+                if element.tag[:2] == "h_":
+                    if self.game_mode == "fight":
+                        if element.tag[:4] == "h_bg": # bg
+                            element.target_alpha = 0.5
+                        else: # hearts
+                            element.target_alpha = 1.0
+
+                            for i in range(3):
+                                if element.tag == "h_"+str(i+1): # changing texture for player hearts
+                                    if self.player.health >= i+1:
+                                        element.change_texture("graphics/heart.png")
+                                    else:
+                                        element.change_texture("graphics/heart_outline.png")
+                                if element.tag == "h_"+str(i+1)+"e": # changing texture for enemy hearts
+                                    if self.fight_enemy != None:
+                                        if self.fight_enemy.health >= i+1:
+                                            element.change_texture("graphics/heart.png")
+                                        else:
+                                            element.change_texture("graphics/heart_outline.png")
+                    else:
+                        element.target_alpha = 0.0
 
                 # puzzle mode
                 if self.game_mode == "puzzle":
@@ -487,20 +510,19 @@ class Scene(InstructionGroup):
                 #     UI_indices_to_remove.append(i)
 
                 # tracks objects by z-order
-                if element.z+1+max_game_z not in objs_by_z_order:
-                    objs_by_z_order[element.z+1+max_game_z] = [i]
+                if element.z+100+max_game_z not in objs_by_z_order:
+                    objs_by_z_order[element.z+100+max_game_z] = [j]
                 else:
-                    objs_by_z_order[element.z+1+max_game_z].append(i)
+                    objs_by_z_order[element.z+100+max_game_z].append(j)
 
             # applying z-order
             all_z_orders = list(objs_by_z_order.keys())
             all_z_orders.sort()
-            refresh_chained = False
+            refresh_chained = False # should always be set to False here
             if len(self.objs_by_z_order_old.keys()) == 0: refresh_chained = True
             for z in all_z_orders:
                 object_inds_at_z = objs_by_z_order[z]
 
-                # print(self.objs_by_z_order_old[z])
                 if refresh_chained == True or z not in self.objs_by_z_order_old.keys() or len(self.objs_by_z_order_old[z]) != len(object_inds_at_z):
                     refresh_chained = True
                     for ind in object_inds_at_z:
