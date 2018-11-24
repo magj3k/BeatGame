@@ -334,8 +334,8 @@ class Scene(InstructionGroup):
             platforms = []
             door = None
             door_warning = None
-            for i in range(len(self.game_elements)):
-                element = self.game_elements[i]
+            for k in range(len(self.game_elements)):
+                element = self.game_elements[k]
                 element.on_update(dt, camera_scalar, camera_offset)
 
                 # collisions w/ pickups and enemies
@@ -343,7 +343,7 @@ class Scene(InstructionGroup):
                     hypo = np.sqrt(np.power(element.element.pos[0] - self.player.world_pos[0]*self.res, 2.0) + np.power(element.element.pos[1] - self.player.world_pos[1]*self.res, 2.0))
                     if hypo < element.radius:
                         if isinstance(element, Pickup): # pickups
-                            object_indices_to_remove.append(i)
+                            object_indices_to_remove.append(k)
                             self.num_keys_collected += 1
                             self.audio_controller.get_key()
 
@@ -365,7 +365,7 @@ class Scene(InstructionGroup):
                 # enemies
                 if isinstance(element, Enemy):
                     if element.health <= 0:
-                        object_indices_to_remove.append(i)
+                        object_indices_to_remove.append(k)
                                 
                         # creates particles
                         for i in range(12):
@@ -403,19 +403,19 @@ class Scene(InstructionGroup):
                     door_warning = element
                 else: # removes invisible objects
                     if element.color.a < 0.01:
-                        object_indices_to_remove.append(i)
+                        object_indices_to_remove.append(k)
 
                 # particles
                 if element.tag == "particle":
                     if element.kill_me == True:
-                        object_indices_to_remove.append(i)
+                        object_indices_to_remove.append(k)
 
                 # tracks objects by z-order
                 max_game_z = max(max_game_z, element.z)
                 if element.z not in objs_by_z_order:
-                    objs_by_z_order[element.z] = [i]
+                    objs_by_z_order[element.z] = [k]
                 else:
-                    objs_by_z_order[element.z].append(i)
+                    objs_by_z_order[element.z].append(k)
 
             for j in range(len(self.UI_elements)):
                 element = self.UI_elements[j]
@@ -429,7 +429,7 @@ class Scene(InstructionGroup):
                 # particles
                 if element.tag == "particle":
                     if element.kill_me == True:
-                        UI_indices_to_remove.append(i)
+                        UI_indices_to_remove.append(j)
 
                 # health UI elements
                 if element.tag[:2] == "h_":
