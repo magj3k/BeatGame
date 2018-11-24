@@ -526,34 +526,26 @@ class GemDisplay(InstructionGroup):
 
 # Displays and controls all game elements: Nowbar, Buttons, BarLines, Gems.
 class BeatMatchDisplay(InstructionGroup):
-    def __init__(self, gem_data, bar_data, particles):
+    def __init__(self, gem_data):
         super(BeatMatchDisplay, self).__init__()
-        self.bar_objects = AnimGroup()
         self.objects = AnimGroup()
+        
         # gems
         self.screen_time = 4
         self.vel = Window.height / self.screen_time # pixels per second
-        self.onscreen_bar_start = -1
-        self.onscreen_bar_end = -1
-        self.onscreen_bars = {}
         self.onscreen_gem_start = -1
-        self.onscreen_gem_end = -1
         self.onscreen_gems = {}
 
         self.gem_data = gem_data
-        self.bar_data = bar_data
         width = 280
         height = 40
         x, y = ((Window.width - width)/2, Window.height/self.screen_time)
 
-
-        self.add(self.bar_objects)
         self.add(self.objects)
 
         # sync to song
         self.song_time = 0
         self.playing = False
-        self.bar_translates = {}
         self.gem_translates = {}
 
     def get_time(self):

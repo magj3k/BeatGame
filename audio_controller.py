@@ -19,6 +19,7 @@ level_map = [
 puzzle_map = [
                 {'bg_music': 'audio/electro_bg.wav',
                  'fg_music': ['audio/electro_support.wav', 'audio/electro_main.wav'],
+                 'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_fg_gems.txt', 'audio/electro_bg_gems.txt'];
                  'bpm': 110,
                  'lanes': 2},
 ]
