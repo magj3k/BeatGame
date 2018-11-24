@@ -215,4 +215,4 @@ scene_2_audio_controller = AudioController(level = 0, bpm = 120, elements = scen
 scene_2_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_2_player.world_pos, speed = 0.85, bounds = scene_1_camera_bounds)
 scene_2 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_2_camera, res = scene_2_resolution, audio_controller = scene_2_audio_controller, player = scene_2_player)
 
-scenes = [scene_1, scene_2]
+scenes = [scene_1]
