@@ -314,6 +314,7 @@ class Player(object):
     def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = ""):
         self.world_size = (0.9, 1.0)
         self.res = res
+        self.initial_world_pos = initial_world_pos
         self.world_pos = initial_world_pos # world units are measured by res
         self.target_world_pos = None
         self.world_vel = (0, 0)
@@ -491,15 +492,22 @@ class Player(object):
                 self.spawning_freeze = True
 
         # fight hit animation
-        if self.fight_hit_animation_t > 0:
-            self.fight_hit_animation_t += -dt
+        if self.health > 0:
+            if self.fight_hit_animation_t > 0:
+                self.fight_hit_animation_t += -dt
 
-            if self.fight_hit_animation_t // 0.075 != self.fight_hit_animation_state:
-                self.fight_hit_animation_state = self.fight_hit_animation_t // 0.075
-                self.element.color.a = ((self.fight_hit_animation_state % 2)*0.6) + 0.4
-        elif self.fight_hit_animation_state != -1:
-            self.fight_hit_animation_state = -1
-            self.element.color.a = 1
+                if self.fight_hit_animation_t // 0.075 != self.fight_hit_animation_state:
+                    self.fight_hit_animation_state = self.fight_hit_animation_t // 0.075
+                    self.element.color.a = ((self.fight_hit_animation_state % 2)*0.6) + 0.4
+            elif self.fight_hit_animation_state == -2: # triggers recovery animaiton
+                self.fight_hit_animation_state = -1.5
+                self.fight_hit_animation_t = 4.25
+            elif self.fight_hit_animation_state != -1: # delays immediately resets player's opacity to 1
+                self.fight_hit_animation_state = -1
+                self.element.color.a = 1
+        else:
+            self.element.color.a = 0
+            self.fight_hit_animation_state = -2
 
         # animations
         self.process_animation(dt)

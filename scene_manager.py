@@ -102,7 +102,7 @@ class Scene(InstructionGroup):
         self.audio_controller = audio_controller
         self.audio_controller.beat_callback = self.on_beat
 
-        # game scenes
+        # player and game elements
         self.player = player
         if self.player == None: self.player = Player(res = res, initial_world_pos = (2, 6))
         self.game_elements.append(self.player.element)
@@ -126,7 +126,6 @@ class Scene(InstructionGroup):
         self.fight_end_timer = -1
 
     def clear(self): # called when the scene is finished and faded out
-        print("SCENE CLEARED")
         self.scene_cleared = True
         self.player = None
         self.game_elements = []
@@ -270,7 +269,7 @@ class Scene(InstructionGroup):
                 if self.fight_t > 1.25: # fight gameplay
 
                     # attacking and defending
-                    if self.fight_enemy.health > 0:
+                    if self.fight_enemy.health > 0 and self.player.health > 0:
                         if active_keys["1"] == True and self.player.fight_keys_available["attack_1"] == True: # attack lane 1
                             self.player.fight_keys_available["attack_1"] = False
                             self.player.attack()
@@ -310,12 +309,43 @@ class Scene(InstructionGroup):
                         self.remove(self.fight_enemy_sword.shape)
                         self.fight_enemy_sword = None
 
+                    # player death
+                    if self.player.health <= 0 and self.fight_player_sword != None:
+                        self.fight_end_timer = 1.75
+
+                        # removes player sword
+                        self.game_elements.remove(self.fight_player_sword)
+                        self.remove(self.fight_player_sword.color)
+                        self.remove(self.fight_player_sword.shape)
+                        self.fight_player_sword = None
+
+                        # creates particles
+                        for i in range(12):
+                            new_particle = Particle(GeometricElement(pos = self.player.element.pos,
+                                vel = (random.random()*100.0 - 50.0, random.random()*65.0 - 15.0),
+                                color = Color(0, 0, 0),
+                                size = (30, 30),
+                                shape = Ellipse(pos = self.player.element.pos, size = (0.01, 0.01))),
+                                z = self.player.z,
+                                resize_period = 0.5+(random.random()*1.6))
+                            self.game_elements.append(new_particle)
+
                     # fight end timer
                     if self.fight_end_timer > 0:
                         self.fight_end_timer += -dt
                     elif self.fight_end_timer != -1:
                         self.fight_end_timer = -1
                         self.change_game_modes("explore")
+
+                        # respawns player if necessary
+                        if self.player.health <= 0:
+                            self.player.world_pos = self.player.initial_world_pos
+                            self.player.health = 3
+                            self.player.fight_hit_animation_t = 0
+
+                            # resets enemy
+                            self.fight_enemy.in_fight = False
+                            self.fight_enemy.target_world_pos = None
 
                 elif self.fight_t > 0.9: # creates swords
                     if self.fight_player_sword == None:
@@ -412,7 +442,7 @@ class Scene(InstructionGroup):
                 # door warning
                 if element.tag == "door_warning":
                     door_warning = element
-                else: # removes invisible objects
+                elif element.tag != "player": # removes invisible objects
                     if element.color.a < 0.01:
                         object_indices_to_remove.append(k)
 
