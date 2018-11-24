@@ -16,7 +16,9 @@ class Element(object):
         self.z = z
         self.shape = None
         self.musical = musical
-        self.target_alpha = target_alpha
+        self.target_alpha = target_alpha # try to use this to control alpha whenever possible
+        self.misc_t = -1
+        self.misc_flag = False
 
         if color == None:
             self.color = Color(1, 1, 1)
@@ -24,7 +26,15 @@ class Element(object):
     def on_update(self, dt):
         self.pos = (self.pos[0]+self.vel[0]*dt, self.pos[1]+self.vel[1]*dt)
         if self.target_alpha != None:
-            self.color.a = self.color.a + ((self.target_alpha - self.color.a)*10.0*dt)
+            self.color.a = self.color.a + ((self.target_alpha - self.color.a)*12.0*dt)
+
+        # misc t
+        if self.misc_t > 0:
+            self.misc_t += -dt
+            self.misc_flag = False
+        elif self.misc_flag != True and self.misc_t != -1:
+            self.misc_t = -1
+            self.misc_flag = True
 
 
 class TexturedElement(Element):
@@ -317,6 +327,13 @@ class Player(object):
         self.jump_used = False
         self.collisions_enabled = True
 
+        # fighting
+        self.fight_pos = None
+        self.health = 3
+        self.fight_hit_animation_state = -1
+        self.fight_hit_animation_t = 0
+        self.fight_keys_available = {"attack_1": True, "attack_2": True, "hit_1": True, "hit_2": True}
+
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
         self.animation_state = "standing"
@@ -378,6 +395,14 @@ class Player(object):
                 highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
 
         return highest_ground
+
+    def attack(self):
+        self.world_pos = (self.fight_pos[0]+0.5, self.fight_pos[1])
+
+    def hit(self):
+        self.world_pos = (self.fight_pos[0]-0.25, self.fight_pos[1])
+        self.health += -1
+        self.fight_hit_animation_t = 1.0
 
     def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None, override_target_x_vel = None):
 
@@ -443,7 +468,7 @@ class Player(object):
 
             if next_player_height < highest_ground: # is true whenever resting on ground
                 next_pos = (next_pos[0], highest_ground+self.world_size[1])
-                if active_keys['spacebar'] == True and self.jump_used == False and self.controls_disabled == False and self.spawning_freeze == False:
+                if active_keys['spacebar'] == True and self.jump_used == False and self.controls_disabled == False and self.spawning_freeze == False and current_player_height > 1.5:
                     next_vel = (next_vel[0], 18.6015*audio_controller.bpm/110)
                     audio_controller.jump()
                     self.on_ground = False
@@ -465,12 +490,23 @@ class Player(object):
                 next_vel = (0, -0.001)
                 self.spawning_freeze = True
 
+        # fight hit animation
+        if self.fight_hit_animation_t > 0:
+            self.fight_hit_animation_t += -dt
+
+            if self.fight_hit_animation_t // 0.075 != self.fight_hit_animation_state:
+                self.fight_hit_animation_state = self.fight_hit_animation_t // 0.075
+                self.element.color.a = ((self.fight_hit_animation_state % 2)*0.6) + 0.4
+        elif self.fight_hit_animation_state != -1:
+            self.fight_hit_animation_state = -1
+            self.element.color.a = 1
+
         # animations
         self.process_animation(dt)
 
         # visual update
         if self.target_world_pos != None:
-            self.world_vel = ((self.target_world_pos[0] - self.world_pos[0])*12.0, (self.target_world_pos[1] - self.world_pos[1])*12.0)
+            self.world_vel = ((self.target_world_pos[0] - self.world_pos[0])*10.0, (self.target_world_pos[1] - self.world_pos[1])*10.0)
             self.world_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
         else:
             self.world_vel = next_vel
@@ -499,8 +535,11 @@ class Enemy(object):
         self.target_velocity = (0, 0)
 
         # fighting
-        self.health = 5
+        self.health = 3
         self.in_fight = False
+        self.fight_pos = None
+        self.fight_hit_animation_state = -1
+        self.fight_hit_animation_t = 0
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right"]
@@ -511,6 +550,14 @@ class Enemy(object):
 
         self.element = TexturedElement(pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res), tag = "enemy", z = self.z, size = (self.res*2, self.res*2), texture_path = "graphics/enemy_stand.png")
         self.shape = self.element.shape
+
+    def attack(self):
+        self.world_pos = (self.fight_pos[0]-0.5, self.fight_pos[1])
+
+    def hit(self):
+        self.world_pos = (self.fight_pos[0]+0.25, self.fight_pos[1])
+        self.health += -1
+        self.fight_hit_animation_t = 1.0
 
     def set_animation_state(self, new_state): # follow this call with self.process_animation()
         if new_state in self.valid_animation_states and new_state != self.animation_state:
@@ -568,6 +615,17 @@ class Enemy(object):
             self.current_move_index = 0
 
     def on_update(self, dt, cam_scalar, cam_offset):
+
+        # fight hit animation
+        if self.fight_hit_animation_t > 0:
+            self.fight_hit_animation_t += -dt
+
+            if self.fight_hit_animation_t // 0.075 != self.fight_hit_animation_state:
+                self.fight_hit_animation_state = self.fight_hit_animation_t // 0.075
+                self.color.a = ((self.fight_hit_animation_state % 2)*0.6) + 0.4
+        elif self.fight_hit_animation_state != -1:
+            self.fight_hit_animation_state = -1
+            self.color.a = 1
 
         # animations
         self.process_animation(dt)

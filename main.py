@@ -12,7 +12,11 @@ class MainWidget(BaseWidget):
                                         'd': False,
                                         'left': False,
                                         'right': False,
-                                        'spacebar': False}  # only contains supported keys
+                                        'spacebar': False,
+                                        '1': False,
+                                        '2': False,
+                                        '3': False,
+                                        '4': False}  # only contains supported keys
 
         self.scene_manager = SceneManager(scenes)
         self.canvas.add(self.scene_manager)
@@ -23,16 +27,12 @@ class MainWidget(BaseWidget):
 
     def on_key_down(self, keycode, modifiers):
         key = keycode[1]
-        # print('down', key)
-
         self.scene_manager.on_key_down(key)
         if key in self.active_keys:
             self.active_keys[key] = True
 
     def on_key_up(self, keycode):
         key = keycode[1]
-        # print('up', key)
-
         self.scene_manager.on_key_up(key)
         if key in self.active_keys:
             self.active_keys[key] = False
