@@ -5,6 +5,7 @@ from kivy.graphics.instructions import InstructionGroup
 import numpy as np
 from math import *
 import random
+import copy
 
 class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
@@ -14,8 +15,9 @@ class SceneManager(InstructionGroup):
         self.fade_color = Color(0, 0, 0)
         self.fading = "in" # or "out"
 
-        self.scenes = scenes
-        self.current_scene_index = 0
+        self.original_scenes = scenes[:]
+        self.scenes = scenes[:]
+        self.current_scene_index = -1
         self.switch_to_scene(initial_scene_index)
 
     def on_key_down(self, key): # for audio controller
@@ -35,10 +37,16 @@ class SceneManager(InstructionGroup):
         self.remove(self.scenes[self.current_scene_index])
 
     def switch_to_scene(self, scene_index):
-        if len(self.scenes) > scene_index:
+        if len(self.scenes) > scene_index and scene_index > self.current_scene_index:
+            self.add(self.scenes[scene_index])
             self.current_scene_index = scene_index
-            self.add(self.scenes[self.current_scene_index])
+            if self.fade_rect_added != False:
+                self.remove(self.fade_color)
+                self.remove(self.fade_rect)
+                self.fade_rect_added = False
 
+            # fades in
+            self.fading = "in"
             if self.fade_rect_added == False:
                 self.add(self.fade_color)
                 self.add(self.fade_rect)
@@ -64,7 +72,7 @@ class SceneManager(InstructionGroup):
 
                 # switches to next scene
                 self.remove_current_scene() # TODO, follow with self.switch_to_scene
-                print("Switch to next scene")
+                self.switch_to_scene(1)
 
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]
@@ -78,9 +86,11 @@ class SceneManager(InstructionGroup):
 class Scene(InstructionGroup):
     def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None):
         super(Scene, self).__init__()
-        self.game_elements = initial_game_elements
+
+        # general setup
+        self.game_elements = initial_game_elements[:]
         self.queued_game_elements = []
-        self.UI_elements = initial_UI_elements
+        self.UI_elements = initial_UI_elements[:]
         self.queued_UI_elements = []
         self.game_camera = game_camera        
         self.res = res
@@ -116,6 +126,7 @@ class Scene(InstructionGroup):
         self.fight_end_timer = -1
 
     def clear(self): # called when the scene is finished and faded out
+        print("SCENE CLEARED")
         self.scene_cleared = True
         self.player = None
         self.game_elements = []
