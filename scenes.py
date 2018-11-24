@@ -57,7 +57,10 @@ scene_1_door = TexturedElement(pos = (2445, 213),
                                 texture_path = "graphics/door_closed.png",
                                 tag = "door")
 
-scene_1_enemies = [ Enemy(res = scene_1_resolution, initial_world_pos = (73, 7), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right", "stop", "right", "stop", "left"]) ]
+scene_1_enemies = [
+    Enemy(res = scene_1_resolution, initial_world_pos = (73, 7), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right", "stop", "right", "stop", "left"]),
+    Enemy(res = scene_1_resolution, initial_world_pos = (64, 8), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right"])
+]
 
 scene_1_game_elements = [   scene_1_door,
                                                     TexturedElement(pos = (2350, 280),
