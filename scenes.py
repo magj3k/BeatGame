@@ -37,13 +37,13 @@ keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         tag = "keys_bg")]
 
 fight_UI = [
-    TexturedElement(pos = (window_size[0]*(1-0.052), window_size[1]),
+    TexturedElement(pos = (window_size[0]-70, window_size[1]),
         z = 1,
         color = Color(0, 0, 0, 0),
         size = (650*0.6, 450*0.45),
         texture_path = "graphics/rounded_box.png",
         tag = "h_bge"),
-    TexturedElement(pos = (window_size[0]*0.052, window_size[1]),
+    TexturedElement(pos = (70, window_size[1]),
         z = 1,
         color = Color(0, 0, 0, 0),
         size = (650*0.6, 450*0.45),
