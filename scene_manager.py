@@ -183,7 +183,7 @@ class Scene(InstructionGroup):
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
                 for i in range(3):
                     offset_y = 176*(-i+1)
-                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], window_size[1]*0.008))
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
 
                 # updates camera
@@ -530,15 +530,15 @@ class Scene(InstructionGroup):
 
                     if element.tag == "k_1x":
                         offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.22))
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5 + 176)
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_2x":
                         offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.0))
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5)
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_3x":
                         offset = 0
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5-0.22))
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5 - 176)
                         element.target_size = (166*0.34, 400*0.34)
                     
                     if self.audio_controller.solved == False:
