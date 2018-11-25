@@ -161,6 +161,25 @@ class Scene(InstructionGroup):
                 self.queued_UI_elements.append(new_bg)
 
                 # adds gems
+                gem_data = []
+                for index, gem_path in enumerate(self.audio_controller.level_puzzle['fg_gems']):
+                    song_data = SongData()
+                    song_data.read_data(gem_path)
+
+                    gem_props = {}
+                    gem_props['gem_times'] = song_data.get_gem_data()
+                    offset_y = (window_size[1]*0.22)*(-index+1)
+                    gem_props['gem_y_pos'] = window_size[1]*0.5 + offset_y
+
+                    gem_data.append(gem_props)
+
+                    ellipse = Ellipse(size=(0.01, 0.01))
+                    gem_element = GeometricElement(pos=(window_size[0]*0.5, window_size[1]*0.5), tag = "gem", color = Color(0.8, 0.8, 0.8), z = 20, size = (28, 28), shape = ellipse)
+                    self.queued_UI_elements.append(gem_element)
+                    print(gem_element.pos)
+
+                self.beat_match_display = BeatMatchDisplay(gem_data, self.audio_controller.bpm, self.audio_controller.get_song_time, self.queued_UI_elements)
+                self.add(self.beat_match_display)
 
                 # adds lines to BG and stores key offsets
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
@@ -263,6 +282,9 @@ class Scene(InstructionGroup):
                     self.player.set_animation_state("run_right")
                     if self.puzzle_solved_timer >= self.puzzle_solved_animation_duration+1.5:
                         self.scene_finished = True
+
+            if self.game_mode == "puzzle":
+                self.beat_match_display.on_update(dt)
 
             # fight mode
             if self.game_mode == "fight":
@@ -499,6 +521,16 @@ class Scene(InstructionGroup):
 
                 # puzzle mode
                 if self.game_mode == "puzzle":
+
+                    if element.tag == "gem":
+                        print("gem!")
+                        print(str(window_size[0]*dt/4))
+                        element.pos = (element.pos[0] - window_size[0] * dt/4, element.pos[1])
+                        print(element.pos)
+                        if element.pos[0] < 0:
+                            print("no more gem")
+                            UI_indices_to_remove.append(j)
+
                     if element.tag == "k_1x":
                         offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]*0.03
                         element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.22))

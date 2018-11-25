@@ -532,7 +532,7 @@ class SongData(object):
 
     # read the gems and song data. You may want to add a secondary filepath
     # argument if your barline data is stored in a different txt file.
-    def read_data(self, fiepath):
+    def read_data(self, filepath):
         solo_file = open(filepath)
         solo_file_lines = solo_file.readlines()
         for line in range(len(solo_file_lines)):
@@ -541,167 +541,103 @@ class SongData(object):
             start_time = line_tokens[0]
             
             self.gems_buffer.append(start_time)
+        return self.gems_buffer
 
     def get_gem_data(self):
-        return self.solo_buffer
-
-    def get_bar_data(self):
-        return self.bar_buffer
+        return self.gems_buffer
 
 # display for a single gem at a position with a color (if desired)
-class GemDisplay(InstructionGroup):
-    def __init__(self, pos, color):
-        super(GemDisplay, self).__init__()
-        gem_size = 28
-        self.pos = pos
-        self.color = color
-        self.type_gem = type_gem
-        self.gem = CEllipse(cpos=(pos.x, pos.y), csize=(gem_size, gem_size))
-        GeometricElement(pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 10, size = (10, 10), shape = None, musical = False, target_alpha = None)
-        self.add(Color(rgb=color))
-        self.add(self.gem)
+# class GemDisplay(InstructionGroup):
+#     def __init__(self, pos, color, queued_UI_elements):
+#         super(GemDisplay, self).__init__()
+#         gem_size = 28
+#         self.pos = pos
+        
+#         # self.add(self.gem)
 
-    # useful if gem is to animate
-    def on_update(self, dt):
-        self.gem.cpos = (self.pos.x, self.pos.y)
+#     # useful if gem is to animate
+#     def on_update(self, dt):
+#         self.gem.shape.pos = (self.pos[0], self.pos[1])
 
-        if self.pos.x < 0:
-            return False
+#         if self.pos[0] < 0:
+#             return False
 
 # Displays and controls all game elements: Nowbar, Buttons, BarLines, Gems.
 class BeatMatchDisplay(InstructionGroup):
-    def __init__(self, gem_data):
+    def __init__(self, gem_data, bpm, get_song_time, queued_UI_elements):
         super(BeatMatchDisplay, self).__init__()
-        self.objects = AnimGroup()
+        self.objects = []
+        self.queued_UI_elements = queued_UI_elements
         
         # gems
         self.screen_time = 4
-        self.vel = Window.height / self.screen_time # pixels per second
-        self.onscreen_gem_start = -1
-        self.onscreen_gems = {}
+        self.vel = Window.width / self.screen_time # pixels per second
 
         self.gem_data = gem_data
-        width = 280
-        height = 40
-        x, y = ((Window.width - width)/2, Window.height/self.screen_time)
+        self.onscreen_data = []
+        for i in range(len(self.gem_data)):
+            self.onscreen_data.append({'onscreen_gems': {}, 'onscreen_gem_start': -1})
 
-        self.add(self.objects)
+        # self.add(self.objects)
 
         # sync to song
+        self.max_song_time = 16 * 60 / bpm
         self.song_time = 0
         self.playing = False
-        self.gem_translates = {}
-
-    def get_time(self):
-        return self.song_time
-
-    # called by Player. Causes the right thing to happen
-    def gem_hit(self, time_idx, gem_idx):
-        if time_idx in self.onscreen_gems:
-            gem = self.onscreen_gems[time_idx][gem_idx]
-            gem.on_hit()
-
-    # called by Player. Causes the right thing to happen
-    def gem_pass(self, time_idx, gem_idx):
-        if time_idx in self.onscreen_gems:
-            gem = self.onscreen_gems[time_idx][gem_idx]
-            gem.on_pass()
-
-    # called by Player. Causes the right thing to happen
-    def on_button_down(self, lane, hit, hold_time=0.5):
-        self.buttons[lane].on_down(hit, hold_time)
-
-    # called by Player. Causes the right thing to happen
-    def on_button_up(self, lane, hold_off=False):
-        self.buttons[lane].on_up(hold_off)
-
-    def toggle_song(self):
-        self.playing = not self.playing
+        # callback
+        self.get_song_time = get_song_time
 
     # call every frame to make gems and barlines flow down the screen
     def on_update(self, dt) :
-        self.bar_objects.on_update()
-        for button in self.buttons:
-            button.on_update(dt)
-        self.objects.on_update()
+        # to_remove = []
+        # print(self.objects)
+        # for obj in self.objects:
+        #     if not obj.on_update(dt):
+        #         to_remove.append(obj)
+        # for obj in to_remove:
+        #     self.objects.remove(obj)
+        #     self.remove(obj)
 
-        if self.playing:
-            self.song_time += dt
+        self.song_time = self.get_song_time()
 
-            for translate in self.bar_translates.values():
-                translate.y = translate.y - dt*self.vel
-            for translates in self.gem_translates.values():
-                for t in translates:
-                    t.y = t.y - dt*self.vel
+        # for each track
+        for index, gem_props in enumerate(self.gem_data):
+            onscreen_data = self.onscreen_data[index]
 
-            # bars
-            while self.onscreen_bar_start + 1 < len(self.bar_data) and float(self.bar_data[self.onscreen_bar_start+1]) < self.song_time + self.screen_time - 1:
-                self.onscreen_bar_start += 1
-                translate = Translate((Window.width - 280)/2, Window.height)
-                gem = GemDisplay(translate, (0.8, 0.8, 0.8), 'bar')
-                self.bar_translates[self.onscreen_bar_start] = translate
-                self.onscreen_bars[self.onscreen_bar_start] = gem
-                self.bar_objects.add(gem)
+            # translate gems
+            for gem_obj in onscreen_data['onscreen_gems'].values():
+                gem_obj.gem.pos = (gem_obj.gem.pos[0] - dt*self.vel, gem_obj.gem.pos[1])
 
-                if self.onscreen_bar_end == -1:
-                    self.onscreen_bar_end = 0
+            # add gems
+            gem_start = onscreen_data['onscreen_gem_start']
+            # print('------------------------------------------------')
+            while gem_start + 1 < len(gem_props['gem_times']) and (
+                float(gem_props['gem_times'][gem_start+1]) < (self.song_time + self.screen_time) % self.max_song_time + dt/2
+                and float(gem_props['gem_times'][gem_start+1]) > (self.song_time + self.screen_time) % self.max_song_time - dt/2):
+                # print('start while')
+                # print('gem start: ' + str(gem_start + 1))
+                # print('gem time: ' + str(gem_props['gem_times'][gem_start+1]))
+                # print('song time: ' + str(self.song_time))
+                # print('screen time: ' + str(self.screen_time))
+                # print('now time: ' + str((self.song_time + self.screen_time) % self.max_song_time))
+                gem_start = (gem_start + 1) % len(gem_props['gem_times'])
+                pos = (Window.width, self.gem_data[index]['gem_y_pos'])
+                ellipse = Ellipse(cpos=(pos[0], pos[1]), size=(gem_size, gem_size))
+                self.gem = GeometricElement(tag = "gem", color = color, z = 100, shape = ellipse)
+                queued_UI_elements.append(self.gem)
+                # onscreen_data['onscreen_gems'][gem_start] = gem
 
-            while self.onscreen_bar_end < len(self.bar_data) and float(self.bar_data[self.onscreen_bar_end]) < self.song_time - self.screen_time:
-                gem = self.onscreen_bars[self.onscreen_bar_end]
-                self.bar_objects.remove(gem)
-                self.onscreen_bars.pop(self.onscreen_bar_end)
-                self.bar_translates.pop(self.onscreen_bar_end)
-                self.onscreen_bar_end += 1
+            onscreen_data['onscreen_gem_start'] = gem_start
 
-            # gems
-            while self.onscreen_gem_start + 1 < len(self.gem_data) and float(self.gem_data[self.onscreen_gem_start+1]['start']) < self.song_time + self.screen_time - 1:
-                time_gems = self.gem_data[self.onscreen_gem_start+1]
-                self.onscreen_gem_start += 1
-
-                for gem_obj in time_gems['gems']:
-                    gem_type = gem_obj['gem_type']
-                    if gem_type == 'none':
-                        continue
-                    # lane position
-                    lane = int(gem_obj['lane'])
-                    color = self.buttons[lane].get_color()
-
-                    translate = Translate(self.buttons[lane].get_pos()[0], Window.height)
-                    if gem_type == 'hold':
-                        hold_until = float(self.gem_data[self.onscreen_gem_start]['start']) + 0.5
-                        if self.onscreen_gem_start + 1 < len(self.gem_data):
-                            hold_until = float(self.gem_data[self.onscreen_gem_start + 1]['start'])
-
-                        hold_time = hold_until - float(time_gems['start'])
-
-                        gem = GemDisplay(translate, color, 'hold', hold_time * self.vel)
-                    else:
-                        gem = GemDisplay(translate, color, 'point')
-
-                    if self.onscreen_gem_start in self.gem_translates:
-                        self.gem_translates[self.onscreen_gem_start].append(translate)
-                    else:
-                        self.gem_translates[self.onscreen_gem_start] = [translate]
-
-                    if self.onscreen_gem_start in self.onscreen_gems:
-                        self.onscreen_gems[self.onscreen_gem_start].append(gem)
-                    else:
-                        self.onscreen_gems[self.onscreen_gem_start] = [gem]
-
-                    self.objects.add(gem)
-
-                    if self.onscreen_gem_end == -1:
-                        self.onscreen_gem_end = 0
-
-            while self.onscreen_gem_end < len(self.gem_data) and float(self.gem_data[self.onscreen_gem_end]['start']) < self.song_time - 2*self.screen_time:
-                if self.onscreen_gem_end in self.onscreen_gems:
-                    for gem in self.onscreen_gems[self.onscreen_gem_end]:
-                        self.objects.remove(gem)
-                        self.onscreen_gems.pop(self.onscreen_gem_end)
-                        self.gem_translates.pop(self.onscreen_gem_end)
-                        self.onscreen_gem_end += 1
-                else:
-                    break
+            # remove passed gems
+            # to_remove = []
+            # for gem_time in onscreen_data['onscreen_gems'].keys():
+            #     if gem_time < self.song_time - self.screen_time:
+            #         gem = onscreen_data['onscreen_gems'][gem_time]
+            #         self.objects.remove(gem)
+            #         to_remove.append(gem_time)
+            # for gem_time in to_remove:
+            #     onscreen_data['onscreen_gems'].pop(gem_time)
 
 
 class Enemy(object):

@@ -19,14 +19,14 @@ level_map = [
 puzzle_map = [
                 {'bg_music': 'audio/electro_bg.wav',
                  'fg_music': ['audio/electro_support.wav', 'audio/electro_main.wav'],
-                 'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_fg_gems.txt', 'audio/electro_bg_gems.txt'];
+                 'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_main_gems.txt', 'audio/electro_bg_gems.txt'],
                  'bpm': 110,
                  'lanes': 2},
 ]
 
 class AudioController(object):
     def __init__(self, level = 0, bpm = 120, elements = [], beat_callback = None):
-        self.mode = 'exploration'
+        self.mode = 'explore'
         self.level = level
         self.level_music = level_map[self.level]
         self.level_puzzle = puzzle_map[self.level]
@@ -70,6 +70,7 @@ class AudioController(object):
         # beat tracking
         self.beat = 0
         self.beat_callback = beat_callback
+        self.song_time = 0
 
         # times of player moves
         self.move_times = []
@@ -109,7 +110,7 @@ class AudioController(object):
     def change_game_modes(self, mode):
         self.mode = mode
 
-        if mode == 'exploration':
+        if mode == 'explore':
             self.move_times = []
             self.walk_ticks = set()
             self.object_ticks = {}
@@ -191,7 +192,7 @@ class AudioController(object):
     #############
 
     def on_key_down(self, keycode):
-        if self.mode == 'exploration':
+        if self.mode == 'explore':
             if keycode in ['left', 'right', 'spacebar']:
                 self.move_times.append(self.sched.get_tick())
         
@@ -203,28 +204,39 @@ class AudioController(object):
                 if keycode == 'down':
                     self.lane = min(self.num_lanes - 1, self.lane + 1)
                 
-                # shift selected track
-                if keycode == 'left':
-                    offset = self.puzzle_gens[self.lane]['offset']
-                    gen = self.puzzle_gens[self.lane]['generator']
-                    tot_frames = self.puzzle_gens[self.lane]['frames']
+                if not self.puzzle_gens[self.lane]['started']:
+                    if keycode == 'left':
+                        play_tick = self.play_ticks[self.lane] + self.note_grid/2
+                        self.play_ticks[self.lane] = play_tick
+                        self.sched.post_at_tick(self.play_track, play_tick, self.puzzle_gens[self.lane])
+                    if keycode == 'right':
+                        play_tick = self.play_ticks[self.lane] - self.note_grid/2
+                        self.play_ticks[self.lane] = play_tick
+                        self.sched.post_at_tick(self.play_track, play_tick, self.puzzle_gens[self.lane])
+                else:
+                    # shift selected track
+                    if keycode == 'left':
+                        offset = self.puzzle_gens[self.lane]['offset']
+                        gen = self.puzzle_gens[self.lane]['generator']
+                        tot_frames = self.puzzle_gens[self.lane]['frames']
 
-                    current_frame = gen.frame
-                    gen.frame = (current_frame - self.frames_per_frac_beat) % tot_frames
+                        current_frame = gen.frame
+                        gen.frame = (current_frame - self.frames_per_frac_beat) % tot_frames
 
-                    self.puzzle_gens[self.lane]['offset'] = offset - 1
+                        self.puzzle_gens[self.lane]['offset'] = offset - 1
 
-                if keycode == 'right':
-                    offset = self.puzzle_gens[self.lane]['offset']
-                    gen = self.puzzle_gens[self.lane]['generator']
-                    tot_frames = self.puzzle_gens[self.lane]['frames']
+                    if keycode == 'right':
+                        offset = self.puzzle_gens[self.lane]['offset']
+                        gen = self.puzzle_gens[self.lane]['generator']
+                        tot_frames = self.puzzle_gens[self.lane]['frames']
 
-                    current_frame = gen.frame
-                    gen.frame = (current_frame + self.frames_per_frac_beat) % tot_frames
+                        current_frame = gen.frame
+                        gen.frame = (current_frame + self.frames_per_frac_beat) % tot_frames
 
-                    self.puzzle_gens[self.lane]['offset'] = offset + 1
+                        self.puzzle_gens[self.lane]['offset'] = offset + 1
                     
-
+    def get_song_time(self):
+        return self.song_time
 
     def on_key_up(self, keycode):
         pass
@@ -233,14 +245,17 @@ class AudioController(object):
         self.audio.on_update()
         now = self.sched.get_tick()
         # callbacks/beat tracking
+        self.song_time += dt
         if now // self.note_grid != self.beat:
             self.beat = now // self.note_grid
+            if self.beat % 16 == 0:
+                self.song_time = 0
             if self.beat_callback != None:
                 self.beat_callback(self.beat)
 
         # Exploration Mode
         ##################
-        if self.mode == 'exploration':
+        if self.mode == 'explore':
             # play sound for continuous player movement
             if player.on_ground and (active_keys['left'] == True or active_keys['right'] == True):
                 next_beat = quantize_tick_up(now, self.note_grid/2)
