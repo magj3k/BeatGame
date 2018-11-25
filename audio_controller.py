@@ -305,7 +305,7 @@ class AudioController(object):
                 prev_beat = quantize_tick_up(now, self.note_grid*4) - self.note_grid*4
                 next_tick = prev_beat + 8*self.note_grid
                 for beat_num in beats:
-                    tick = prev_beat + self.note_grid * (beat_num-1)
+                    tick = prev_beat + self.note_grid * (beat_num)
                     if tick > now:
                         if tick < next_tick:
                             next_tick = tick
