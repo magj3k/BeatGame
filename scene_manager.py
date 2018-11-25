@@ -168,7 +168,7 @@ class Scene(InstructionGroup):
 
                     gem_props = {}
                     gem_props['gem_times'] = song_data.get_gem_data()
-                    offset_y = (window_size[1]*0.22)*(-index+1)
+                    offset_y = 176*(-index+1)
                     gem_props['gem_y_pos'] = window_size[1]*0.5 + offset_y
                     if index == self.audio_controller.num_lanes:
                         gem_props['offset'] = 0
@@ -182,8 +182,8 @@ class Scene(InstructionGroup):
                 # adds lines to BG and stores key offsets
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
                 for i in range(3):
-                    offset_y = (window_size[1]*0.22)*(-i+1)
-                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], window_size[1]*0.008))
+                    offset_y = 176*(-i+1)
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
 
                 # updates camera
@@ -230,9 +230,13 @@ class Scene(InstructionGroup):
             element = self.game_elements[i]
 
             if isinstance(element, Platform):
-                element.toggle_active_state()
+                quant_beat = int(beat) % len(element.beats)
+                if quant_beat in element.beats:
+                    element.toggle_active_state()
             elif isinstance(element, Enemy):
-                element.advance_moves()
+                quant_beat = int(beat) % 2
+                if quant_beat == 0:
+                    element.advance_moves()
 
     def append_ui_element(self, element):
         self.queued_UI_elements.append(element)
@@ -525,20 +529,20 @@ class Scene(InstructionGroup):
 
                     if element.tag == "gem":
                         element.pos = (element.pos[0] - window_size[0] * dt/4, element.pos[1])
-                        if element.pos[0] < 0:
+                        if element.pos[0] < -50:
                             UI_indices_to_remove.append(j)
 
                     if element.tag == "k_1x":
                         offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.22))
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5 + 176)
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_2x":
                         offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.0))
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5)
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_3x":
                         offset = 0
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5-0.22))
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5 - 176)
                         element.target_size = (166*0.34, 400*0.34)
                     
                     if self.audio_controller.solved == False:
@@ -644,7 +648,7 @@ class Scene(InstructionGroup):
             if door_warning != None and self.game_mode != "puzzle":
                 target_warning_alpha = 0.0
                 if fabs(door.pos[0] - (self.player.world_pos[0]*self.player.res)) < 105.0:
-                    if self.num_keys_collected < 3: # TODO, change to 3
+                    if self.num_keys_collected < 3: # should always be < 3
                         target_warning_alpha = 1.0
                     else:
                         # enters puzzle mode

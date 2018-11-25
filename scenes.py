@@ -37,13 +37,13 @@ keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         tag = "keys_bg")]
 
 fight_UI = [
-    TexturedElement(pos = (window_size[0]*(1-0.052), window_size[1]),
+    TexturedElement(pos = (window_size[0]-70, window_size[1]),
         z = 1,
         color = Color(0, 0, 0, 0),
         size = (650*0.6, 450*0.45),
         texture_path = "graphics/rounded_box.png",
         tag = "h_bge"),
-    TexturedElement(pos = (window_size[0]*0.052, window_size[1]),
+    TexturedElement(pos = (70, window_size[1]),
         z = 1,
         color = Color(0, 0, 0, 0),
         size = (650*0.6, 450*0.45),
@@ -185,14 +185,14 @@ scene_1_game_elements = [   scene_1_door,
                                                         type = "dirt",
                                                         z = 100,
                                                         musical = True,
-                                                        beats = [1, 3],
+                                                        beats = [0, 2],
                                                         res = scene_1_resolution,
                                                         sound_path = "audio/platform_sfx.wav"),
                                                     Platform(((46.5, 6), (47.5, 6)),
                                                         type = "dirt",
                                                         z = 100,
                                                         musical = True,
-                                                        beats = [2, 4],
+                                                        beats = [0, 2],
                                                         res = scene_1_resolution,
                                                         active = False,
                                                         sound_path = "audio/platform_sfx.wav")
@@ -203,7 +203,7 @@ scene_1_UI_elements.extend(keys_UI)
 scene_1_UI_elements.extend(fight_UI)
 
 scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
-scene_1_camera_bounds = ((25, 6.5), (65.5, 9.5))
+scene_1_camera_bounds = ((25, 6.5), (66, 9.5))
 scene_1_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_1_player.world_pos, speed = 1.05, bounds = scene_1_camera_bounds)
 scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player)
 
