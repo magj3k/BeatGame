@@ -94,11 +94,11 @@ class AudioController(object):
             data = file.get_frames(0, 1000000000)
             tot_frames = len(data) // 2 # for stereo
 
-            rand_offset = random.randint(-4, 3)
-            if rand_offset < 0:
-                rand_offset -= 2
-            else:
-                rand_offset += 3
+            rand_offset = random.randint(-8, -2)
+            # if rand_offset < 0:
+            #     rand_offset -= 2
+            # else:
+            #     rand_offset += 3
             self.puzzle_gens.append({'generator': gen, 'frames': tot_frames, 'lane': index, 'offset': rand_offset, 'started': False})
 
         # frames per offset

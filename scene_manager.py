@@ -170,16 +170,14 @@ class Scene(InstructionGroup):
                     gem_props['gem_times'] = song_data.get_gem_data()
                     offset_y = (window_size[1]*0.22)*(-index+1)
                     gem_props['gem_y_pos'] = window_size[1]*0.5 + offset_y
+                    if index == self.audio_controller.num_lanes:
+                        gem_props['offset'] = 0
+                    else:
+                        gem_props['offset'] = self.audio_controller.puzzle_gens[index]['offset']
 
                     gem_data.append(gem_props)
 
-                    ellipse = Ellipse(size=(0.01, 0.01))
-                    gem_element = GeometricElement(pos=(window_size[0]*0.5, window_size[1]*0.5), tag = "gem", color = Color(0.8, 0.8, 0.8), z = 20, size = (28, 28), shape = ellipse)
-                    self.queued_UI_elements.append(gem_element)
-                    print(gem_element.pos)
-
-                self.beat_match_display = BeatMatchDisplay(gem_data, self.audio_controller.bpm, self.audio_controller.get_song_time, self.queued_UI_elements)
-                self.add(self.beat_match_display)
+                self.puzzle_gems = PuzzleGems(gem_data, self.audio_controller.bpm, self.audio_controller.get_song_time, self.append_ui_element)
 
                 # adds lines to BG and stores key offsets
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
@@ -236,6 +234,9 @@ class Scene(InstructionGroup):
             elif isinstance(element, Enemy):
                 element.advance_moves()
 
+    def append_ui_element(self, element):
+        self.queued_UI_elements.append(element)
+
     def on_update(self, dt, active_keys):
         if self.scene_cleared == False:
 
@@ -284,7 +285,7 @@ class Scene(InstructionGroup):
                         self.scene_finished = True
 
             if self.game_mode == "puzzle":
-                self.beat_match_display.on_update(dt)
+                self.puzzle_gems.on_update(dt)
 
             # fight mode
             if self.game_mode == "fight":
@@ -523,20 +524,16 @@ class Scene(InstructionGroup):
                 if self.game_mode == "puzzle":
 
                     if element.tag == "gem":
-                        print("gem!")
-                        print(str(window_size[0]*dt/4))
                         element.pos = (element.pos[0] - window_size[0] * dt/4, element.pos[1])
-                        print(element.pos)
                         if element.pos[0] < 0:
-                            print("no more gem")
                             UI_indices_to_remove.append(j)
 
                     if element.tag == "k_1x":
-                        offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]*0.03
+                        offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
                         element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.22))
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_2x":
-                        offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]*0.03
+                        offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]/16
                         element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*(0.5+0.0))
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_3x":
