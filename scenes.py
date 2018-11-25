@@ -103,7 +103,6 @@ scene_1_water_map[38:51] = [-1+scene_1_elevation_offset]*13
 scene_1_ground_map[51:53] = [1+scene_1_elevation_offset]*2
 scene_1_ground_map[59:67] = [1+scene_1_elevation_offset]*8
 scene_1_ground_map[80:95] = [4+scene_1_elevation_offset]*15
-scene_1_camera_bounds = ((25, 6.5), (64, 9.5))
 scene_1_resolution = 30.0
 scene_1_player = Player(res = scene_1_resolution, initial_world_pos = (27.5, 8), z = 110)
 scene_1_door = TexturedElement(pos = (2445, 213),
@@ -204,7 +203,8 @@ scene_1_UI_elements.extend(keys_UI)
 scene_1_UI_elements.extend(fight_UI)
 
 scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
-scene_1_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_1_player.world_pos, speed = 0.85, bounds = scene_1_camera_bounds)
+scene_1_camera_bounds = ((25, 6.5), (65.5, 9.5))
+scene_1_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_1_player.world_pos, speed = 1.05, bounds = scene_1_camera_bounds)
 scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_1_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player)
 
 # SCENE 2 IS A TEST, currently it copies objects from scene 1, which DOES NOT WORK
