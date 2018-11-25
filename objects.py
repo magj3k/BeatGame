@@ -557,7 +557,6 @@ class PuzzleGems(InstructionGroup):
         self.queue_UI_element = queue_UI_element
         
         # gems
-
         self.gem_data = gem_data
         self.onscreen_index = []
         for i in range(len(self.gem_data)):
