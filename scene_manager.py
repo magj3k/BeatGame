@@ -230,11 +230,13 @@ class Scene(InstructionGroup):
             element = self.game_elements[i]
 
             if isinstance(element, Platform):
-                quant_beat = int(beat) % 4
+                quant_beat = int(beat) % len(element.beats)
                 if quant_beat in element.beats:
                     element.toggle_active_state()
             elif isinstance(element, Enemy):
-                element.advance_moves()
+                quant_beat = int(beat) % 2
+                if quant_beat == 0:
+                    element.advance_moves()
 
     def append_ui_element(self, element):
         self.queued_UI_elements.append(element)

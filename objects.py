@@ -211,7 +211,7 @@ class Platform(object):
         if self.type == "mech":
             musical = True
         self.musical = musical
-        self.beats = beats
+        self.beats = beats # measured in half-beats
         self.texture = texture
         self.cell_bounds = cell_bounds # in world_pos coordinate system
         self.z = z

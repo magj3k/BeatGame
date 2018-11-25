@@ -69,6 +69,7 @@ class AudioController(object):
 
         # beat tracking
         self.beat = 0
+        self.half_beat = 0
         self.beat_callback = beat_callback
         self.song_time = 0
 
@@ -250,8 +251,11 @@ class AudioController(object):
             self.beat = now // self.note_grid
             if self.beat % 16 == 0:
                 self.song_time = 0
+
+        if now // (self.note_grid*0.5) != self.half_beat:
+            self.half_beat = now // (self.note_grid*0.5)
             if self.beat_callback != None:
-                self.beat_callback(self.beat)
+                self.beat_callback(self.half_beat)
 
         # Exploration Mode
         ##################
@@ -302,19 +306,19 @@ class AudioController(object):
 
                 # find closest beat to now
                 beats = element.beats
-                prev_beat = quantize_tick_up(now, self.note_grid*4) - self.note_grid*4
-                next_tick = prev_beat + 8*self.note_grid
+                prev_beat = quantize_tick_up(now, self.note_grid*4*0.5) - self.note_grid*4*0.5
+                next_tick = prev_beat + 8*self.note_grid*0.5
                 for beat_num in beats:
-                    tick = prev_beat + self.note_grid * (beat_num)
+                    tick = prev_beat + self.note_grid * (beat_num) * 0.5
                     if tick > now:
                         if tick < next_tick:
                             next_tick = tick
                     else:
-                        tick += 4*self.note_grid
+                        tick += 4*self.note_grid*0.5
                         if tick < next_tick:
                             next_tick = tick
 
-                if next_tick < prev_beat + 8*self.note_grid:
+                if next_tick < prev_beat + 8*self.note_grid*0.5:
                     if index not in self.object_ticks:
                         self.object_ticks[index] = {}
 
