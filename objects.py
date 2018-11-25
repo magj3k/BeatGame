@@ -74,6 +74,12 @@ class GeometricElement(Element):
         if self.shape == None:
             self.shape = Rectangle(pos=((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier),size=(self.size[0]*retina_multiplier, self.size[1]*retina_multiplier))
 
+        # size safety
+        if self.shape.size[0] == 0:
+            self.shape.size = (0.01, self.shape.size[1])
+        if self.shape.size[1] == 0:
+            self.shape.size = (self.shape.size[0], 0.01)
+
     def change_shape(self, new_shape):
         self.shape = new_shape
 
