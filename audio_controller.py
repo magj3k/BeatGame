@@ -306,19 +306,21 @@ class AudioController(object):
 
                 # find closest beat to now
                 beats = element.beats
-                prev_beat = quantize_tick_up(now, self.note_grid*4*0.5) - self.note_grid*4*0.5
-                next_tick = prev_beat + 8*self.note_grid*0.5
+                prev_beat = quantize_tick_up(now, self.note_grid*4) - self.note_grid*4
+                next_tick = prev_beat + 8*self.note_grid
                 for beat_num in beats:
-                    tick = prev_beat + self.note_grid * (beat_num) * 0.5
+                    beat_num = beat_num / 2
+
+                    tick = prev_beat + self.note_grid * (beat_num)
                     if tick > now:
                         if tick < next_tick:
                             next_tick = tick
                     else:
-                        tick += 4*self.note_grid*0.5
+                        tick += 4*self.note_grid
                         if tick < next_tick:
                             next_tick = tick
 
-                if next_tick < prev_beat + 8*self.note_grid*0.5:
+                if next_tick < prev_beat + 8*self.note_grid:
                     if index not in self.object_ticks:
                         self.object_ticks[index] = {}
 

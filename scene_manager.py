@@ -230,7 +230,7 @@ class Scene(InstructionGroup):
             element = self.game_elements[i]
 
             if isinstance(element, Platform):
-                quant_beat = int(beat) % len(element.beats)
+                quant_beat = int(beat) % 8
                 if quant_beat in element.beats:
                     element.toggle_active_state()
             elif isinstance(element, Enemy):
