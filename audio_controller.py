@@ -99,7 +99,7 @@ class AudioController(object):
             # if rand_offset < 0:
             #     rand_offset -= 2
             # else:
-            #     rand_offset += 3
+            #     rand_offset += 1
             self.puzzle_gens.append({'generator': gen, 'frames': tot_frames, 'lane': index, 'offset': rand_offset, 'started': False})
 
         # frames per offset
@@ -137,7 +137,7 @@ class AudioController(object):
             play_now = True
             for gen_props in self.puzzle_gens:
                 play_tick = next_downbeat - gen_props['offset'] * self.note_grid/2
-                if play_tick - now < self.note_grid * 4:
+                if play_tick - now < self.note_grid * 7:
                     play_now = False
 
             for gen_props in self.puzzle_gens:
@@ -199,6 +199,9 @@ class AudioController(object):
     def get_offsets(self):
         offsets = [gen_props['offset'] for gen_props in self.puzzle_gens]
         return offsets
+
+    def get_puzzle_gens(self):
+        return self.puzzle_gens
 
 
     #############

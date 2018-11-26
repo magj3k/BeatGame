@@ -205,6 +205,9 @@ class Scene(InstructionGroup):
                     if isinstance(element, Platform):
                         platforms.append(element)
 
+                # adds gems
+                # self.fight_gems = FightGems(self.audio_controller, self.append_ui_element)
+
                 # updates player
                 self.player.controls_disabled = True
                 self.player.set_animation_state("standing")
