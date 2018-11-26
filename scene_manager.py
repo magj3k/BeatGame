@@ -286,6 +286,7 @@ class Scene(InstructionGroup):
 
                 if self.puzzle_solved_timer >= self.puzzle_solved_animation_duration:
                     self.player.set_animation_state("run_right")
+                    self.puzzle_gems.create_gems = False
                     if self.puzzle_solved_timer >= self.puzzle_solved_animation_duration+1.5:
                         self.scene_finished = True
 
