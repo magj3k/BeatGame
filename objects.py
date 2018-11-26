@@ -556,7 +556,7 @@ class SongData(object):
             elif size_word == 'small':
                 size = 28
 
-            color_diff = 0.2*(float(intensity))
+            color_diff = 0.15*(5 - float(intensity))
             color = Color(min(1, self.base_color[0] + color_diff), min(1, self.base_color[1] + color_diff), min(1, self.base_color[2] + color_diff))
             
             self.gems_buffer.append({'start_time': float(start_time), 'color': color, 'size': size})
