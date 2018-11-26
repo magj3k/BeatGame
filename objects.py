@@ -594,6 +594,8 @@ class PuzzleGems(InstructionGroup):
         self.screen_time = 4
         self.vel = window_size[0] / self.screen_time # pixels per second
 
+        self.start = False
+
         # callback
         self.get_song_time = get_song_time
 
@@ -607,10 +609,15 @@ class PuzzleGems(InstructionGroup):
                 gem_start = self.onscreen_index[index]
                 offset = gem_props['offset'] * self.beat_time / 2
 
+                if index == len(self.gem_data)-1 and not self.start:
+                    while gem_start < len(gem_props['gem_times']) and gem_props['gem_times'][gem_start]['start_time'] < (self.song_time + 0.75*self.screen_time + offset % self.max_song_time - 2*dt):
+                        gem_start = (gem_start + 1) % len(gem_props['gem_times'])
+
                 # add gems
                 while gem_start < len(gem_props['gem_times']) and (
                     gem_props['gem_times'][gem_start]['start_time'] < (self.song_time + 0.75*self.screen_time + offset) % self.max_song_time + 2*dt
                     and gem_props['gem_times'][gem_start]['start_time'] > (self.song_time + 0.75*self.screen_time + offset) % self.max_song_time - 2*dt):
+                    self.start = True
                     pos = (window_size[0], self.gem_data[index]['gem_y_pos'])
                     ellipse = Ellipse(size=(0.01, 0.01))
                     color = gem_props['gem_times'][gem_start]['color']

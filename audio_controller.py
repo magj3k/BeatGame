@@ -127,15 +127,22 @@ class AudioController(object):
         if mode == 'puzzle':
             self.play_ticks = {}
 
-            self.mixer.remove(self.fg_gen)
+            if self.fg_gen in self.mixer.generators:
+                self.mixer.remove(self.fg_gen)
             self.bg_gen.set_gain(0.5)
 
             now = self.sched.get_tick()
             next_downbeat = quantize_tick_up(now, self.note_grid * 16)
 
+            play_now = True
             for gen_props in self.puzzle_gens:
                 play_tick = next_downbeat - gen_props['offset'] * self.note_grid/2
-                if play_tick < now:
+                if play_tick - now < self.note_grid * 4:
+                    play_now = False
+
+            for gen_props in self.puzzle_gens:
+                play_tick = next_downbeat - gen_props['offset'] * self.note_grid/2
+                if not play_now:
                     play_tick += self.note_grid*16
 
                 self.play_ticks[gen_props['lane']] = play_tick
