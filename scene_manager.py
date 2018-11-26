@@ -423,7 +423,7 @@ class Scene(InstructionGroup):
                 # collisions w/ pickups and enemies
                 if isinstance(element, Pickup) or isinstance(element, Enemy):
                     hypo = np.sqrt(np.power(element.element.pos[0] - self.player.world_pos[0]*self.res, 2.0) + np.power(element.element.pos[1] - self.player.world_pos[1]*self.res, 2.0))
-                    if hypo < element.radius:
+                    if hypo < element.radius and self.game_mode == "explore":
                         if isinstance(element, Pickup): # pickups
                             object_indices_to_remove.append(k)
                             self.num_keys_collected += 1
