@@ -169,7 +169,7 @@ class Scene(InstructionGroup):
 
                     gem_props = {}
                     gem_props['gem_times'] = song_data.get_gem_data()
-                    offset_y = 176*(-index+1)
+                    offset_y = 176*(-index+1) + 40
                     gem_props['gem_y_pos'] = window_size[1]*0.5 + offset_y
                     if index == self.audio_controller.num_lanes:
                         gem_props['offset'] = 0
@@ -183,7 +183,7 @@ class Scene(InstructionGroup):
                 # adds lines to BG and stores key offsets
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
                 for i in range(3):
-                    offset_y = 176*(-i+1)
+                    offset_y = 176*(-i+1) + 40
                     new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
 

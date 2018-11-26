@@ -610,7 +610,7 @@ class PuzzleGems(InstructionGroup):
                     ellipse = Ellipse(size=(0.01, 0.01))
                     color = gem_props['gem_times'][gem_start]['color']
                     size = gem_props['gem_times'][gem_start]['size']
-                    gem_element = GeometricElement(pos=pos, tag = "gem", color = color, z = 20, size = (size, size), shape = ellipse)
+                    gem_element = GeometricElement(pos=pos, tag = "gem", color = color, z = 9, size = (size, size), shape = ellipse)
                     self.queue_UI_element(gem_element)
 
                     gem_start = (gem_start + 1) % len(gem_props['gem_times'])
