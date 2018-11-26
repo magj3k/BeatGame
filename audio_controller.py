@@ -337,3 +337,4 @@ class AudioController(object):
                 if gen_props['offset'] % 32 != 0:
                     solved = False
             self.solved = solved
+            

@@ -70,6 +70,7 @@ class GeometricElement(Element):
     def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), shape = None, musical = False, target_alpha = None):
         Element.__init__(self, pos, vel, tag, color, z, musical, target_alpha)
         self.size = size
+        self.target_size = None
         self.shape = shape
         if self.shape == None:
             self.shape = Rectangle(pos=((self.pos[0]-(self.size[0]/2))*retina_multiplier, (self.pos[1]-(self.size[1]/2))*retina_multiplier),size=(self.size[0]*retina_multiplier, self.size[1]*retina_multiplier))
@@ -86,6 +87,10 @@ class GeometricElement(Element):
     def on_update(self, dt, cam_scalar, cam_offset):
         super().on_update(dt)
         self.shape.pos = (((self.pos[0]-(self.size[0]/2))*retina_multiplier)*cam_scalar + cam_offset[0], ((self.pos[1]-(self.size[1]/2))*retina_multiplier)*cam_scalar + cam_offset[1])
+
+        # size management
+        if self.target_size != None:
+            self.size = (self.size[0] + ((self.target_size[0] - self.size[0])*dt*10.0), self.size[1] + ((self.target_size[1] - self.size[1])*dt*10.0))
         self.shape.size = (self.size[0]*retina_multiplier*cam_scalar, self.size[1]*retina_multiplier*cam_scalar)
 
 
