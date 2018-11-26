@@ -136,8 +136,10 @@ class Scene(InstructionGroup):
 
     def change_game_modes(self, new_mode):
         if new_mode != self.game_mode:
-            self.audio_controller.change_game_modes(new_mode)
             if new_mode == "explore":
+                self.audio_controller.change_game_modes(new_mode)
+                self.game_mode = new_mode
+                
                 self.game_camera.bounds_enabled = True
                 self.game_camera.target_zoom_factor = self.game_camera.initial_target_zoom_factor
                 self.game_camera.speed = self.game_camera.initial_speed
@@ -152,6 +154,9 @@ class Scene(InstructionGroup):
                     self.fight_enemy_sword.target_alpha = 0.0
                     self.fight_enemy_sword = None
             elif new_mode == "puzzle" and self.game_mode == "explore":
+                self.audio_controller.change_game_modes(new_mode)
+                self.game_mode = new_mode
+
                 self.game_camera.bounds_enabled = False
                 self.player.controls_disabled = True
                 self.player.set_animation_state("standing")
@@ -196,6 +201,8 @@ class Scene(InstructionGroup):
                         self.game_camera.speed = 1.4
 
             elif new_mode == "fight" and self.game_mode == "explore" and self.fight_enemy != None:
+                self.audio_controller.change_game_modes(new_mode)
+                self.game_mode = new_mode
 
                 # updates related variables
                 self.fight_t = 0
@@ -223,8 +230,6 @@ class Scene(InstructionGroup):
                 self.game_camera.update_target( ((self.player.target_world_pos[0] + self.fight_enemy.target_world_pos[0])/2, 0.85+((self.player.target_world_pos[1] + self.fight_enemy.target_world_pos[1])/2)) )
                 self.game_camera.target_zoom_factor = 5.5
                 self.game_camera.speed = 4.0
-
-            self.game_mode = new_mode
 
     def on_beat(self, beat):
         for i in range(len(self.game_elements)):
