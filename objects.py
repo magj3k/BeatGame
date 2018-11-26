@@ -529,9 +529,10 @@ class Player(object):
 
 # holds data for gems
 class SongData(object):
-    def __init__(self):
+    def __init__(self, color):
         super(SongData, self).__init__()
         self.gems_buffer = []
+        self.base_color = color
 
     # read the gems and song data. You may want to add a secondary filepath
     # argument if your barline data is stored in a different txt file.
@@ -542,8 +543,24 @@ class SongData(object):
             line_tokens = solo_file_lines[line].strip().split('\t')
 
             start_time = line_tokens[0]
+
+            if len(line_tokens) > 1:
+                size_word, intensity = line_tokens[1].split(' ')
+            else:
+                size_word = 'med'
+                intensity = '3'
+
+            size = 39
+            if size_word == 'big':
+                size = 50
+            elif size_word == 'small':
+                size = 28
+
+            color_diff = 0.2*(float(intensity))
+            color = Color(min(1, self.base_color[0] + color_diff), min(1, self.base_color[1] + color_diff), min(1, self.base_color[2] + color_diff))
             
-            self.gems_buffer.append(start_time)
+            self.gems_buffer.append({'start_time': float(start_time), 'color': color, 'size': size})
+            # self.gems_buffer.append(start_time)
         return self.gems_buffer
 
     def get_gem_data(self):
@@ -585,11 +602,13 @@ class PuzzleGems(InstructionGroup):
 
             # add gems
             while gem_start < len(gem_props['gem_times']) and (
-                float(gem_props['gem_times'][gem_start]) < (self.song_time + 0.75*self.screen_time + offset) % self.max_song_time + dt
-                and float(gem_props['gem_times'][gem_start]) > (self.song_time + 0.75*self.screen_time + offset) % self.max_song_time - dt):
+                gem_props['gem_times'][gem_start]['start_time'] < (self.song_time + 0.75*self.screen_time + offset) % self.max_song_time + 2*dt
+                and gem_props['gem_times'][gem_start]['start_time'] > (self.song_time + 0.75*self.screen_time + offset) % self.max_song_time - 2*dt):
                 pos = (window_size[0], self.gem_data[index]['gem_y_pos'])
                 ellipse = Ellipse(size=(0.01, 0.01))
-                gem_element = GeometricElement(pos=pos, tag = "gem", color = Color(0.9, 0.9, 0.9), z = 20, size = (28, 28), shape = ellipse)
+                color = gem_props['gem_times'][gem_start]['color']
+                size = gem_props['gem_times'][gem_start]['size']
+                gem_element = GeometricElement(pos=pos, tag = "gem", color = color, z = 20, size = (size, size), shape = ellipse)
                 self.queue_UI_element(gem_element)
 
                 gem_start = (gem_start + 1) % len(gem_props['gem_times'])

@@ -162,8 +162,9 @@ class Scene(InstructionGroup):
 
                 # adds gems
                 gem_data = []
+                colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
                 for index, gem_path in enumerate(self.audio_controller.level_puzzle['fg_gems']):
-                    song_data = SongData()
+                    song_data = SongData(colors[index])
                     song_data.read_data(gem_path)
 
                     gem_props = {}
