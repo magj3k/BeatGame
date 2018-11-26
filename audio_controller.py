@@ -151,6 +151,12 @@ class AudioController(object):
         key_gen.set_gain(0.15)
         self.mixer.add(key_gen)
 
+    def block(self):
+        pass
+
+    def hit(self):
+        pass
+
     def jump(self):
         jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
         jump_gen.set_gain(0.6)
@@ -337,4 +343,3 @@ class AudioController(object):
                 if gen_props['offset'] % 32 != 0:
                     solved = False
             self.solved = solved
-            

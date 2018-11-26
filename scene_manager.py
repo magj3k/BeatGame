@@ -308,6 +308,7 @@ class Scene(InstructionGroup):
                             self.fight_player_sword.change_texture("graphics/sword_1_right_down.png")
 
                             self.fight_enemy.hit()
+                            self.audio_controller.hit()
                         elif active_keys["1"] == False:
                             self.player.fight_keys_available["attack_1"] = True
 
@@ -318,6 +319,7 @@ class Scene(InstructionGroup):
                             self.fight_enemy.attack()
                             self.fight_enemy_sword.misc_t = 0.6
                             self.fight_enemy_sword.change_texture("graphics/sword_1_left_down.png")
+                            self.audio_controller.hit()
                         elif active_keys["3"] == False:
                             self.player.fight_keys_available["hit_1"] = True
 
