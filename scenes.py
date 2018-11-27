@@ -228,7 +228,7 @@ menu_1_water_map[38:51] = [-1+scene_elevation_offset]*13
 menu_1_ground_map[51:53] = [1+scene_elevation_offset]*2
 menu_1_ground_map[59:67] = [1+scene_elevation_offset]*8
 menu_1_ground_map[80:95] = [4+scene_elevation_offset]*15
-menu_1_player = Player(res = scene_resolution, initial_world_pos = (38, 9.2), z = 110)
+menu_1_player = Player(res = scene_resolution, initial_world_pos = (38, 9.5), z = 110)
 menu_1_player.collisions_enabled = False
 menu_1_player.controls_disabled = True
 menu_1_player.hidden = True
@@ -303,7 +303,7 @@ menu_1_UI_elements = [
 ]
 
 menu_1_audio_controller = AudioController(level = 0, bpm = 120, elements = menu_1_game_elements)
-menu_1_camera = Camera(zoom_factor = 0.85, initial_world_target = menu_1_player.world_pos, speed = 2.2)
+menu_1_camera = Camera(zoom_factor = 0.85, initial_world_target = menu_1_player.world_pos, speed = 8.0)
 menu_1 = Menu(num_options = 2, option_actions = [["scene", 1], ["quit", -1]], initial_game_elements = menu_1_game_elements, initial_UI_elements = menu_1_UI_elements, ground_map = menu_1_ground_map, game_camera = menu_1_camera, res = scene_resolution, audio_controller = menu_1_audio_controller, player = menu_1_player)
 
 # SCENE 2 IS A TEST, currently it copies objects from scene 1, which DOES NOT WORK

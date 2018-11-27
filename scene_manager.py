@@ -689,6 +689,7 @@ class Menu(Scene):
         self.option_selected = 0
         self.num_options = num_options
         self.option_actions = option_actions # list of lists; option_actions[option_index] = [action_type, scene or menu index]
+        self.initial_player_y = self.player.world_pos[1]
 
         # menu navigation
         self.key_listen_buffer_timer = 0
@@ -729,6 +730,7 @@ class Menu(Scene):
                     self.scene_finished = True
 
         # visual updates for selected option
+        self.player.target_world_pos = (self.player.world_pos[0], self.initial_player_y-(self.option_selected*0.45))
         for i in range(len(self.UI_elements)):
             element = self.UI_elements[i]
 
