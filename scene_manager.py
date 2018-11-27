@@ -356,6 +356,17 @@ class Scene(InstructionGroup):
                         self.remove(self.fight_enemy_sword.shape)
                         self.fight_enemy_sword = None
 
+                        # creates key if applicable
+                        if self.fight_enemy.has_key == True:
+                            self.fight_enemy.has_key = False
+
+                            new_key = Pickup(TexturedElement(pos = (self.fight_enemy.world_pos[0]*self.res, (self.fight_enemy.world_pos[1] + 1.1)*self.res),
+                                size = (166*0.091, 400*0.091),
+                                texture_path = "graphics/key.png"), z = 110, radius = 20)
+                            new_key.element.target_alpha = 1.0
+                            new_key.element.color.a = 0
+                            self.queued_game_elements.append(new_key)
+
                     # player death
                     if self.player.health <= 0 and self.fight_player_sword != None:
                         self.fight_end_timer = 1.75
