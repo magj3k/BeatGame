@@ -262,7 +262,7 @@ class AudioController(object):
 
     def on_update(self, dt, player, active_keys):
         # fading
-        self.mixer_gain = self.mixer_gain + ((self.target_mixer_gain - self.mixer_gain) * dt * 3.0)
+        self.mixer_gain = self.mixer_gain + ((self.target_mixer_gain - self.mixer_gain) * dt * 3.25)
         self.mixer.set_gain(self.mixer_gain)
 
         self.audio.on_update()
