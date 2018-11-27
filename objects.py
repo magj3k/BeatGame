@@ -338,6 +338,7 @@ class Player(object):
         self.tag = tag
         self.jump_used = False
         self.collisions_enabled = True
+        self.hidden = False
 
         # fighting
         self.fight_pos = None
@@ -503,7 +504,7 @@ class Player(object):
                 self.spawning_freeze = True
 
         # fight hit animation
-        if self.health > 0:
+        if self.health > 0 and self.hidden == False:
             if self.fight_hit_animation_t > 0:
                 self.fight_hit_animation_t += -dt
 
@@ -704,6 +705,7 @@ class Enemy(object):
         if color == None:
             self.color = Color(0, 0, 0)
         self.radius = radius
+        self.hidden = False
 
         # movement
         self.moves_per_beat = moves_per_beat # e.g. ["stop", "left", "stop", "right"]
@@ -793,15 +795,18 @@ class Enemy(object):
     def on_update(self, dt, cam_scalar, cam_offset):
 
         # fight hit animation
-        if self.fight_hit_animation_t > 0:
-            self.fight_hit_animation_t += -dt
+        if self.hidden == False:
+            if self.fight_hit_animation_t > 0:
+                self.fight_hit_animation_t += -dt
 
-            if self.fight_hit_animation_t // 0.075 != self.fight_hit_animation_state:
-                self.fight_hit_animation_state = self.fight_hit_animation_t // 0.075
-                self.color.a = ((self.fight_hit_animation_state % 2)*0.6) + 0.4
-        elif self.fight_hit_animation_state != -1:
-            self.fight_hit_animation_state = -1
-            self.color.a = 1
+                if self.fight_hit_animation_t // 0.075 != self.fight_hit_animation_state:
+                    self.fight_hit_animation_state = self.fight_hit_animation_t // 0.075
+                    self.color.a = ((self.fight_hit_animation_state % 2)*0.6) + 0.4
+            elif self.fight_hit_animation_state != -1:
+                self.fight_hit_animation_state = -1
+                self.color.a = 1
+        else:
+            self.color.a = 0
 
         # animations
         self.process_animation(dt)

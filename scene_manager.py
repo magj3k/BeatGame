@@ -6,6 +6,7 @@ import numpy as np
 from math import *
 import random
 import copy
+import sys
 
 class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
@@ -71,8 +72,11 @@ class SceneManager(InstructionGroup):
                 self.fade_color.a = 1.0
 
                 # switches to next scene
-                self.remove_current_scene() # TODO, follow with self.switch_to_scene
-                self.switch_to_scene(1)
+                self.remove_current_scene()
+                if isinstance(self.scenes[self.current_scene_index], Menu):
+                    next_scene_index = self.scenes[self.current_scene_index].next_scene_index
+                    if next_scene_index != -1:
+                        self.switch_to_scene(next_scene_index)
 
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]
@@ -424,7 +428,7 @@ class Scene(InstructionGroup):
                 # collisions w/ pickups and enemies
                 if isinstance(element, Pickup) or isinstance(element, Enemy):
                     hypo = np.sqrt(np.power(element.element.pos[0] - self.player.world_pos[0]*self.res, 2.0) + np.power(element.element.pos[1] - self.player.world_pos[1]*self.res, 2.0))
-                    if hypo < element.radius:
+                    if hypo < element.radius and self.game_mode == "explore":
                         if isinstance(element, Pickup): # pickups
                             object_indices_to_remove.append(k)
                             self.num_keys_collected += 1
@@ -678,6 +682,68 @@ class Scene(InstructionGroup):
         self.game_elements.append(element)
 
 
+class Menu(Scene):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None, num_options = 1, option_actions = [["", -1]]):
+        Scene.__init__(self, initial_game_elements, initial_UI_elements, game_camera, ground_map, res, audio_controller, player)
+
+        self.menu_active = True
+        self.option_selected = 0
+        self.num_options = num_options
+        self.option_actions = option_actions # list of lists; option_actions[option_index] = [action_type, scene or menu index]
+        self.initial_player_y = self.player.world_pos[1]
+
+        # menu navigation
+        self.key_listen_buffer_timer = 0
+
+        # destination scene
+        self.next_scene_index = -1
+
+    def on_update(self, dt, active_keys):
+
+        # menu navigation
+        if self.menu_active == True:
+            if self.key_listen_buffer_timer <= 0:
+                self.key_listen_buffer_timer = 0
+
+                if active_keys["up"] == True:
+                    self.key_listen_buffer_timer = 0.25
+                    self.option_selected += -1
+                if active_keys["down"] == True:
+                    self.key_listen_buffer_timer = 0.25
+                    self.option_selected += 1
+
+                if self.option_selected < 0:
+                    self.option_selected = self.num_options-1
+                if self.option_selected >= self.num_options:
+                    self.option_selected = 0
+            else:
+                self.key_listen_buffer_timer += -dt
+
+            if active_keys["enter"] == True: # selecting an option
+                selected_action = self.option_actions[self.option_selected][0]
+                self.key_listen_buffer_timer = 0.25
+                self.menu_active = False
+
+                if selected_action == "quit":
+                    sys.exit()
+                elif selected_action == "scene":
+                    self.next_scene_index = int(self.option_actions[self.option_selected][1])
+                    self.scene_finished = True
+
+        # visual updates for selected option
+        self.player.target_world_pos = (self.player.world_pos[0], self.initial_player_y-(self.option_selected*0.45))
+        for i in range(len(self.UI_elements)):
+            element = self.UI_elements[i]
+
+            if element.tag[:7] == "option_":
+                if element.tag == "option_"+str(self.option_selected+1):
+                    element.target_alpha = 1.0
+                else:
+                    element.target_alpha = 0.5
+
+        # normally updates elements
+        super().on_update(dt, active_keys)
+
 class Camera(object):
     def __init__(self, initial_world_target = (0, 0), zoom_factor = 1.1, speed = 1.0, bounds = None):
         self.world_target = initial_world_target
@@ -689,6 +755,9 @@ class Camera(object):
         self.speed = speed
         self.bounds = bounds
         self.bounds_enabled = True
+
+        if self.bounds == None:
+            self.bounds_enabled = False
 
     def update_target(self, new_target):
         if self.bounds_enabled:
