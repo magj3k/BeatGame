@@ -238,7 +238,16 @@ class AudioController(object):
         size = 39 # gem_data[lane]['size']
         gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
+        self.fight_gems.append(gem_element)
 
+    def create_left_gem(self, lane):
+        pos = (window_size[0], window_size[1]*0.75) # self.gem_data[lane]['gem_y_pos'])
+        ellipse = Ellipse(size=(0.01, 0.01))
+        color = Color(1, 1, 1) # gem_data[lane]['color']
+        size = 39 # gem_data[lane]['size']
+        gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
+        self.queue_ui_callback(gem_element)
+        self.fight_gems.append(gem_element)
 
     #############
     # All Modes #
