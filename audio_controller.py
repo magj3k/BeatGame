@@ -42,7 +42,9 @@ class AudioController(object):
         # create Audio, Mixer
         self.audio = Audio(2)
         self.mixer = Mixer()
-        self.mixer.set_gain(0.5)
+        self.mixer_gain = 0.0
+        self.target_mixer_gain = 0.7
+        # self.mixer.set_gain(self.mixer_gain)
         self.audio.set_generator(self.mixer)
 
         # create TempoMap, AudioScheduler
@@ -259,6 +261,10 @@ class AudioController(object):
         pass
 
     def on_update(self, dt, player, active_keys):
+        # fading
+        self.mixer_gain = self.mixer_gain + ((self.target_mixer_gain - self.mixer_gain) * dt * 3.0)
+        self.mixer.set_gain(self.mixer_gain)
+
         self.audio.on_update()
         now = self.sched.get_tick()
         # callbacks/beat tracking

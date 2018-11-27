@@ -84,6 +84,8 @@ class SceneManager(InstructionGroup):
 
             # exits current scene
             if current_scene.scene_finished == True:
+                if current_scene.audio_controller != None:
+                    current_scene.audio_controller.target_mixer_gain = 0.0
                 self.fading = "out"
 
 
