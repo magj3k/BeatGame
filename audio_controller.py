@@ -123,7 +123,7 @@ class AudioController(object):
         #######
         # self.fight_gems = FightGems(fight_data, self.bpm, self.get_song_time, self.queue_ui_callback)
         self.fight_lanes = self.level_fight['lanes']
-
+        self.fight_gems = []
 
     def change_game_modes(self, mode):
         self.mode = mode
@@ -230,12 +230,12 @@ class AudioController(object):
     ##############
 
     def create_right_gem(self, lane):
-        pos = (window_size[0], self.gem_data[lane]['gem_y_pos'])
+        pos = (window_size[0], window_size[1]*0.75) # self.gem_data[lane]['gem_y_pos'])
         ellipse = Ellipse(size=(0.01, 0.01))
-        color = gem_data[lane]['color']
-        size = gem_data[lane]['size']
-        gem_element = GeometricElement(pos=pos, tag = "right_gem_" + lane, color = color, z = 11, size = (size, size), shape = ellipse)
-        self.queue_UI_element(gem_element)
+        color = Color(1, 1, 1) # gem_data[lane]['color']
+        size = 39 # gem_data[lane]['size']
+        gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
+        self.queue_ui_callback(gem_element)
 
 
     #############
@@ -288,7 +288,7 @@ class AudioController(object):
 
         if self.mode == 'fight':
             if keycode in ['1', '2', '3']:
-                pass
+                self.create_right_gem(1)
                     
     def get_song_time(self):
         return self.song_time

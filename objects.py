@@ -589,7 +589,7 @@ class PuzzleGems(InstructionGroup):
         self.playing = False
         self.create_gems = True
 
-        self.screen_time = 4
+        self.screen_time = self.max_song_time/2
         self.vel = window_size[0] / self.screen_time # pixels per second
 
         self.start = False

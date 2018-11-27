@@ -106,6 +106,7 @@ class Scene(InstructionGroup):
         self.audio_controller = audio_controller
         self.audio_controller.beat_callback = self.on_beat
         self.audio_controller.queue_ui_callback = self.append_ui_element
+        self.song_length = 16 * 60 / self.audio_controller.bpm
 
         # player and game elements
         self.player = player
@@ -545,7 +546,7 @@ class Scene(InstructionGroup):
                 if self.game_mode == "puzzle":
 
                     if element.tag == "gem":
-                        element.pos = (element.pos[0] - window_size[0] * dt/4, element.pos[1])
+                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/2), element.pos[1])
                         if element.pos[0] < -50:
                             UI_indices_to_remove.append(j)
 
@@ -592,11 +593,19 @@ class Scene(InstructionGroup):
                 elif self.game_mode == "fight": # fight mode
                     if element.tag[:2] == "k_" or element.tag == "keys_bg":
                         element.target_alpha = 0.0
+
+                    if element.tag[:10] == "right_gem_":
+                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
+                        if element.pos[0] < window_size[0]/2 - 10:
+                            UI_indices_to_remove.append(j)
+
                 elif self.game_mode == "explore": # fight mode
                     if element.tag[:2] == "k_" and element.target_alpha != 1.0:
                         element.target_alpha = 1.0
                     if element.tag == "keys_bg" and element.target_alpha != 0.5:
                         element.target_alpha = 0.5
+                    if "gem" in element.tag:
+                        UI_indices_to_remove.append(j)
 
                 # removes invisible objects, TODO maybe not necessary
                 # if self.game_mode != "fight" and element.color.a < 0.01:
