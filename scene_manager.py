@@ -101,6 +101,7 @@ class Scene(InstructionGroup):
         # sets up audio controller
         self.audio_controller = audio_controller
         self.audio_controller.beat_callback = self.on_beat
+        self.audio_controller.queue_ui_callback = self.append_ui_element
 
         # player and game elements
         self.player = player

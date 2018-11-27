@@ -4,6 +4,7 @@ from audio.clock import *
 from audio.mixer import *
 from audio.wavegen import *
 from audio.wavesrc import *
+from objects import *
 import random
 
 level_map = [
@@ -23,13 +24,21 @@ puzzle_map = [
                  'bpm': 110,
                  'lanes': 2},
 ]
+fight_map = [
+                {'lane_music': ['audio/jump_sound.wav', 'audio/key_sfx.wav', 'audio/snare.wav'],
+                 'left_beats': [1, 5],
+                 'right_beats': [3, 7],
+                 'miss_sfx': 'audio/error_sound.wav',
+                 'lanes': 3},
+]
 
 class AudioController(object):
-    def __init__(self, level = 0, bpm = 120, elements = [], beat_callback = None):
+    def __init__(self, level = 0, bpm = 120, elements = [], beat_callback = None, queue_ui_callback = None):
         self.mode = 'explore'
         self.level = level
         self.level_music = level_map[self.level]
         self.level_puzzle = puzzle_map[self.level]
+        self.level_fight = fight_map[self.level]
 
         self.bpm = self.level_music['bpm']
         self.note_grid = 480
@@ -49,6 +58,15 @@ class AudioController(object):
         self.tempo_map  = SimpleTempoMap(self.bpm)
         self.sched = AudioScheduler(self.tempo_map)
 
+        # callbacks
+        self.queue_ui_callback = queue_ui_callback
+
+        # beat tracking
+        self.beat = 0
+        self.half_beat = 0
+        self.beat_callback = beat_callback
+        self.song_time = 0
+
         # Exploration
         #############
 
@@ -66,12 +84,6 @@ class AudioController(object):
         # keeping track of ticks
         self.walk_ticks = set()
         self.object_ticks = {}
-
-        # beat tracking
-        self.beat = 0
-        self.half_beat = 0
-        self.beat_callback = beat_callback
-        self.song_time = 0
 
         # times of player moves
         self.move_times = []
@@ -106,6 +118,11 @@ class AudioController(object):
         self.frames_per_frac_beat = int(44100 / (2 * self.bpm / 60))
 
         self.play_ticks = {}
+
+        # Fight
+        #######
+        # self.fight_gems = FightGems(fight_data, self.bpm, self.get_song_time, self.queue_ui_callback)
+        self.fight_lanes = self.level_fight['lanes']
 
 
     def change_game_modes(self, mode):
@@ -147,6 +164,10 @@ class AudioController(object):
 
                 self.play_ticks[gen_props['lane']] = play_tick
                 self.sched.post_at_tick(self.play_track, play_tick, gen_props)
+
+        if mode == 'fight':
+            if self.fg_gen in self.mixer.generators:
+                self.mixer.remove(self.fg_gen)
 
 
     ####################
@@ -204,6 +225,19 @@ class AudioController(object):
         return self.puzzle_gens
 
 
+    ##############
+    # Fight Mode #
+    ##############
+
+    def create_right_gem(self, lane):
+        pos = (window_size[0], self.gem_data[lane]['gem_y_pos'])
+        ellipse = Ellipse(size=(0.01, 0.01))
+        color = gem_data[lane]['color']
+        size = gem_data[lane]['size']
+        gem_element = GeometricElement(pos=pos, tag = "right_gem_" + lane, color = color, z = 11, size = (size, size), shape = ellipse)
+        self.queue_UI_element(gem_element)
+
+
     #############
     # All Modes #
     #############
@@ -251,6 +285,10 @@ class AudioController(object):
                         gen.frame = (current_frame + self.frames_per_frac_beat) % tot_frames
 
                         self.puzzle_gens[self.lane]['offset'] = offset + 1
+
+        if self.mode == 'fight':
+            if keycode in ['1', '2', '3']:
+                pass
                     
     def get_song_time(self):
         return self.song_time
@@ -353,3 +391,8 @@ class AudioController(object):
                 if gen_props['offset'] % 32 != 0:
                     solved = False
             self.solved = solved
+
+        # Fight Mode
+        ############
+        if self.mode == 'fight':
+            pass
