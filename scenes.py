@@ -228,7 +228,7 @@ menu_1_water_map[38:51] = [-1+scene_elevation_offset]*13
 menu_1_ground_map[51:53] = [1+scene_elevation_offset]*2
 menu_1_ground_map[59:67] = [1+scene_elevation_offset]*8
 menu_1_ground_map[80:95] = [4+scene_elevation_offset]*15
-menu_1_player = Player(res = scene_resolution, initial_world_pos = (36, 9.2), z = 110)
+menu_1_player = Player(res = scene_resolution, initial_world_pos = (38, 9.2), z = 110)
 menu_1_player.collisions_enabled = False
 menu_1_player.controls_disabled = True
 menu_1_player.hidden = True
@@ -290,12 +290,12 @@ menu_1_UI_elements = [
         size = (878*0.55, 318*0.55),
         texture_path = "graphics/logo.png",
         tag = "logo"),
-    TexturedElement(pos = (window_size[0]-(539*0.3*0.5)-80, 255),
+    TexturedElement(pos = (window_size[0]-(539*0.3*0.5)-40, 135),
         z = 1,
         size = (539*0.3, 157*0.3),
         texture_path = "graphics/option_play.png",
         tag = "option_1"),
-    TexturedElement(pos = (window_size[0]-(490*0.3*0.5)-80, 175),
+    TexturedElement(pos = (window_size[0]-(490*0.3*0.5)-40, 65),
         z = 1,
         size = (490*0.3, 155*0.3),
         texture_path = "graphics/option_quit.png",
