@@ -330,21 +330,16 @@ class AudioController(object):
             to_remove = []
             if keycode in ['1', '2', '3']:
                 now_gems = []
-                print(keycode)
                 for gem in self.fight_gems:
-                    print(gem.tag)
-                    print(gem.pos)
-                    print(str(gem.color.r) + ' ' + str(gem.color.g) + ' ' + str(gem.color.b))
                     if gem.tag[:10] == 'right_gem_':
-                        if gem.pos[0] < window_size[0]/2 + 15 and gem.pos[0] > window_size[0]/2 - 3:
+                        if gem.pos[0] < window_size[0]/2 + 20 and gem.pos[0] > window_size[0]/2 - 3:
                             now_gems.append(gem)
                     if gem.tag[:9] == 'left_gem_':
-                        if gem.pos[0] > window_size[0]/2 - 15 and gem.pos[0] < window_size[0]/2 + 3:
+                        if gem.pos[0] > window_size[0]/2 - 20 and gem.pos[0] < window_size[0]/2 + 3:
                             now_gems.append(gem)
 
                 # temporal miss
                 if len(now_gems) == 0:
-                    print('temp miss')
                     self.miss()
                     return
 
@@ -493,14 +488,14 @@ class AudioController(object):
             if new_beat:
                 for attack in self.level_fight['right_beats']:
                     if self.half_beat % 8 == attack:
-                        create_bool = random.randint(0, 10) < 4
+                        create_bool = random.randint(0, 10) < 6
                         lane = random.randint(1, self.fight_lanes)
                         if create_bool:
                             self.create_right_gem(lane)
 
                 for attack in self.level_fight['left_beats']:
                     if self.half_beat % 8 == attack:
-                        create_bool = random.randint(0, 10) < 4
+                        create_bool = random.randint(0, 10) < 6
                         lane = random.randint(1, self.fight_lanes)
                         if create_bool:
                             self.create_left_gem(lane)

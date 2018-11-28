@@ -240,7 +240,8 @@ class Scene(InstructionGroup):
                 self.game_camera.speed = 4.0
 
                 # adds UI bg
-                new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg_fight", color = Color(0, 0, 0, 0.011), z = 3, size = window_size)
+                new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg_fight", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
+                new_bg.target_alpha = 0.3
                 self.queued_UI_elements.append(new_bg)
 
                 # adds lines to BG
@@ -248,7 +249,7 @@ class Scene(InstructionGroup):
                 self.queued_UI_elements.append(now_bar)
                 for i in range(3):
                     offset_y = window_size[1]*(-i+1) * 0.07
-                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.65 + offset_y), tag = "fight_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.65 + offset_y), tag = "fight_line_"+str(i), color = Color(0.7, 0.7, 0.7, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
 
 
@@ -622,15 +623,15 @@ class Scene(InstructionGroup):
                     if element.tag[:10] == "right_gem_":
                         if element.pos[0] < window_size[0]/2 - 6:
                             UI_indices_to_remove.append(j)
-                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/2), element.pos[1])
+                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
 
                     if element.tag[:9] == "left_gem_":
                         if element.pos[0] > window_size[0]/2 + 6:
                             UI_indices_to_remove.append(j)
-                        element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/2), element.pos[1])
+                        element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
                         
                     if self.fight_end_timer != -1:
-                        if "fight" in element.tag:
+                        if "fight" in element.tag or "gem" in element.tag:
                             UI_indices_to_remove.append(j)
 
                 elif self.game_mode == "explore": # explore mode
