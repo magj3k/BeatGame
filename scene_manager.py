@@ -599,12 +599,12 @@ class Scene(InstructionGroup):
 
                     if element.tag[:10] == "right_gem_":
                         element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
-                        if element.pos[0] < window_size[0]/2 - 3:
+                        if element.pos[0] < window_size[0]/2 - 2:
                             UI_indices_to_remove.append(j)
 
                     if element.tag[:9] == "left_gem_":
                         element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
-                        if element.pos[0] < window_size[0]/2 + 3:
+                        if element.pos[0] > window_size[0]/2 + 2:
                             UI_indices_to_remove.append(j)
 
                 elif self.game_mode == "explore": # fight mode

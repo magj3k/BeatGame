@@ -26,8 +26,8 @@ puzzle_map = [
 ]
 fight_map = [
                 {'lane_music': ['audio/jump_sound.wav', 'audio/key_sfx.wav', 'audio/snare.wav'],
-                 'left_beats': [1, 5],
-                 'right_beats': [3, 7],
+                 'left_beats': [0],
+                 'right_beats': [4],
                  'miss_sfx': 'audio/error_sound.wav',
                  'lanes': 3},
 ]
@@ -181,12 +181,6 @@ class AudioController(object):
         key_gen.set_gain(0.15)
         self.mixer.add(key_gen)
 
-    def block(self):
-        pass
-
-    def hit(self):
-        pass
-
     def jump(self):
         jump_gen = WaveGenerator(WaveFile(self.level_music['jump_sfx']))
         jump_gen.set_gain(0.6)
@@ -232,22 +226,32 @@ class AudioController(object):
     ##############
 
     def create_right_gem(self, lane):
-        pos = (window_size[0], window_size[1]*0.75) # self.gem_data[lane]['gem_y_pos'])
         ellipse = Ellipse(size=(0.01, 0.01))
         color = Color(1, 1, 1) # gem_data[lane]['color']
         size = 39 # gem_data[lane]['size']
+        pos = (window_size[0] + size/2, window_size[1]*0.75) # self.gem_data[lane]['gem_y_pos'])
         gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
 
     def create_left_gem(self, lane):
-        pos = (window_size[0], window_size[1]*0.75) # self.gem_data[lane]['gem_y_pos'])
         ellipse = Ellipse(size=(0.01, 0.01))
         color = Color(1, 1, 1) # gem_data[lane]['color']
         size = 39 # gem_data[lane]['size']
+        pos = (0 - size/2, window_size[1]*0.75) # self.gem_data[lane]['gem_y_pos'])
         gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
+
+
+    def block(self):
+        pass
+
+    def hit(self):
+        pass
+
+    def miss(self):
+        pass
 
     #############
     # All Modes #
@@ -299,6 +303,22 @@ class AudioController(object):
 
         if self.mode == 'fight':
             if keycode in ['1', '2', '3']:
+                now_gems = []
+                for gem in self.fight_gems:
+                    if gem.pos[0] <= window_size[0] + 3 and gem.pos[0] >= window_size[0] - 3:
+                        now_gems.append(gem)
+
+                if len(now_gems) == 0:
+                    self.miss()
+
+                for now_gem in now_gems:
+                    if now_gem.tag[:10] == 'right_gem_':
+                        if now_gem.tag[10:] == keycode:
+                            self.hit(keycode)
+                    if now_gem.tag[:9] == 'left_gem_':
+                        if now_gem.tag[9:] == keycode:
+                            self.hit(keycode)
+
                 self.create_right_gem(1)
                     
     def get_song_time(self):
@@ -315,6 +335,7 @@ class AudioController(object):
         self.audio.on_update()
         now = self.sched.get_tick()
         # callbacks/beat tracking
+        new_beat = False
         self.song_time += dt
         if now // self.note_grid != self.beat:
             self.beat = now // self.note_grid
@@ -323,6 +344,7 @@ class AudioController(object):
 
         if now // (self.note_grid*0.5) != self.half_beat:
             self.half_beat = now // (self.note_grid*0.5)
+            new_beat = True
             if self.beat_callback != None:
                 self.beat_callback(self.half_beat)
 
@@ -410,4 +432,18 @@ class AudioController(object):
         # Fight Mode
         ############
         if self.mode == 'fight':
-            pass
+            # plus or minus 2 is hit
+            if new_beat:
+                for attack in self.level_fight['right_beats']:
+                    if self.half_beat % 8 == attack:
+                        create_bool = random.randint(0, 10) < 3
+                        lane = random.randint(1, self.fight_lanes)
+                        if create_bool:
+                            self.create_right_gem(lane)
+
+                for attack in self.level_fight['left_beats']:
+                    if self.half_beat % 8 == attack:
+                        create_bool = random.randint(0, 10) < 3
+                        lane = random.randint(1, self.fight_lanes)
+                        if create_bool:
+                            self.create_left_gem(lane)
