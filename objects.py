@@ -275,6 +275,7 @@ class Platform(object):
 class Pickup(object):
     def __init__(self, element, z = 10, radius = 10, musical = False, tag = ""): # self.z, self.shape, self.color, self.on_update(), self.musical
         self.element = element
+        self.element.target_size = self.element.size
         self.color = self.element.color
         self.initial_pos = self.element.pos
         self.z = z
@@ -692,7 +693,7 @@ class PuzzleGems(InstructionGroup):
         
 
 class Enemy(object):
-    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "", moves_per_beat = ["stop"], color = None, radius = 25.0):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "", moves_per_beat = ["stop"], color = None, radius = 25.0, has_key = False):
         self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
@@ -705,6 +706,7 @@ class Enemy(object):
         if color == None:
             self.color = Color(0, 0, 0)
         self.radius = radius
+        self.has_key = has_key
         self.hidden = False
 
         # movement
