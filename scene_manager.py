@@ -244,7 +244,7 @@ class Scene(InstructionGroup):
                 self.queued_UI_elements.append(new_bg)
 
                 # adds lines to BG
-                now_bar = GeometricElement(pos = (window_size[0]*0.5, window_size[1] * 0.65), tag = "fight_now_bar", color = Color(0.1, 0.1, 0.1), z = 4, size = (30, window_size[1]*0.16))
+                now_bar = GeometricElement(pos = (window_size[0]*0.5, window_size[1] * 0.65), tag = "fight_now_bar", color = Color(0.1, 0.1, 0.1), z = 4, size = (39, window_size[1]*0.2))
                 self.queued_UI_elements.append(now_bar)
                 for i in range(3):
                     offset_y = window_size[1]*(-i+1) * 0.07
@@ -620,15 +620,15 @@ class Scene(InstructionGroup):
                         element.target_alpha = 0.0
 
                     if element.tag[:10] == "right_gem_":
-                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
                         if element.pos[0] < window_size[0]/2 - 2:
                             UI_indices_to_remove.append(j)
+                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
 
                     if element.tag[:9] == "left_gem_":
-                        element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
                         if element.pos[0] > window_size[0]/2 + 2:
                             UI_indices_to_remove.append(j)
-
+                        element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
+                        
                     if self.fight_end_timer != -1:
                         if "fight" in element.tag:
                             UI_indices_to_remove.append(j)
