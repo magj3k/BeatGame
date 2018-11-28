@@ -620,14 +620,14 @@ class Scene(InstructionGroup):
                         element.target_alpha = 0.0
 
                     if element.tag[:10] == "right_gem_":
-                        if element.pos[0] < window_size[0]/2 - 2:
+                        if element.pos[0] < window_size[0]/2 - 6:
                             UI_indices_to_remove.append(j)
-                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
+                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/2), element.pos[1])
 
                     if element.tag[:9] == "left_gem_":
-                        if element.pos[0] > window_size[0]/2 + 2:
+                        if element.pos[0] > window_size[0]/2 + 6:
                             UI_indices_to_remove.append(j)
-                        element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
+                        element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/2), element.pos[1])
                         
                     if self.fight_end_timer != -1:
                         if "fight" in element.tag:

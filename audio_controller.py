@@ -130,15 +130,15 @@ class AudioController(object):
         self.fight_lanes = self.level_fight['lanes']
         self.fight_gems = []
         self.fight_gem_data = [
-                                {'color': Color(1, 0.1, 0.1),
-                                 'size': 39,
-                                 'y_pos': window_size[1]*0.65 - 0.07 * window_size[1]},
-                                {'color': Color(0.1, 1, 0.1),
-                                 'size': 39,
-                                 'y_pos': window_size[1]*0.65},
                                 {'color': Color(0.1, 0.1, 1),
                                  'size': 39,
                                  'y_pos': window_size[1]*0.65 + 0.07 * window_size[1]},
+                                {'color': Color(0.1, 1, 0.1),
+                                 'size': 39,
+                                 'y_pos': window_size[1]*0.65},
+                                {'color': Color(1, 0.1, 0.1),
+                                 'size': 39,
+                                 'y_pos': window_size[1]*0.65 - 0.07 * window_size[1]},
         ]
 
     def change_game_modes(self, mode):
@@ -244,7 +244,7 @@ class AudioController(object):
         ellipse = Ellipse(size=(0.01, 0.01))
         color = self.fight_gem_data[lane-1]['color']
         size = self.fight_gem_data[lane-1]['size']
-        pos = (window_size[0] + size/2, self.fight_gem_data[lane-1]['y_pos'])
+        pos = (window_size[0], self.fight_gem_data[lane-1]['y_pos'])
         gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
@@ -257,7 +257,7 @@ class AudioController(object):
         ellipse = Ellipse(size=(0.01, 0.01))
         color = self.fight_gem_data[lane-1]['color']
         size = self.fight_gem_data[lane-1]['size']
-        pos = (0 - size/2, self.fight_gem_data[lane-1]['y_pos'])
+        pos = (0, self.fight_gem_data[lane-1]['y_pos'])
         gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
@@ -330,38 +330,49 @@ class AudioController(object):
             to_remove = []
             if keycode in ['1', '2', '3']:
                 now_gems = []
+                print(keycode)
                 for gem in self.fight_gems:
-                    if gem.tag[:10] == 'right_gem_' and gem.pos[0] < window_size[0] - 2:
-                        self.miss()
-                        to_remove.append(gem)
-                    if gem.tag[:9] == 'left_gem_' and gem.pos[0] > window_size[0] + 2:
-                        self.miss()
-                        to_remove.append(gem)
-
-                    if gem.pos[0] <= window_size[0] + 2 and gem.pos[0] >= window_size[0] - 2:
-                        now_gems.append(gem)
+                    print(gem.tag)
+                    print(gem.pos)
+                    print(str(gem.color.r) + ' ' + str(gem.color.g) + ' ' + str(gem.color.b))
+                    if gem.tag[:10] == 'right_gem_':
+                        if gem.pos[0] < window_size[0]/2 + 15 and gem.pos[0] > window_size[0]/2 - 3:
+                            now_gems.append(gem)
+                    if gem.tag[:9] == 'left_gem_':
+                        if gem.pos[0] > window_size[0]/2 - 15 and gem.pos[0] < window_size[0]/2 + 3:
+                            now_gems.append(gem)
 
                 # temporal miss
                 if len(now_gems) == 0:
+                    print('temp miss')
                     self.miss()
+                    return
 
                 # hit
+                any_gem_hit = False
                 for now_gem in now_gems:
                     gem_hit = False
                     if now_gem.tag[:10] == 'right_gem_':
                         if now_gem.tag[10:] == keycode:
                             self.block(int(keycode))
                             now_gem.target_size = now_gem.size
-                            now_gem.size = now_gem.size + 10
+                            now_gem.size = (now_gem.size[0] + 10, now_gem.size[1] + 10)
                             gem_hit = True
                     if now_gem.tag[:9] == 'left_gem_':
                         if now_gem.tag[9:] == keycode:
                             self.hit(int(keycode))
                             now_gem.target_size = now_gem.size
-                            now_gem.size = now_gem.size + 10
+                            now_gem.size = (now_gem.size[0] + 10, now_gem.size[1] + 10)
                             gem_hit = True
                     if gem_hit:
-                        to_remove.append(gem)
+                        to_remove.append(now_gem)
+                        any_gem_hit = True
+
+                # lane miss
+                if not any_gem_hit:
+                    self.miss()
+                    for now_gem in now_gems:
+                        to_remove.append(now_gem)
 
             for gem in to_remove:
                 self.fight_gems.remove(gem)
@@ -493,3 +504,17 @@ class AudioController(object):
                         lane = random.randint(1, self.fight_lanes)
                         if create_bool:
                             self.create_left_gem(lane)
+
+                to_remove = []
+                for gem in self.fight_gems:
+                    if gem.tag[:10] == 'right_gem_':
+                        if gem.pos[0] <= window_size[0]/2 - 3:
+                            self.miss()
+                            to_remove.append(gem)
+                    if gem.tag[:9] == 'left_gem_':
+                        if gem.pos[0] >= window_size[0]/2 + 3:
+                            self.miss()
+                            to_remove.append(gem)
+
+                for gem in to_remove:
+                    self.fight_gems.remove(gem)
