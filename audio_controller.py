@@ -132,13 +132,13 @@ class AudioController(object):
         self.fight_gem_data = [
                                 {'color': Color(1, 0.1, 0.1),
                                  'size': 39,
-                                 'y_pos': window_size[1]*0.6 - 0.07 * window_size[1]},
+                                 'y_pos': window_size[1]*0.65 - 0.07 * window_size[1]},
                                 {'color': Color(0.1, 1, 0.1),
                                  'size': 39,
-                                 'y_pos': window_size[1]*0.6},
+                                 'y_pos': window_size[1]*0.65},
                                 {'color': Color(0.1, 0.1, 1),
                                  'size': 39,
-                                 'y_pos': window_size[1]*0.6 + 0.07 * window_size[1]},
+                                 'y_pos': window_size[1]*0.65 + 0.07 * window_size[1]},
         ]
 
     def change_game_modes(self, mode):

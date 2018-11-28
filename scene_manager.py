@@ -240,14 +240,15 @@ class Scene(InstructionGroup):
                 self.game_camera.speed = 4.0
 
                 # adds UI bg
-                new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 8, size = window_size)
+                new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg_fight", color = Color(0, 0, 0, 0.011), z = 3, size = window_size)
                 self.queued_UI_elements.append(new_bg)
 
                 # adds lines to BG
-                now_bar = GeometricElement(pos = (window_size[0]*0.5-5, window_size[1] * 0.6 - window_size[1]*0.7), tag = "now_bar", color = Color(0.5, 0.5, 0.5), z = 8, size = (10, window_size[1]*0.14))
+                now_bar = GeometricElement(pos = (window_size[0]*0.5, window_size[1] * 0.65), tag = "fight_now_bar", color = Color(0.1, 0.1, 0.1), z = 4, size = (30, window_size[1]*0.16))
+                self.queued_UI_elements.append(now_bar)
                 for i in range(3):
                     offset_y = window_size[1]*(-i+1) * 0.07
-                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.6 + offset_y), tag = "fight_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.65 + offset_y), tag = "fight_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
 
 
@@ -325,28 +326,28 @@ class Scene(InstructionGroup):
                 if self.fight_t > 1.25: # fight gameplay
 
                     # attacking and defending
-                    # if self.fight_enemy.health > 0 and self.player.health > 0:
-                    #     if active_keys["1"] == True and self.player.fight_keys_available["attack_1"] == True: # attack lane 1
-                    #         self.player.fight_keys_available["attack_1"] = False
-                    #         self.player.attack()
-                    #         self.fight_player_sword.misc_t = 0.6
-                    #         self.fight_player_sword.change_texture("graphics/sword_1_right_down.png")
+                    if self.fight_enemy.health > 0 and self.player.health > 0:
+                        if active_keys["4"] == True and self.player.fight_keys_available["attack_1"] == True: # attack lane 1
+                            self.player.fight_keys_available["attack_1"] = False
+                            self.player.attack()
+                            self.fight_player_sword.misc_t = 0.6
+                            self.fight_player_sword.change_texture("graphics/sword_1_right_down.png")
 
-                    #         self.fight_enemy.hit()
-                    #         self.audio_controller.hit()
-                    #     elif active_keys["1"] == False:
-                    #         self.player.fight_keys_available["attack_1"] = True
+                            self.fight_enemy.hit()
+                            self.audio_controller.hit(2)
+                        elif active_keys["4"] == False:
+                            self.player.fight_keys_available["attack_1"] = True
 
-                    #     if active_keys["3"] == True and self.player.fight_keys_available["hit_1"] == True: # hit lane 1
-                    #         self.player.fight_keys_available["hit_1"] = False
-                    #         self.player.hit()
+                        if active_keys["5"] == True and self.player.fight_keys_available["hit_1"] == True: # hit lane 1
+                            self.player.fight_keys_available["hit_1"] = False
+                            self.player.hit()
 
-                    #         self.fight_enemy.attack()
-                    #         self.fight_enemy_sword.misc_t = 0.6
-                    #         self.fight_enemy_sword.change_texture("graphics/sword_1_left_down.png")
-                    #         self.audio_controller.hit()
-                    #     elif active_keys["3"] == False:
-                    #         self.player.fight_keys_available["hit_1"] = True
+                            self.fight_enemy.attack()
+                            self.fight_enemy_sword.misc_t = 0.6
+                            self.fight_enemy_sword.change_texture("graphics/sword_1_left_down.png")
+                            self.audio_controller.hit(2)
+                        elif active_keys["5"] == False:
+                            self.player.fight_keys_available["hit_1"] = True
 
                     # resets sword graphics
                     if self.fight_player_sword != None and self.fight_player_sword.misc_flag == True:
@@ -626,6 +627,10 @@ class Scene(InstructionGroup):
                     if element.tag[:9] == "left_gem_":
                         element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
                         if element.pos[0] > window_size[0]/2 + 2:
+                            UI_indices_to_remove.append(j)
+
+                    if self.fight_end_timer != -1:
+                        if "fight" in element.tag:
                             UI_indices_to_remove.append(j)
 
                 elif self.game_mode == "explore": # explore mode
