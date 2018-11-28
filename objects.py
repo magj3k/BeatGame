@@ -275,6 +275,7 @@ class Platform(object):
 class Pickup(object):
     def __init__(self, element, z = 10, radius = 10, musical = False, tag = ""): # self.z, self.shape, self.color, self.on_update(), self.musical
         self.element = element
+        self.element.target_size = self.element.size
         self.color = self.element.color
         self.initial_pos = self.element.pos
         self.z = z

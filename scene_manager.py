@@ -360,11 +360,12 @@ class Scene(InstructionGroup):
                         if self.fight_enemy.has_key == True:
                             self.fight_enemy.has_key = False
 
-                            new_key = Pickup(TexturedElement(pos = (self.fight_enemy.world_pos[0]*self.res, (self.fight_enemy.world_pos[1] + 1.1)*self.res),
+                            new_key = Pickup(TexturedElement(pos = (self.fight_enemy.world_pos[0]*self.res, (self.fight_enemy.world_pos[1] + 0.8)*self.res),
                                 size = (166*0.091, 400*0.091),
                                 texture_path = "graphics/key.png"), z = 110, radius = 20)
                             new_key.element.target_alpha = 1.0
                             new_key.element.color.a = 0
+                            new_key.element.size = (0.01, 0.01)
                             self.queued_game_elements.append(new_key)
 
                     # player death
