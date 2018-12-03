@@ -541,18 +541,18 @@ class Scene(InstructionGroup):
                         else: # hearts
                             element.target_alpha = 1.0
 
-                            for i in range(3):
-                                if element.tag == "h_"+str(i+1): # changing texture for player hearts
-                                    if self.player.health >= i+1:
-                                        element.change_texture("graphics/heart.png")
-                                    else:
-                                        element.change_texture("graphics/heart_outline.png")
-                                if element.tag == "h_"+str(i+1)+"e": # changing texture for enemy hearts
-                                    if self.fight_enemy != None:
-                                        if self.fight_enemy.health >= i+1:
-                                            element.change_texture("graphics/heart.png")
-                                        else:
-                                            element.change_texture("graphics/heart_outline.png")
+                            # for i in range(3):
+                            #     if element.tag == "h_"+str(i+1): # changing texture for player hearts
+                            #         if self.player.health >= i+1:
+                            #             element.change_texture("graphics/heart.png")
+                            #         else:
+                            #             element.change_texture("graphics/heart_outline.png")
+                            #     if element.tag == "h_"+str(i+1)+"e": # changing texture for enemy hearts
+                            #         if self.fight_enemy != None:
+                            #             if self.fight_enemy.health >= i+1:
+                            #                 element.change_texture("graphics/heart.png")
+                            #             else:
+                            #                 element.change_texture("graphics/heart_outline.png")
                     else:
                         element.target_alpha = 0.0
 
