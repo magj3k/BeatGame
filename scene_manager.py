@@ -173,6 +173,14 @@ class Scene(InstructionGroup):
                 new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
                 self.queued_UI_elements.append(new_bg)
 
+                # adds mute button
+                mute_button = TexturedElement(pos = (window_size[0]*0.5, window_size[1]-100),
+                    z = 10,
+                    size = (355*0.2, 356*0.2),
+                    texture_path = "graphics/mute_on.png",
+                    tag = "puzzle_mute")
+                self.queued_UI_elements.append(mute_button)
+
                 # adds gems
                 gem_data = []
                 colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
@@ -183,7 +191,7 @@ class Scene(InstructionGroup):
                     gem_props = {}
                     gem_props['gem_times'] = song_data.get_gem_data()
                     offset_y = 176*(-index+1) + 40
-                    gem_props['gem_y_pos'] = window_size[1]*0.5 + offset_y
+                    gem_props['gem_y_pos'] = window_size[1]*0.43 + offset_y
                     if index == self.audio_controller.num_lanes:
                         gem_props['offset'] = 0
                     else:
@@ -196,8 +204,8 @@ class Scene(InstructionGroup):
                 # adds lines to BG and stores key offsets
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
                 for i in range(3):
-                    offset_y = 176*(-i+1) + 40
-                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
+                    offset_y = 176*(-i+1) + 40 
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.43 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
 
                 # updates camera
@@ -575,17 +583,22 @@ class Scene(InstructionGroup):
                         if element.pos[0] < -50:
                             UI_indices_to_remove.append(j)
 
+                        if self.audio_controller.lane == -1:
+                            element.target_alpha = 0.5
+                        else:
+                            element.target_alpha = 1.0
+
                     if element.tag == "k_1x":
                         offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5 + 176)
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 + 176)
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_2x":
                         offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5)
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43)
                         element.target_size = (166*0.34, 400*0.34)
                     elif element.tag == "k_3x":
                         offset = 0
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.5 - 176)
+                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 - 176)
                         element.target_size = (166*0.34, 400*0.34)
                     
                     if self.audio_controller.solved == False:
@@ -607,6 +620,16 @@ class Scene(InstructionGroup):
                                 element.target_alpha = 1.0
                             else:
                                 element.target_alpha = 0.6
+
+                        # mute button
+                        if element.tag == "puzzle_mute":
+                            if self.audio_controller.lane == -1:
+                                element.target_alpha = 1.0
+                                element.change_texture("graphics/mute_off.png")
+                            else:
+                                element.target_alpha = 0.5
+                                element.change_texture("graphics/mute_on.png")
+
                     elif self.puzzle_solved_timer > self.puzzle_solved_animation_duration:
                         element.target_alpha = 0.0
                         self.game_camera.target_zoom_factor = 3.0
