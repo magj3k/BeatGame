@@ -339,10 +339,10 @@ class AudioController(object):
                 now_gems = []
                 for gem in self.fight_gems:
                     if gem.tag[:10] == 'right_gem_':
-                        if gem.pos[0] < window_size[0]/2 + 20 and gem.pos[0] > window_size[0]/2 - 3:
+                        if gem.pos[0] < window_size[0]/2 + gem.size[0] and gem.pos[0] > window_size[0]/2 - 3:
                             now_gems.append(gem)
                     if gem.tag[:9] == 'left_gem_':
-                        if gem.pos[0] > window_size[0]/2 - 20 and gem.pos[0] < window_size[0]/2 + 3:
+                        if gem.pos[0] > window_size[0]/2 - gem.size[0] and gem.pos[0] < window_size[0]/2 + 3:
                             now_gems.append(gem)
 
                 # temporal miss
@@ -358,13 +358,13 @@ class AudioController(object):
                         if now_gem.tag[10:] == keycode:
                             self.block(int(keycode))
                             now_gem.target_size = now_gem.size
-                            now_gem.size = (now_gem.size[0] + 10, now_gem.size[1] + 10)
+                            now_gem.size = (now_gem.size[0] + gem.size[0], now_gem.size[1] + gem.size[0])
                             gem_hit = True
                     if now_gem.tag[:9] == 'left_gem_':
                         if now_gem.tag[9:] == keycode:
                             self.hit(int(keycode))
                             now_gem.target_size = now_gem.size
-                            now_gem.size = (now_gem.size[0] + 10, now_gem.size[1] + 10)
+                            now_gem.size = (now_gem.size[0] + gem.size[0], now_gem.size[1] + gem.size[0])
                             gem_hit = True
                     if gem_hit:
                         to_remove.append(now_gem)
