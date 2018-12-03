@@ -109,6 +109,7 @@ scene_1_ground_map[51:53] = [1+scene_elevation_offset]*2
 scene_1_ground_map[59:67] = [1+scene_elevation_offset]*8
 scene_1_ground_map[80:95] = [4+scene_elevation_offset]*15
 scene_1_player = Player(res = scene_resolution, initial_world_pos = (27.5, 8), z = 110)
+# scene_1_player = Player(res = scene_resolution, initial_world_pos = (77, 10), z = 110)
 scene_1_door = TexturedElement(pos = (2445, 213),
                                 z = 101,
                                 size = (500*0.13, 500*0.13),

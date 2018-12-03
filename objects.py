@@ -24,7 +24,8 @@ class Element(object):
             self.color = Color(1, 1, 1)
 
     def on_update(self, dt):
-        self.pos = (self.pos[0]+self.vel[0]*dt, self.pos[1]+self.vel[1]*dt)
+        if self.vel != None:
+            self.pos = (self.pos[0]+self.vel[0]*dt, self.pos[1]+self.vel[1]*dt)
         if self.target_alpha != None:
             self.color.a = self.color.a + ((self.target_alpha - self.color.a)*12.0*dt)
 
