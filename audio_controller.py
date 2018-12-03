@@ -482,6 +482,20 @@ class AudioController(object):
         # Puzzle Mode
         #############
         if self.mode == 'puzzle':
+            if self.playing_melody:
+                melody_target = 1
+                puzzle_gens_target = 0
+            else:
+                melody_target = 0
+                puzzle_gens_target = 1
+
+            melody_gain = self.fg_gen.get_gain() + ((melody_target - self.fg_gen.get_gain()) * dt * 3.25)
+            self.fg_gen.set_gain(melody_gain)
+
+            for gen_props in self.puzzle_gens:
+                gen_gain = gen_props['generator'].get_gain() + ((puzzle_gens_target - gen_props['generator'].get_gain()) * dt * 3.25)
+                gen_props['generator'].set_gain(gen_gain)
+
             solved = True
             for gen_props in self.puzzle_gens:
                 if gen_props['offset'] % 32 != 0:
