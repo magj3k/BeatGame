@@ -20,7 +20,9 @@ class MainWidget(BaseWidget):
                                         '2': False,
                                         '3': False,
                                         '4': False,
-                                        '5': False}  # only contains supported keys
+                                        '5': False,
+                                        '6': False,
+                                        '7': False}  # only contains supported keys
 
         self.scene_manager = SceneManager(scenes)
         self.canvas.add(self.scene_manager)

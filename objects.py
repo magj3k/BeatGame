@@ -419,6 +419,9 @@ class Player(object):
         self.health += -1
         self.fight_hit_animation_t = 1.0
 
+    def block(self):
+        self.world_pos = (self.fight_pos[0]-0.05, self.fight_pos[1])
+
     def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None, override_target_x_vel = None):
 
         # position update
@@ -694,7 +697,7 @@ class PuzzleGems(InstructionGroup):
         
 
 class Enemy(object):
-    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "", moves_per_beat = ["stop"], color = None, radius = 25.0, has_key = False):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "enemy", moves_per_beat = ["stop"], color = None, radius = 25.0, has_key = False):
         self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
@@ -739,6 +742,9 @@ class Enemy(object):
         self.world_pos = (self.fight_pos[0]+0.25, self.fight_pos[1])
         self.health += -1
         self.fight_hit_animation_t = 1.0
+
+    def block(self):
+        self.world_pos = (self.fight_pos[0]+0.05, self.fight_pos[1])
 
     def set_animation_state(self, new_state): # follow this call with self.process_animation()
         if new_state in self.valid_animation_states and new_state != self.animation_state:
