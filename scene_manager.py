@@ -227,6 +227,7 @@ class Scene(InstructionGroup):
                     element = self.game_elements[i]
                     if isinstance(element, Platform):
                         platforms.append(element)
+                self.audio_controller.begin_fight(self.player, self.fight_enemy)
 
                 # updates player
                 self.player.controls_disabled = True
@@ -357,6 +358,32 @@ class Scene(InstructionGroup):
                             self.audio_controller.hit(2)
                         elif active_keys["5"] == False:
                             self.player.fight_keys_available["hit_1"] = True
+
+                        if active_keys["6"] == True and self.player.fight_keys_available["attack_2"] == True: # attack lane 2
+                            self.player.fight_keys_available["attack_2"] = False
+                            self.player.attack()
+                            self.fight_player_sword.misc_t = 0.6
+                            self.fight_player_sword.change_texture("graphics/sword_1_right_down.png")
+
+                            self.fight_enemy.block()
+                            self.fight_enemy_sword.misc_t = 0.6
+                            self.fight_enemy_sword.change_texture("graphics/sword_1_left_block.png")
+                            # self.audio_controller.hit(2)
+                        elif active_keys["6"] == False:
+                            self.player.fight_keys_available["attack_2"] = True
+
+                        if active_keys["7"] == True and self.player.fight_keys_available["hit_2"] == True: # hit lane 2
+                            self.player.fight_keys_available["hit_2"] = False
+                            self.player.block()
+                            self.fight_player_sword.misc_t = 0.6
+                            self.fight_player_sword.change_texture("graphics/sword_1_right_block.png")
+
+                            self.fight_enemy.attack()
+                            self.fight_enemy_sword.misc_t = 0.6
+                            self.fight_enemy_sword.change_texture("graphics/sword_1_left_down.png")
+                            # self.audio_controller.hit(2)
+                        elif active_keys["7"] == False:
+                            self.player.fight_keys_available["hit_2"] = True
 
                     # resets sword graphics
                     if self.fight_player_sword != None and self.fight_player_sword.misc_flag == True:

@@ -142,6 +142,9 @@ class AudioController(object):
                                  'y_pos': window_size[1]*0.65 - 0.07 * window_size[1]},
         ]
 
+    def begin_fight(self, player, enemy):
+        pass
+
     def change_game_modes(self, mode):
         self.mode = mode
 
