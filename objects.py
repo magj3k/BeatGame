@@ -348,6 +348,7 @@ class Player(object):
         self.fight_hit_animation_state = -1
         self.fight_hit_animation_t = 0
         self.fight_keys_available = {"attack_1": True, "attack_2": True, "hit_1": True, "hit_2": True}
+        self.sword = None
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right", "jump_right", "jump_left"]
@@ -414,6 +415,10 @@ class Player(object):
     def attack(self):
         self.world_pos = (self.fight_pos[0]+0.5, self.fight_pos[1])
 
+        if self.sword != None:
+            self.sword.misc_t = 0.6
+            self.sword.change_texture("graphics/sword_1_right_down.png")
+
     def hit(self):
         self.world_pos = (self.fight_pos[0]-0.25, self.fight_pos[1])
         self.health += -1
@@ -421,6 +426,10 @@ class Player(object):
 
     def block(self):
         self.world_pos = (self.fight_pos[0]-0.05, self.fight_pos[1])
+
+        if self.sword != None:
+            self.sword.misc_t = 0.6
+            self.sword.change_texture("graphics/sword_1_right_block.png")
 
     def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None, override_target_x_vel = None):
 
@@ -724,6 +733,7 @@ class Enemy(object):
         self.fight_pos = None
         self.fight_hit_animation_state = -1
         self.fight_hit_animation_t = 0
+        self.sword = None
 
         # animations
         self.valid_animation_states = ["standing", "run_left", "run_right"]
@@ -738,6 +748,10 @@ class Enemy(object):
     def attack(self):
         self.world_pos = (self.fight_pos[0]-0.5, self.fight_pos[1])
 
+        if self.sword != None:
+            self.sword.misc_t = 0.6
+            self.sword.change_texture("graphics/sword_1_left_down.png")
+
     def hit(self):
         self.world_pos = (self.fight_pos[0]+0.25, self.fight_pos[1])
         self.health += -1
@@ -745,6 +759,10 @@ class Enemy(object):
 
     def block(self):
         self.world_pos = (self.fight_pos[0]+0.05, self.fight_pos[1])
+
+        if self.sword != None:
+            self.sword.misc_t = 0.6
+            self.sword.change_texture("graphics/sword_1_left_block.png")
 
     def set_animation_state(self, new_state): # follow this call with self.process_animation()
         if new_state in self.valid_animation_states and new_state != self.animation_state:

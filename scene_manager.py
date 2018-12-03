@@ -335,56 +335,6 @@ class Scene(InstructionGroup):
 
                 if self.fight_t > 1.25: # fight gameplay
 
-                    # attacking and defending
-                    if self.fight_enemy.health > 0 and self.player.health > 0:
-                        if active_keys["4"] == True and self.player.fight_keys_available["attack_1"] == True: # attack lane 1
-                            self.player.fight_keys_available["attack_1"] = False
-                            self.player.attack()
-                            self.fight_player_sword.misc_t = 0.6
-                            self.fight_player_sword.change_texture("graphics/sword_1_right_down.png")
-
-                            self.fight_enemy.hit()
-                            self.audio_controller.hit(2)
-                        elif active_keys["4"] == False:
-                            self.player.fight_keys_available["attack_1"] = True
-
-                        if active_keys["5"] == True and self.player.fight_keys_available["hit_1"] == True: # hit lane 1
-                            self.player.fight_keys_available["hit_1"] = False
-                            self.player.hit()
-
-                            self.fight_enemy.attack()
-                            self.fight_enemy_sword.misc_t = 0.6
-                            self.fight_enemy_sword.change_texture("graphics/sword_1_left_down.png")
-                            self.audio_controller.hit(2)
-                        elif active_keys["5"] == False:
-                            self.player.fight_keys_available["hit_1"] = True
-
-                        if active_keys["6"] == True and self.player.fight_keys_available["attack_2"] == True: # attack lane 2
-                            self.player.fight_keys_available["attack_2"] = False
-                            self.player.attack()
-                            self.fight_player_sword.misc_t = 0.6
-                            self.fight_player_sword.change_texture("graphics/sword_1_right_down.png")
-
-                            self.fight_enemy.block()
-                            self.fight_enemy_sword.misc_t = 0.6
-                            self.fight_enemy_sword.change_texture("graphics/sword_1_left_block.png")
-                            # self.audio_controller.hit(2)
-                        elif active_keys["6"] == False:
-                            self.player.fight_keys_available["attack_2"] = True
-
-                        if active_keys["7"] == True and self.player.fight_keys_available["hit_2"] == True: # hit lane 2
-                            self.player.fight_keys_available["hit_2"] = False
-                            self.player.block()
-                            self.fight_player_sword.misc_t = 0.6
-                            self.fight_player_sword.change_texture("graphics/sword_1_right_block.png")
-
-                            self.fight_enemy.attack()
-                            self.fight_enemy_sword.misc_t = 0.6
-                            self.fight_enemy_sword.change_texture("graphics/sword_1_left_down.png")
-                            # self.audio_controller.hit(2)
-                        elif active_keys["7"] == False:
-                            self.player.fight_keys_available["hit_2"] = True
-
                     # resets sword graphics
                     if self.fight_player_sword != None and self.fight_player_sword.misc_flag == True:
                         self.fight_player_sword.misc_flag = False
@@ -442,6 +392,7 @@ class Scene(InstructionGroup):
                         self.fight_end_timer += -dt
                     elif self.fight_end_timer != -1:
                         self.fight_end_timer = -1
+                        self.player.sword = None
                         self.change_game_modes("explore")
 
                         # respawns player if necessary
@@ -453,6 +404,7 @@ class Scene(InstructionGroup):
                             # resets enemy
                             self.fight_enemy.in_fight = False
                             self.fight_enemy.target_world_pos = None
+                            self.fight_enemy.sword = None
 
                 elif self.fight_t > 0.9: # creates swords
                     if self.fight_player_sword == None:
@@ -464,6 +416,7 @@ class Scene(InstructionGroup):
                             texture_path = "graphics/sword_1_right_up.png",
                             tag = "sword_player")
                         self.game_elements.append(self.fight_player_sword)
+                        self.player.sword = self.fight_player_sword
                     if self.fight_enemy_sword == None and self.fight_enemy != None:
                         self.fight_enemy_sword = TexturedElement(pos = ((self.fight_enemy.world_pos[0]-0.5)*self.res, self.fight_enemy.world_pos[1]*self.res),
                             z = self.fight_enemy.z-1,
@@ -473,6 +426,7 @@ class Scene(InstructionGroup):
                             texture_path = "graphics/sword_1_left_up.png",
                             tag = "sword_enemy")
                         self.game_elements.append(self.fight_enemy_sword)
+                        self.fight_enemy.sword = self.fight_enemy_sword
 
             # loops over all objects in the current scene for rendering based on z positions
             objs_by_z_order = {} # tracks objects by non-zero z-order
