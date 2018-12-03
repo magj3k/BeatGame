@@ -564,11 +564,11 @@ class AudioController(object):
                 for gem in self.fight_gems:
                     if gem.tag[:10] == 'right_gem_':
                         if gem.pos[0] <= window_size[0]/2 - 3:
-                            self.missed_block()
+                            self.missed_block(int(gem.tag[10:]))
                             to_remove.append(gem)
                     if gem.tag[:9] == 'left_gem_':
                         if gem.pos[0] >= window_size[0]/2 + 3:
-                            self.missed_hit()
+                            self.missed_hit(int(gem.tag[9:]))
                             to_remove.append(gem)
 
                 for gem in to_remove:
