@@ -47,9 +47,12 @@ class AudioController(object):
         self.note_grid = 480
 
         self.musical_elements = []
+        self.player = None
         for el in elements:
             if el.musical:
                 self.musical_elements.append(el)
+            if el.tag == 'player':
+                self.player = el
 
         # create Audio, Mixer
         self.audio = Audio(2)
@@ -141,6 +144,7 @@ class AudioController(object):
                                  'size': 39,
                                  'y_pos': window_size[1]*0.65 - 0.07 * window_size[1]},
         ]
+        self.current_enemy = None
 
     def begin_fight(self, player, enemy):
         pass
@@ -242,6 +246,10 @@ class AudioController(object):
     # Fight Mode #
     ##############
 
+    def begin_fight(self, player, enemy):
+        self.player = player
+        self.enemy = enemy
+
     def create_right_gem(self, lane):
         # visual
         ellipse = Ellipse(size=(0.01, 0.01))
@@ -269,17 +277,41 @@ class AudioController(object):
         lane_sfx = WaveGenerator(WaveFile(self.level_fight['left_sfx'][lane-1]))
         self.mixer.add(lane_sfx)
 
+    # hit right gem
     def block(self, lane):
+        # sfx
         block_sfx = WaveGenerator(WaveFile(self.level_fight['right_sfx'][lane-1]))
         self.mixer.add(block_sfx)
+        # graphics
+        self.enemy.attack()
+        self.player.block()
 
+    # hit left gem
     def hit(self, lane):
+        # sfx
         hit_sfx = WaveGenerator(WaveFile(self.level_fight['left_sfx'][lane-1]))
         self.mixer.add(hit_sfx)
+        # graphics
+        self.player.attack()
+        self.enemy.hit()
 
-    def miss(self):
+    # miss right gem
+    def missed_block(self, lane):
+        # sfx
         miss_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
         self.mixer.add(miss_sfx)
+        # graphics
+        self.enemy.attack()
+        self.player.hit()
+
+    # miss left gem
+    def missed_hit(self, lane):
+        # sfx
+        miss_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
+        self.mixer.add(miss_sfx)
+        # graphics
+        self.player.attack()
+        self.enemy.block()
 
     #############
     # All Modes #
@@ -291,7 +323,7 @@ class AudioController(object):
                 self.move_times.append(self.sched.get_tick())
         
         if self.mode == 'puzzle':
-            
+
             if not self.solved:
                 # change lanes
                 if keycode == 'up':
@@ -354,7 +386,7 @@ class AudioController(object):
 
                 # temporal miss
                 if len(now_gems) == 0:
-                    self.miss()
+                    self.missed_hit(int(keycode))
                     return
 
                 # hit
@@ -379,7 +411,10 @@ class AudioController(object):
 
                 # lane miss
                 if not any_gem_hit:
-                    self.miss()
+                    if now_gems[0][:10] == 'right_gem_':
+                        self.missed_block(int(now_gems[0][10:]))
+                    else:
+                        self.missed_hit(int(now_gems[0][9:]))
                     for now_gem in now_gems:
                         to_remove.append(now_gem)
 
@@ -532,11 +567,11 @@ class AudioController(object):
                 for gem in self.fight_gems:
                     if gem.tag[:10] == 'right_gem_':
                         if gem.pos[0] <= window_size[0]/2 - 3:
-                            self.miss()
+                            self.missed_block()
                             to_remove.append(gem)
                     if gem.tag[:9] == 'left_gem_':
                         if gem.pos[0] >= window_size[0]/2 + 3:
-                            self.miss()
+                            self.missed_hit()
                             to_remove.append(gem)
 
                 for gem in to_remove:
