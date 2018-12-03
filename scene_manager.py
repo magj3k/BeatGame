@@ -199,7 +199,7 @@ class Scene(InstructionGroup):
 
                     gem_data.append(gem_props)
 
-                self.puzzle_gems = PuzzleGems(gem_data, self.audio_controller.bpm, self.audio_controller.get_song_time, self.append_ui_element)
+                self.puzzle_gems = PuzzleGems(gem_data, self.audio_controller.bpm, self.audio_controller.get_song_time, self.append_ui_element, self.audio_controller.get_offsets)
 
                 # adds lines to BG and stores key offsets
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()

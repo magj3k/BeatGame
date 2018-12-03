@@ -588,7 +588,7 @@ class SongData(object):
 
 # Displays and controls gems for puzzle mode
 class PuzzleGems(InstructionGroup):
-    def __init__(self, gem_data, bpm, get_song_time, queue_UI_element):
+    def __init__(self, gem_data, bpm, get_song_time, queue_UI_element, get_offsets):
         super(PuzzleGems, self).__init__()
         # gems
         self.gem_data = gem_data
@@ -611,6 +611,7 @@ class PuzzleGems(InstructionGroup):
         # callbacks
         self.get_song_time = get_song_time
         self.queue_UI_element = queue_UI_element
+        self.get_offsets = get_offsets
 
     # call every frame to make gems and barlines flow down the screen
     def on_update(self, dt) :
@@ -623,7 +624,7 @@ class PuzzleGems(InstructionGroup):
                 offset = gem_props['offset'] * self.beat_time / 2
 
                 if index == len(self.gem_data)-1 and not self.start:
-                    while gem_start < len(gem_props['gem_times']) and gem_props['gem_times'][gem_start]['start_time'] < (self.song_time + 0.75*self.screen_time + offset % self.max_song_time - 2*dt):
+                    while gem_start < len(gem_props['gem_times']) and gem_props['gem_times'][gem_start]['start_time'] < (self.song_time + 0.75*self.screen_time + offset) % self.max_song_time - 2*dt:
                         gem_start = gem_start + 1
                 gem_start = gem_start % len(gem_props['gem_times'])
                 # add gems
@@ -643,67 +644,26 @@ class PuzzleGems(InstructionGroup):
 
                 self.onscreen_gems[index]['start_index'] = gem_start
 
-                # pulse when hit
-                # for index, onscreen_props in enumerate(self.onscreen_gems):
-                #     to_remove = []
+            # pulse when hit
+            offsets = self.get_offsets()
+            for index, onscreen_props in enumerate(self.onscreen_gems):
+                to_remove = []
+                if index == len(self.gem_data)-1:
+                    offset = 0
+                else:
+                    offset = offsets[index] * self.beat_time / 2
+                for gem_time in onscreen_props['gems'].keys():
+                    gem, props = onscreen_props['gems'][gem_time]
+                    if gem.pos[0] < -50:
+                        to_remove.append(gem_time)
+                    elif gem_time < (self.song_time + offset) % self.max_song_time + dt and gem_time > (self.song_time + offset) % self.max_song_time - dt:
+                        size = props['size']
+                        gem.size = (size*2, size*2)
+                        gem.target_size = (size, size)
 
-                #     for gem_time in onscreen_props['gems'].keys():
-                #         gem, props = onscreen_props['gems'][gem_time]
-                #         if gem.pos[0] < -50:
-                #             to_remove.append(gem_time)
-                #         elif gem_time < (self.song_time + offset) % self.max_song_time + dt and gem_time > (self.song_time + offset) % self.max_song_time - dt:
-                #             print('----------------')
-                #             print(gem_time)
-                #             print((self.song_time + offset) % self.max_song_time)
-                #             print(self.song_time)
-                #             print(offset)
-                #             print(self.max_song_time)
-                #             size = props['size']
-                #             gem.size = (size + 10, size + 10)
-                #             gem.target_size = (size, size)
-
-                #     for gem_time in to_remove:
-                #         onscreen_props['gems'].pop(gem_time)
-
-
-# # Displays and controls gems for puzzle mode
-# class FightGems(InstructionGroup):
-#     def __init__(self, gem_data, bpm, get_song_time, queue_UI_element):
-#         super(PuzzleGems, self).__init__()        
-#         # gems
-#         self.gem_data = gem_data
-#         self.onscreen_gems = []
-#         for i in range(len(self.gem_data)):
-#             self.onscreen_gems.append({'onscreen_gems': []})
-
-#         # sync to song
-#         self.beat_time = 60 / bpm
-#         self.max_song_time = 16 * 60 / bpm
-#         self.song_time = 0
-#         self.playing = False
-#         self.create_gems = True
-
-#         self.screen_time = 4
-#         self.vel = window_size[0] / self.screen_time # pixels per second
-
-#         self.start = False
-
-#         # callback
-#         self.get_song_time = get_song_time
-#         self.queue_UI_element = queue_UI_element
-
-#     def create_right_gem(self, lane):
-#         pos = (window_size[0], self.gem_data[lane]['gem_y_pos'])
-#         ellipse = Ellipse(size=(0.01, 0.01))
-#         color = gem_data[lane]['color']
-#         size = gem_data[lane]['size']
-#         gem_element = GeometricElement(pos=pos, tag = "right_gem_" + lane, color = color, z = 11, size = (size, size), shape = ellipse)
-#         self.queue_UI_element(gem_element)
-
-#     # call every frame to make gems and barlines flow down the screen
-#     def on_update(self, dt) :
-#         pass
-        
+                for gem_time in to_remove:
+                    onscreen_props['gems'].pop(gem_time)
+  
 
 class Enemy(object):
     def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "enemy", moves_per_beat = ["stop"], color = None, radius = 25.0, has_key = False):

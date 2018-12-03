@@ -174,7 +174,7 @@ class AudioController(object):
             play_now = True
             for gen_props in self.puzzle_gens:
                 play_tick = next_downbeat - gen_props['offset'] * self.note_grid/2
-                if play_tick - now < self.note_grid * 7:
+                if play_tick - now < self.note_grid * 8 * 0.75:
                     play_now = False
 
             for gen_props in self.puzzle_gens:
@@ -408,10 +408,10 @@ class AudioController(object):
 
                 # lane miss
                 if not any_gem_hit:
-                    if now_gems[0][:10] == 'right_gem_':
-                        self.missed_block(int(now_gems[0][10:]))
+                    if now_gems[0].tag[:10] == 'right_gem_':
+                        self.missed_block(int(now_gems[0].tag[10:]))
                     else:
-                        self.missed_hit(int(now_gems[0][9:]))
+                        self.missed_hit(int(now_gems[0].tag[9:]))
                     for now_gem in now_gems:
                         to_remove.append(now_gem)
 
