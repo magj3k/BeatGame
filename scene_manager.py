@@ -671,12 +671,12 @@ class Scene(InstructionGroup):
                         element.target_alpha = 0.0
 
                     if element.tag[:10] == "right_gem_":
-                        if element.pos[0] < window_size[0]/2 - 6:
+                        if element.pos[0] < window_size[0]/2 - 11:
                             UI_indices_to_remove.append(j)
                         element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
 
                     if element.tag[:9] == "left_gem_":
-                        if element.pos[0] > window_size[0]/2 + 6:
+                        if element.pos[0] > window_size[0]/2 + 11:
                             UI_indices_to_remove.append(j)
                         element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
                         
