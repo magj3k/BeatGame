@@ -146,9 +146,6 @@ class AudioController(object):
         ]
         self.current_enemy = None
 
-    def begin_fight(self, player, enemy):
-        pass
-
     def change_game_modes(self, mode):
         self.mode = mode
 
