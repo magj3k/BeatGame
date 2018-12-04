@@ -262,7 +262,7 @@ class Scene(InstructionGroup):
                     self.queued_UI_elements.append(new_line)
 
                     new_button_ind = TexturedElement(pos = (window_size[0]*0.5, window_size[1]*0.7 + offset_y),
-                        z = 11,
+                        z = 5,
                         size = (377*0.1, 378*0.1),
                         texture_path = "graphics/beat_"+str(i+1)+".png",
                         tag = "fight_button_indicator",
@@ -337,6 +337,11 @@ class Scene(InstructionGroup):
 
             if self.game_mode == "puzzle":
                 self.puzzle_gems.on_update(dt)
+
+                if self.audio_controller.lane == -1:
+                    self.puzzle_gems.pulsing_enabled = False
+                else:
+                    self.puzzle_gems.pulsing_enabled = True
 
             # fight mode
             if self.game_mode == "fight":
@@ -550,16 +555,19 @@ class Scene(InstructionGroup):
                             element.target_alpha = 0.5
                         else: # hearts
                             element.target_alpha = 1.0
-
                             if element.tag[:6] == "h_bar_":
                                 if element.tag[-1] == "e": # enemy health
-                                    element.target_size = (element.initial_size[0]*(self.fight_enemy.health/self.fight_enemy.max_health), element.initial_size[1])
+                                    health_coeff = (self.fight_enemy.health/self.fight_enemy.max_health)
+                                    element.target_size = (element.initial_size[0]*health_coeff, element.initial_size[1])
+                                    element.target_pos = (element.initial_pos[0]+((1-health_coeff)*element.initial_size[0]*0.5), element.initial_pos[1])
                                 else: # player health
-                                    element.target_size = (element.initial_size[0]*(self.player.health/3), element.initial_size[1])
+                                    health_coeff = (self.player.health/3)
+                                    element.target_size = (element.initial_size[0]*health_coeff, element.initial_size[1])
+                                    element.target_pos = (element.initial_pos[0]-((1-health_coeff)*element.initial_size[0]*0.5), element.initial_pos[1])
                     else:
                         element.target_alpha = 0.0
 
-                if element.tag[:6] == "h_bar_" or element.tag[:11] == "fight_line_" or element.tag == "UI_bg_fight" or element.tag == "fight_button_indicator":
+                if element.tag[:11] == "fight_line_" or element.tag == "UI_bg_fight" or element.tag == "fight_button_indicator" or element.tag[:9] == "left_gem_" or element.tag[:10] == "right_gem_":
                     if self.game_mode != "fight":
                         element.target_alpha = 0.0
                         if element.color.a <= 0.05:
@@ -642,6 +650,12 @@ class Scene(InstructionGroup):
                         if element.pos[0] > window_size[0]/2 + element.size[0]:
                             UI_indices_to_remove.append(j)
                         element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
+
+                    # removing fight gems after fight has ended
+                    if self.fight_end_timer > 0 and (element.tag[:9] == "left_gem_" or element.tag[:10] == "right_gem_"):
+                        element.target_alpha = 0.0
+                        if element.color.a <= 0.05:
+                            UI_indices_to_remove.append(j)
 
                 elif self.game_mode == "explore": # explore mode
                     if element.tag[:2] == "k_" and element.target_alpha != 1.0:

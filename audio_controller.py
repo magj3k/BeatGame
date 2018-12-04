@@ -255,7 +255,7 @@ class AudioController(object):
         color = self.fight_gem_data[lane-1]['color']
         size = self.fight_gem_data[lane-1]['size']
         pos = (window_size[0], self.fight_gem_data[lane-1]['y_pos'])
-        gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
+        gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 7, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
 
@@ -268,7 +268,7 @@ class AudioController(object):
         color = self.fight_gem_data[lane-1]['color']
         size = self.fight_gem_data[lane-1]['size']
         pos = (0, self.fight_gem_data[lane-1]['y_pos'])
-        gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 11, size = (size, size), shape = ellipse)
+        gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 6, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
 

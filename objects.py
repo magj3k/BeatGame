@@ -43,6 +43,7 @@ class TexturedElement(Element):
         Element.__init__(self, pos, vel, tag, color, z, musical, target_alpha)
         self.size = size
         self.initial_size = size
+        self.initial_pos = pos
         self.target_pos = None
         self.target_size = None
         self.texture_path = texture_path
@@ -603,6 +604,7 @@ class PuzzleGems(InstructionGroup):
         self.song_time = 0
         self.playing = False
         self.create_gems = True
+        self.pulsing_enabled = True
 
         self.screen_time = self.max_song_time/2
         self.vel = window_size[0] / self.screen_time # pixels per second
@@ -657,7 +659,7 @@ class PuzzleGems(InstructionGroup):
                     gem, props = onscreen_props['gems'][gem_time]
                     if gem.pos[0] < -50:
                         to_remove.append(gem_time)
-                    elif gem_time < (self.song_time + offset) % self.max_song_time + dt and gem_time > (self.song_time + offset) % self.max_song_time - dt:
+                    elif self.pulsing_enabled == True and gem_time < (self.song_time + offset) % self.max_song_time + dt and gem_time > (self.song_time + offset) % self.max_song_time - dt:
                         size = props['size']
                         gem.size = (size*2, size*2)
                         gem.target_size = (size, size)
