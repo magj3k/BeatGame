@@ -108,6 +108,8 @@ class Scene(InstructionGroup):
         self.audio_controller = audio_controller
         self.audio_controller.beat_callback = self.on_beat
         self.audio_controller.queue_ui_callback = self.append_ui_element
+        self.audio_controller.remove_ui_callback = self.remove_ui_element
+        self.audio_controller.add_fight_gem_callback = self.add_fight_gem
         self.song_length = 16 * 60 / self.audio_controller.bpm
 
         # player and game elements
@@ -117,6 +119,8 @@ class Scene(InstructionGroup):
 
         self.ground_map = ground_map
         self.objs_by_z_order_old = {}
+        self.num_UI_elements_old = 0
+        self.num_game_elements_old = 0
 
         # key collection and puzzle mode
         self.num_keys_collected = 0
@@ -286,6 +290,43 @@ class Scene(InstructionGroup):
 
     def append_ui_element(self, element):
         self.queued_UI_elements.append(element)
+
+    def remove_ui_element(self, element_tag = None, particle_type = ""):
+        for j in range(len(self.UI_elements)):
+            element = self.UI_elements[j]
+            if element.tag == element_tag:
+
+                # adds particles if necessary
+                if particle_type == "shoot_left":
+                    element.target_alpha = 0.0
+                elif particle_type == "shoot_right":
+                    element.target_alpha = 0.0
+                elif particle_type == "circular":
+                    for i in range(6):
+                        new_particle = Particle(GeometricElement(pos = element.pos,
+                            vel = (random.random()*150.0 - 75.0, random.random()*150.0 - 75.0),
+                            color = Color(1, 1, 1, 0.65),
+                            size = (32, 32),
+                            shape = Ellipse(pos = element.pos, size = (0.01, 0.01))),
+                            z = 10,
+                            resize_period = 0.4+(random.random()*0.7))
+                        self.UI_elements.append(new_particle)
+
+                    # removes element
+                    element.kill_me = True
+
+    def add_fight_gem(self, left_or_right, lane, gem_uuid, fight_gem_data):
+        if left_or_right == "left" or left_or_right == "right":
+            ellipse = Ellipse(size=(0.01, 0.01))
+            color = Color(fight_gem_data[lane-1]['color'][0], fight_gem_data[lane-1]['color'][1], fight_gem_data[lane-1]['color'][2])
+            size = fight_gem_data[lane-1]['size']
+            pos = (0, fight_gem_data[lane-1]['y_pos'])
+            z = 7
+            if left_or_right == "left":
+                pos = (window_size[0], fight_gem_data[lane-1]['y_pos'])
+                z = 6
+            gem_element = GeometricElement(pos=pos, tag = gem_uuid, color = color, z = z, size = (size, size), shape = ellipse)
+            self.queued_UI_elements.append(gem_element)
 
     def on_update(self, dt, active_keys):
         if self.scene_cleared == False:
@@ -536,7 +577,14 @@ class Scene(InstructionGroup):
 
             for j in range(len(self.UI_elements)):
                 element = self.UI_elements[j]
-                element.on_update(dt, 1.0, (0, 0))
+                screen_dilation = window_size[1]/intended_window_size[1]
+                element.on_update(dt, screen_dilation, ((window_size[0]/2)*(1-screen_dilation), (window_size[1]/2)*(1-screen_dilation)))
+
+                # removes gems if flagged to kill
+                if element.tag[:10] == "fight_gem_":
+                    if element.kill_me == True or (element.target_alpha == 0.0 and element.color.a < 0.05):
+                        element.color.a = 0
+                        UI_indices_to_remove.append(j)
 
                 # updating collected keys
                 if (element.tag == "k_1" and self.num_keys_collected >= 1) or (element.tag == "k_2" and self.num_keys_collected >= 2) or (element.tag == "k_3" and self.num_keys_collected >= 3):
@@ -567,7 +615,7 @@ class Scene(InstructionGroup):
                     else:
                         element.target_alpha = 0.0
 
-                if element.tag[:11] == "fight_line_" or element.tag == "UI_bg_fight" or element.tag == "fight_button_indicator" or element.tag[:9] == "left_gem_" or element.tag[:10] == "right_gem_":
+                if element.tag[:11] == "fight_line_" or element.tag == "UI_bg_fight" or element.tag == "fight_button_indicator":
                     if self.game_mode != "fight":
                         element.target_alpha = 0.0
                         if element.color.a <= 0.05:
@@ -641,33 +689,36 @@ class Scene(InstructionGroup):
                     if element.tag[:2] == "k_" or element.tag == "keys_bg":
                         element.target_alpha = 0.0
 
-                    if element.tag[:10] == "right_gem_":
-                        if element.pos[0] < window_size[0]/2 - element.size[0]:
-                            UI_indices_to_remove.append(j)
-                        element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
+                    # FIX: move gems according to tag/uuid direction, do NOT delete
+                    if element.tag[:10] == "fight_gem_":
 
-                    if element.tag[:9] == "left_gem_":
-                        if element.pos[0] > window_size[0]/2 + element.size[0]:
-                            UI_indices_to_remove.append(j)
-                        element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
+                        # if element.tag[:10] == "right_gem_":
+                        #     if element.pos[0] < window_size[0]/2 - element.size[0]:
+                        #         UI_indices_to_remove.append(j)
+                        #     element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
 
-                    # removing fight gems after fight has ended
-                    if self.fight_end_timer > 0 and (element.tag[:9] == "left_gem_" or element.tag[:10] == "right_gem_"):
-                        element.target_alpha = 0.0
-                        if element.color.a <= 0.05:
-                            UI_indices_to_remove.append(j)
+                        # if element.tag[:9] == "left_gem_":
+                        #     if element.pos[0] > window_size[0]/2 + element.size[0]:
+                        #         UI_indices_to_remove.append(j)
+                        #     element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
+                        if element.tag[-5:] == "right":
+                            element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
+                        elif element.tag[-4:] == "left":
+                            element.pos = (element.pos[0] - window_size[0] * dt/(self.song_length/4), element.pos[1])
+
+                        # removing fight gems after fight has ended
+                        if self.fight_end_timer > 0:
+                            element.target_alpha = 0.0
+                            if element.color.a <= 0.05:
+                                UI_indices_to_remove.append(j)
 
                 elif self.game_mode == "explore": # explore mode
                     if element.tag[:2] == "k_" and element.target_alpha != 1.0:
                         element.target_alpha = 1.0
-                    if element.tag == "keys_bg" and element.target_alpha != 0.5:
+                    elif element.tag == "keys_bg" and element.target_alpha != 0.5:
                         element.target_alpha = 0.5
-                    if "gem" in element.tag:
+                    elif "gem" in element.tag:
                         UI_indices_to_remove.append(j)
-
-                # removes invisible objects, TODO maybe not necessary
-                # if self.game_mode != "fight" and element.color.a < 0.01:
-                #     UI_indices_to_remove.append(i)
 
                 # tracks objects by z-order
                 if element.z+100+max_game_z not in objs_by_z_order:
@@ -680,6 +731,8 @@ class Scene(InstructionGroup):
             all_z_orders.sort()
             refresh_chained = False # should always be set to False here
             if len(self.objs_by_z_order_old.keys()) == 0: refresh_chained = True
+            if self.num_game_elements_old != len(self.game_elements): refresh_chained = True
+            if self.num_UI_elements_old != len(self.UI_elements): refresh_chained = True
             for z in all_z_orders:
                 object_inds_at_z = objs_by_z_order[z]
 
@@ -703,6 +756,8 @@ class Scene(InstructionGroup):
                                 self.remove(obj.shape)
                                 self.add(obj.shape)
             self.objs_by_z_order_old = objs_by_z_order
+            self.num_game_elements_old = len(self.game_elements)
+            self.num_UI_elements_old = len(self.UI_elements)
 
             # deletes objects
             for i in range(len(object_indices_to_remove)):

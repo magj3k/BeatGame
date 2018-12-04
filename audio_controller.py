@@ -36,7 +36,7 @@ fight_map = [
 ]
 
 class AudioController(object):
-    def __init__(self, level = 0, bpm = 120, elements = [], beat_callback = None, queue_ui_callback = None):
+    def __init__(self, level = 0, bpm = 120, elements = [], beat_callback = None, queue_ui_callback = None, queue_ui_remove_callback = None, add_fight_gem_callback = None):
         self.mode = 'explore'
         self.level = level
         self.level_music = level_map[self.level]
@@ -68,6 +68,8 @@ class AudioController(object):
 
         # callbacks
         self.queue_ui_callback = queue_ui_callback
+        self.remove_ui_callback = queue_ui_remove_callback
+        self.add_fight_gem_callback = add_fight_gem_callback
 
         # beat tracking
         self.beat = 0
@@ -133,19 +135,30 @@ class AudioController(object):
         # self.fight_gems = FightGems(fight_data, self.bpm, self.get_song_time, self.queue_ui_callback)
         self.fighting_enabled = True
         self.fight_lanes = self.level_fight['lanes']
-        self.fight_gems = []
+        self.fight_gem_tracking = {} # e.g. self.fight_gem_tracking[gem_uuid/tag] = (gem position, lane)
+        self.fight_gem_margin = 40
+        self.last_gem_uuid = 0
+        self.fight_keys = {'1': False, '2': False, '3': False}
         self.fight_gem_data = [
-                                {'color': Color(0.3, 0.3, 1),
+                                {'color': [0.3, 0.3, 1],
                                  'size': 39,
                                  'y_pos': window_size[1]*0.7 + 0.07 * window_size[1]},
-                                {'color': Color(0.3, 1, 0.3),
+                                {'color': [0.3, 1, 0.3],
                                  'size': 39,
                                  'y_pos': window_size[1]*0.7},
-                                {'color': Color(1, 0.3, 0.3),
+                                {'color': [1, 0.3, 0.3],
                                  'size': 39,
                                  'y_pos': window_size[1]*0.7 - 0.07 * window_size[1]},
         ]
         self.current_enemy = None
+
+    def get_new_gem_uuid_suffix(self, direction):
+        self.last_gem_uuid += 1
+
+        suffix = str(self.last_gem_uuid)
+        while len(suffix) < 6:
+            suffix = "0"+suffix
+        return suffix+"_"+direction
 
     def change_game_modes(self, mode):
         self.mode = mode
@@ -188,6 +201,7 @@ class AudioController(object):
 
         if mode == 'fight':
             self.fighting_enabled = True
+            self.fight_gem_tracking = {}
             if self.fg_gen in self.mixer.generators:
                 self.fg_gen.set_gain(0)
 
@@ -252,30 +266,36 @@ class AudioController(object):
     def create_right_gem(self, lane):
 
         # visual
-        ellipse = Ellipse(size=(0.01, 0.01))
-        color = self.fight_gem_data[lane-1]['color']
-        size = self.fight_gem_data[lane-1]['size']
-        pos = (window_size[0], self.fight_gem_data[lane-1]['y_pos'])
-        gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 7, size = (size, size), shape = ellipse)
-        self.queue_ui_callback(gem_element)
-        self.fight_gems.append(gem_element)
+        # ellipse = Ellipse(size=(0.01, 0.01))
+        # color = self.fight_gem_data[lane-1]['color']
+        # size = self.fight_gem_data[lane-1]['size']
+        # pos = (window_size[0], self.fight_gem_data[lane-1]['y_pos'])
+        # gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 7, size = (size, size), shape = ellipse)
+        # self.queue_ui_callback(gem_element)
+        # self.fight_gems.append(gem_element)
 
         # FIX: callback to create gem in scene_manager, store unique gem id and track position in audio_controller, remove self.fight_gems
+        gem_uuid = "fight_gem_"+self.get_new_gem_uuid_suffix("right")
+        self.fight_gem_tracking[gem_uuid] = [0, lane, "right"]
+        self.add_fight_gem_callback("right", lane, gem_uuid, self.fight_gem_data)
 
         # audio
         lane_sfx = WaveGenerator(WaveFile(self.level_fight['right_sfx'][lane-1]))
         self.mixer.add(lane_sfx)
 
     def create_left_gem(self, lane):
-        ellipse = Ellipse(size=(0.01, 0.01))
-        color = self.fight_gem_data[lane-1]['color']
-        size = self.fight_gem_data[lane-1]['size']
-        pos = (0, self.fight_gem_data[lane-1]['y_pos'])
-        gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 6, size = (size, size), shape = ellipse)
-        self.queue_ui_callback(gem_element)
-        self.fight_gems.append(gem_element)
+        # ellipse = Ellipse(size=(0.01, 0.01))
+        # color = self.fight_gem_data[lane-1]['color']
+        # size = self.fight_gem_data[lane-1]['size']
+        # pos = (0, self.fight_gem_data[lane-1]['y_pos'])
+        # gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 6, size = (size, size), shape = ellipse)
+        # self.queue_ui_callback(gem_element)
+        # self.fight_gems.append(gem_element)
 
         # FIX: callback to create gem in scene_manager, store unique gem id and track position in audio_controller, remove self.fight_gems
+        gem_uuid = "fight_gem_"+self.get_new_gem_uuid_suffix("left")
+        self.fight_gem_tracking[gem_uuid] = [window_size[0], lane, "left"]
+        self.add_fight_gem_callback("left", lane, gem_uuid, self.fight_gem_data)
 
         # audio
         lane_sfx = WaveGenerator(WaveFile(self.level_fight['left_sfx'][lane-1]))
@@ -382,17 +402,23 @@ class AudioController(object):
 
         if self.mode == 'fight':
             to_remove = []
-            if keycode in ['1', '2', '3']:
+            if keycode in ['1', '2', '3'] and self.fight_keys[keycode] == False:
+                self.fight_keys[keycode] = True
+
                 now_gems = []
-                for gem in self.fight_gems:
-                    if gem.tag[:10] == 'right_gem_':
-                        if gem.pos[0] < window_size[0]/2 + gem.size[0]*3 and gem.pos[0] >= window_size[0]/2 - gem.size[0]:
-                            now_gems.append(gem)
-                    if gem.tag[:9] == 'left_gem_':
-                        if gem.pos[0] > window_size[0]/2 - gem.size[0]*3 and gem.pos[0] <= window_size[0]/2 + gem.size[0]:
-                            now_gems.append(gem)
+                # for gem in self.fight_gems:
+                #     if gem.tag[:10] == 'right_gem_':
+                #         if gem.pos[0] < window_size[0]/2 + gem.size[0]*3 and gem.pos[0] >= window_size[0]/2 - gem.size[0]:
+                #             now_gems.append(gem)
+                #     if gem.tag[:9] == 'left_gem_':
+                #         if gem.pos[0] > window_size[0]/2 - gem.size[0]*3 and gem.pos[0] <= window_size[0]/2 + gem.size[0]:
+                #             now_gems.append(gem)
 
                 # FIX: replace self.fight_gems with uuid-based position tracking dict, append uuids to now_gems
+                for gem_uuid in self.fight_gem_tracking.keys():
+                    gem_pos = self.fight_gem_tracking[gem_uuid][0]
+                    if gem_pos <= window_size[0]/2 + self.fight_gem_margin and gem_pos >= window_size[0]/2 - self.fight_gem_margin:
+                        now_gems.append(gem_uuid)
 
                 # temporal miss
                 if len(now_gems) == 0:
@@ -401,48 +427,72 @@ class AudioController(object):
 
                 # hit
                 any_gem_hit = False
-                for now_gem in now_gems:
-                    gem_hit = False
-                    if now_gem.tag[:10] == 'right_gem_':
-                        if now_gem.tag[10:] == keycode:
-                            self.block(int(keycode))
-                            now_gem.target_size = now_gem.size
-                            now_gem.size = (now_gem.size[0] + gem.size[0], now_gem.size[1] + gem.size[0])
-                            gem_hit = True
-                    if now_gem.tag[:9] == 'left_gem_':
-                        if now_gem.tag[9:] == keycode:
-                            self.hit(int(keycode))
-                            now_gem.target_size = now_gem.size
-                            now_gem.size = (now_gem.size[0] + gem.size[0], now_gem.size[1] + gem.size[0])
-                            gem_hit = True
-                    if gem_hit:
-                        to_remove.append(now_gem)
-                        any_gem_hit = True
+                # for now_gem in now_gems:
+                #     gem_hit = False
+                #     if now_gem.tag[:10] == 'right_gem_':
+                #         if now_gem.tag[10:] == keycode:
+                #             self.block(int(keycode))
+                #             now_gem.target_size = now_gem.size
+                #             now_gem.size = (now_gem.size[0] + gem.size[0], now_gem.size[1] + gem.size[0])
+                #             gem_hit = True
+                #     if now_gem.tag[:9] == 'left_gem_':
+                #         if now_gem.tag[9:] == keycode:
+                #             self.hit(int(keycode))
+                #             now_gem.target_size = now_gem.size
+                #             now_gem.size = (now_gem.size[0] + gem.size[0], now_gem.size[1] + gem.size[0])
+                #             gem_hit = True
+                #     if gem_hit:
+                #         to_remove.append(now_gem)
+                #         any_gem_hit = True
 
                 # FIX: clean up unnecessary code and handle now_gems uuids, hit scene_manager callback for gem hit animations
+                for gem_uuid in now_gems:
+                    gem_hit = False
+                    if str(self.fight_gem_tracking[gem_uuid][1]) == keycode: # correct lane
+                        gem_hit = True
+
+                        if gem_uuid[-5:] == "right":
+                            self.hit(int(keycode))
+                        elif gem_uuid[-4:] == "left":
+                            self.block(int(keycode))
+                    if gem_hit:
+                        to_remove.append((gem_uuid, "circular"))
+                        any_gem_hit = True
 
                 # lane miss
                 if not any_gem_hit:
-                    if now_gems[0].tag[:10] == 'right_gem_':
-                        self.missed_block(int(now_gems[0].tag[10:]))
-                    else:
-                        self.missed_hit(int(now_gems[0].tag[9:]))
-                    for now_gem in now_gems:
-                        to_remove.append(now_gem)
+                    # if now_gems[0].tag[:10] == 'right_gem_':
+                    #     self.missed_block(int(now_gems[0].tag[10:]))
+                    # else:
+                    #     self.missed_hit(int(now_gems[0].tag[9:]))
+                    # for now_gem in now_gems:
+                    #     to_remove.append(now_gem)
 
-                # FIX: store lane in now_gems and use those to call missed_block and missed_hit
+                    # FIX: store lane in now_gems and use those to call missed_block and missed_hit
+                    for gem_uuid in now_gems:
+                        if gem_uuid[-5:] == "right":
+                            self.missed_block(self.fight_gem_tracking[gem_uuid][1])
+                            to_remove.append((gem_uuid, "shoot_right"))
+                        elif gem_uuid[-4:] == "left":
+                            self.missed_hit(self.fight_gem_tracking[gem_uuid][1])
+                            to_remove.append((gem_uuid, "shoot_left"))
 
-            for gem in to_remove:
-                self.fight_gems.remove(gem)
+            for gem_data in to_remove:
+                gem_uuid = gem_data[0]
+                particle_type = gem_data[1]
+                # self.fight_gems.remove(gem)
 
-            # FIX: add callback for scene_manager to delete gems by UUID
+                # FIX: add callback for scene_manager to delete gems by UUID
+                self.remove_ui_callback(gem_uuid, particle_type)
+                self.fight_gem_tracking.pop(gem_uuid)
 
                     
     def get_song_time(self):
         return self.song_time
 
     def on_key_up(self, keycode):
-        pass
+        if keycode in ['1', '2', '3'] and self.fight_keys[keycode] == True:
+            self.fight_keys[keycode] = False
 
     def on_update(self, dt, player, active_keys):
 
@@ -565,6 +615,15 @@ class AudioController(object):
         # Fight Mode
         ############
         if self.mode == 'fight' and self.fighting_enabled == True:
+
+            # advances fight_gem_tracking
+            song_length = 16 * 60 / self.bpm
+            for gem_uuid in self.fight_gem_tracking.keys():
+                if self.fight_gem_tracking[gem_uuid][2] == "right":
+                    self.fight_gem_tracking[gem_uuid][0] += window_size[0] * dt/(song_length/4)
+                elif self.fight_gem_tracking[gem_uuid][2] == "left":
+                    self.fight_gem_tracking[gem_uuid][0] -= window_size[0] * dt/(song_length/4)
+
             # plus or minus 2 is hit
             if new_beat:
                 for attack in self.level_fight['right_beats']:
@@ -581,21 +640,35 @@ class AudioController(object):
                         if create_bool:
                             self.create_left_gem(lane)
 
-                to_remove = []
-                for gem in self.fight_gems:
-                    if gem.tag[:10] == 'right_gem_':
-                        if gem.pos[0] < window_size[0]/2 - gem.size[0]:
-                            self.missed_block(int(gem.tag[10:]))
-                            to_remove.append(gem)
-                    if gem.tag[:9] == 'left_gem_':
-                        if gem.pos[0] > window_size[0]/2 + gem.size[0]:
-                            self.missed_hit(int(gem.tag[9:]))
-                            to_remove.append(gem)
+            to_remove = []
+            # for gem in self.fight_gems:
+            #     if gem.tag[:10] == 'right_gem_':
+            #         if gem.pos[0] < window_size[0]/2 - gem.size[0]:
+            #             self.missed_block(int(gem.tag[10:]))
+            #             to_remove.append(gem)
+            #     if gem.tag[:9] == 'left_gem_':
+            #         if gem.pos[0] > window_size[0]/2 + gem.size[0]:
+            #             self.missed_hit(int(gem.tag[9:]))
+            #             to_remove.append(gem)
 
-                # FIX: use uuid-based position gem tracking dict instead of self.fight_gems, add UUIDs to to_remove
+            # FIX: use uuid-based position gem tracking dict instead of self.fight_gems, add UUIDs to to_remove
+            for gem_uuid in self.fight_gem_tracking.keys():
+                gem_pos = self.fight_gem_tracking[gem_uuid][0]
+                if gem_uuid[-4:] == "left":
+                    if gem_pos < window_size[0]/2 - self.fight_gem_margin:
+                        self.missed_block(self.fight_gem_tracking[gem_uuid][1])
+                        to_remove.append((gem_uuid, "shoot_left"))
+                elif gem_uuid[-5:] == "right":
+                    if gem_pos > window_size[0]/2 + self.fight_gem_margin:
+                        self.missed_hit(self.fight_gem_tracking[gem_uuid][1])
+                        to_remove.append((gem_uuid, "shoot_right"))
 
-                for gem in to_remove:
-                    self.fight_gems.remove(gem)
+            for gem_data in to_remove:
+                gem_uuid = gem_data[0]
+                particle_type = gem_data[1]
+                # self.fight_gems.remove(gem)
 
                 # FIX: add callback for scene_manager to delete gems by UUID
+                self.remove_ui_callback(gem_uuid, particle_type)
+                self.fight_gem_tracking.pop(gem_uuid)
 

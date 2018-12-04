@@ -19,6 +19,7 @@ class Element(object):
         self.target_alpha = target_alpha # try to use this to control alpha whenever possible
         self.misc_t = -1
         self.misc_flag = False
+        self.kill_me = False
 
         if color == None:
             self.color = Color(1, 1, 1)
