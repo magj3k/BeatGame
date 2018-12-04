@@ -249,17 +249,26 @@ class Scene(InstructionGroup):
                 self.game_camera.speed = 4.0
 
                 # adds UI bg
-                new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.5), tag = "UI_bg_fight", color = Color(0, 0, 0, 0.011), z = 2, size = window_size)
-                new_bg.target_alpha = 0.3
+                new_bg = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.7), tag = "UI_bg_fight", color = Color(0, 0, 0, 0.011), z = 2, size = (window_size[0], window_size[1]*0.285))
+                new_bg.target_alpha = 0.5
                 self.queued_UI_elements.append(new_bg)
 
                 # adds lines to BG
-                now_bar = GeometricElement(pos = (window_size[0]*0.5, window_size[1] * 0.65), tag = "fight_now_bar", color = Color(0.1, 0.1, 0.1), z = 4, size = (39, window_size[1]*0.2))
-                self.queued_UI_elements.append(now_bar)
+                # now_bar = GeometricElement(pos = (window_size[0]*0.5, window_size[1] * 0.7), tag = "fight_now_bar", color = Color(0.1, 0.1, 0.1), z = 4, size = (39, window_size[1]*0.2))
+                # self.queued_UI_elements.append(now_bar)
                 for i in range(3):
                     offset_y = window_size[1]*(-i+1) * 0.07
-                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.65 + offset_y), tag = "fight_line_"+str(i), color = Color(0.7, 0.7, 0.7, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.7 + offset_y), tag = "fight_line_"+str(i), color = Color(0.85, 0.85, 0.85, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
+
+                    new_button_ind = TexturedElement(pos = (window_size[0]*0.5, window_size[1]*0.7 + offset_y),
+                        z = 11,
+                        size = (377*0.1, 378*0.1),
+                        texture_path = "graphics/beat_"+str(i+1)+".png",
+                        tag = "fight_button_indicator",
+                        color = Color(1, 1, 1, 0), 
+                        target_alpha = 1.0)
+                    self.queued_UI_elements.append(new_button_ind)
 
 
     def on_beat(self, beat):
@@ -389,6 +398,7 @@ class Scene(InstructionGroup):
 
                     # fight end timer
                     if self.fight_end_timer > 0:
+                        self.audio_controller.fighting_enabled = False
                         self.fight_end_timer += -dt
                     elif self.fight_end_timer != -1:
                         self.fight_end_timer = -1
@@ -541,20 +551,19 @@ class Scene(InstructionGroup):
                         else: # hearts
                             element.target_alpha = 1.0
 
-                            # for i in range(3):
-                            #     if element.tag == "h_"+str(i+1): # changing texture for player hearts
-                            #         if self.player.health >= i+1:
-                            #             element.change_texture("graphics/heart.png")
-                            #         else:
-                            #             element.change_texture("graphics/heart_outline.png")
-                            #     if element.tag == "h_"+str(i+1)+"e": # changing texture for enemy hearts
-                            #         if self.fight_enemy != None:
-                            #             if self.fight_enemy.health >= i+1:
-                            #                 element.change_texture("graphics/heart.png")
-                            #             else:
-                            #                 element.change_texture("graphics/heart_outline.png")
+                            if element.tag[:6] == "h_bar_":
+                                if element.tag[-1] == "e": # enemy health
+                                    element.target_size = (element.initial_size[0]*(self.fight_enemy.health/self.fight_enemy.max_health), element.initial_size[1])
+                                else: # player health
+                                    element.target_size = (element.initial_size[0]*(self.player.health/3), element.initial_size[1])
                     else:
                         element.target_alpha = 0.0
+
+                if element.tag[:6] == "h_bar_" or element.tag[:11] == "fight_line_" or element.tag == "UI_bg_fight" or element.tag == "fight_button_indicator":
+                    if self.game_mode != "fight":
+                        element.target_alpha = 0.0
+                        if element.color.a <= 0.05:
+                            UI_indices_to_remove.append(j)
 
                 # puzzle mode
                 if self.game_mode == "puzzle":
@@ -633,10 +642,6 @@ class Scene(InstructionGroup):
                         if element.pos[0] > window_size[0]/2 + element.size[0]:
                             UI_indices_to_remove.append(j)
                         element.pos = (element.pos[0] + window_size[0] * dt/(self.song_length/4), element.pos[1])
-                        
-                    if self.fight_end_timer != -1:
-                        if "fight" in element.tag or "gem" in element.tag:
-                            UI_indices_to_remove.append(j)
 
                 elif self.game_mode == "explore": # explore mode
                     if element.tag[:2] == "k_" and element.target_alpha != 1.0:

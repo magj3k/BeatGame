@@ -131,18 +131,19 @@ class AudioController(object):
         # Fight
         #######
         # self.fight_gems = FightGems(fight_data, self.bpm, self.get_song_time, self.queue_ui_callback)
+        self.fighting_enabled = True
         self.fight_lanes = self.level_fight['lanes']
         self.fight_gems = []
         self.fight_gem_data = [
                                 {'color': Color(0.1, 0.1, 1),
                                  'size': 39,
-                                 'y_pos': window_size[1]*0.65 + 0.07 * window_size[1]},
+                                 'y_pos': window_size[1]*0.7 + 0.07 * window_size[1]},
                                 {'color': Color(0.1, 1, 0.1),
                                  'size': 39,
-                                 'y_pos': window_size[1]*0.65},
+                                 'y_pos': window_size[1]*0.7},
                                 {'color': Color(1, 0.1, 0.1),
                                  'size': 39,
-                                 'y_pos': window_size[1]*0.65 - 0.07 * window_size[1]},
+                                 'y_pos': window_size[1]*0.7 - 0.07 * window_size[1]},
         ]
         self.current_enemy = None
 
@@ -186,6 +187,7 @@ class AudioController(object):
                 self.sched.post_at_tick(self.play_track, play_tick, gen_props)
 
         if mode == 'fight':
+            self.fighting_enabled = True
             if self.fg_gen in self.mixer.generators:
                 self.fg_gen.set_gain(0)
 
@@ -276,39 +278,43 @@ class AudioController(object):
 
     # hit right gem
     def block(self, lane):
-        # sfx
-        block_sfx = WaveGenerator(WaveFile(self.level_fight['right_sfx'][lane-1]))
-        self.mixer.add(block_sfx)
-        # graphics
-        self.enemy.attack()
-        self.player.block()
+        if self.fighting_enabled:
+            # sfx
+            block_sfx = WaveGenerator(WaveFile(self.level_fight['right_sfx'][lane-1]))
+            self.mixer.add(block_sfx)
+            # graphics
+            self.enemy.attack()
+            self.player.block()
 
     # hit left gem
     def hit(self, lane):
-        # sfx
-        hit_sfx = WaveGenerator(WaveFile(self.level_fight['left_sfx'][lane-1]))
-        self.mixer.add(hit_sfx)
-        # graphics
-        self.player.attack()
-        self.enemy.hit()
+        if self.fighting_enabled:
+            # sfx
+            hit_sfx = WaveGenerator(WaveFile(self.level_fight['left_sfx'][lane-1]))
+            self.mixer.add(hit_sfx)
+            # graphics
+            self.player.attack()
+            self.enemy.hit()
 
     # miss right gem
     def missed_block(self, lane):
-        # sfx
-        miss_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
-        self.mixer.add(miss_sfx)
-        # graphics
-        self.enemy.attack()
-        self.player.hit()
+        if self.fighting_enabled:
+            # sfx
+            miss_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
+            self.mixer.add(miss_sfx)
+            # graphics
+            self.enemy.attack()
+            self.player.hit()
 
     # miss left gem
     def missed_hit(self, lane):
-        # sfx
-        miss_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
-        self.mixer.add(miss_sfx)
-        # graphics
-        self.player.attack()
-        self.enemy.block()
+        if self.fighting_enabled:
+            # sfx
+            miss_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
+            self.mixer.add(miss_sfx)
+            # graphics
+            self.player.attack()
+            self.enemy.block()
 
     #############
     # All Modes #
@@ -543,7 +549,7 @@ class AudioController(object):
 
         # Fight Mode
         ############
-        if self.mode == 'fight':
+        if self.mode == 'fight' and self.fighting_enabled == True:
             # plus or minus 2 is hit
             if new_beat:
                 for attack in self.level_fight['right_beats']:

@@ -42,6 +42,7 @@ class TexturedElement(Element):
     def __init__(self, pos = (0, 0), vel = (0, 0), tag = "", color = None, z = 0, size = (10, 10), texture_path = "", musical = False, target_alpha = None):
         Element.__init__(self, pos, vel, tag, color, z, musical, target_alpha)
         self.size = size
+        self.initial_size = size
         self.target_pos = None
         self.target_size = None
         self.texture_path = texture_path
@@ -688,6 +689,7 @@ class Enemy(object):
         self.target_velocity = (0, 0)
 
         # fighting
+        self.max_health = 3
         self.health = 3
         self.in_fight = False
         self.fight_pos = None
