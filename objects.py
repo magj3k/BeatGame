@@ -438,7 +438,7 @@ class Player(object):
 
         # position update
         target_x_vel = 0
-        if audio_controller.solved == False:
+        if audio_controller != None and audio_controller.solved == False:
             if self.controls_disabled == False and self.spawning_freeze == False:
                 if active_keys["right"] == True:
                     target_x_vel += 9.0

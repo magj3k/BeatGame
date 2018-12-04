@@ -307,6 +307,15 @@ menu_1_audio_controller = AudioController(level = 0, bpm = 120, elements = menu_
 menu_1_camera = Camera(zoom_factor = 0.85, initial_world_target = menu_1_player.world_pos, speed = 8.0)
 menu_1 = Menu(num_options = 2, option_actions = [["scene", 1], ["quit", -1]], initial_game_elements = menu_1_game_elements, initial_UI_elements = menu_1_UI_elements, ground_map = menu_1_ground_map, game_camera = menu_1_camera, res = scene_resolution, audio_controller = menu_1_audio_controller, player = menu_1_player)
 
+# panel 1
+
+panel_1_objects = [
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)+30), z = 1, size = (1476*0.5, 69*0.5), texture_path = "graphics/text_1.png"), 0.5, None),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.2, None)
+]
+panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
+panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = 2)
+
 # SCENE 2 IS A TEST, currently it copies objects from scene 1, which DOES NOT WORK
 
 scene_2_player = Player(res = scene_resolution, initial_world_pos = (27.5, 8), z = 110)
@@ -314,4 +323,4 @@ scene_2_audio_controller = AudioController(level = 0, bpm = 120, elements = scen
 scene_2_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_2_player.world_pos, speed = 0.85, bounds = scene_1_camera_bounds)
 scene_2 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_2_camera, res = scene_resolution, audio_controller = scene_2_audio_controller, player = scene_2_player)
 
-scenes = [menu_1, scene_1]
+scenes = [menu_1, panel_1, scene_1]

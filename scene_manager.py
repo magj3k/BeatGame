@@ -73,7 +73,7 @@ class SceneManager(InstructionGroup):
 
                 # switches to next scene
                 self.remove_current_scene()
-                if isinstance(self.scenes[self.current_scene_index], Menu):
+                if isinstance(self.scenes[self.current_scene_index], Menu) or isinstance(self.scenes[self.current_scene_index], Panel):
                     next_scene_index = self.scenes[self.current_scene_index].next_scene_index
                     if next_scene_index != -1:
                         self.switch_to_scene(next_scene_index)
@@ -106,11 +106,12 @@ class Scene(InstructionGroup):
 
         # sets up audio controller
         self.audio_controller = audio_controller
-        self.audio_controller.beat_callback = self.on_beat
-        self.audio_controller.queue_ui_callback = self.append_ui_element
-        self.audio_controller.remove_ui_callback = self.remove_ui_element
-        self.audio_controller.add_fight_gem_callback = self.add_fight_gem
-        self.song_length = 16 * 60 / self.audio_controller.bpm
+        if self.audio_controller != None:
+            self.audio_controller.beat_callback = self.on_beat
+            self.audio_controller.queue_ui_callback = self.append_ui_element
+            self.audio_controller.remove_ui_callback = self.remove_ui_element
+            self.audio_controller.add_fight_gem_callback = self.add_fight_gem
+            self.song_length = 16 * 60 / self.audio_controller.bpm
 
         # player and game elements
         self.player = player
@@ -349,7 +350,7 @@ class Scene(InstructionGroup):
                 camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+(actual_window_size[0]*0.5*retina_multiplier), -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+(actual_window_size[1]*0.5*retina_multiplier))
 
             # puzzle mode solving
-            if self.audio_controller.solved == True:
+            if self.audio_controller != None and self.audio_controller.solved == True:
                 self.puzzle_solved_timer += dt
                 if self.puzzle_solved_started != True:
                     self.puzzle_solved_started = True
@@ -772,7 +773,7 @@ class Scene(InstructionGroup):
 
             # updates player collisions
             override_x_velocity = None
-            if self.audio_controller.solved and self.puzzle_solved_timer >= self.puzzle_solved_animation_duration: override_x_velocity = 3.5
+            if self.audio_controller != None and self.audio_controller.solved and self.puzzle_solved_timer >= self.puzzle_solved_animation_duration: override_x_velocity = 3.5
             self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms, door, override_x_velocity)
             if self.game_camera != None and self.game_mode == "explore": self.game_camera.update_target(self.player.world_pos)
 
@@ -861,6 +862,48 @@ class Menu(Scene):
                     element.target_alpha = 1.0
                 else:
                     element.target_alpha = 0.5
+
+        # normally updates elements
+        super().on_update(dt, active_keys)
+
+class Panel(Scene): # essentially just a timed story panel
+    def __init__(self, game_camera = None, res = 20.0, audio_controller = None, timed_objects = None, end_time = 30.0, next_scene_index = -1):
+        Scene.__init__(self, [], [], game_camera, None, res, audio_controller, None)
+        self.player.controls_disabled = True
+        self.player.collisions_enabled = False
+
+        # panel elements
+        self.timed_objects = timed_objects # e.g. self.timed_objects[0] = (object, time_created, time_destroyed)
+        self.timed_objects_created = ["False"]*len(self.timed_objects)
+        self.end_time = end_time
+        self.t = 0
+
+        # destination scene
+        self.next_scene_index = next_scene_index
+
+    def on_update(self, dt, active_keys):
+        self.t += dt
+
+        # adds/removes timed objects
+        for i in range(len(self.timed_objects)):
+            obj_params = self.timed_objects[i]
+
+            if obj_params[2] != None and self.t > obj_params[2]: # "destroys" objects
+                # self.timed_objects_created[i] = False
+                existing_object = obj_params[0]
+                existing_object.target_alpha = 0.0
+            elif self.t > obj_params[1] and self.timed_objects_created[i] != True: # creates objects
+                self.timed_objects_created[i] = True
+                new_object = obj_params[0]
+                new_object.color.a = 0
+                new_object.target_alpha = 1.0
+                self.queued_UI_elements.append(new_object)
+            elif self.t <= obj_params[1]: # object not yet created
+                self.timed_objects_created[i] = False 
+
+        # end of panel
+        if self.t >= self.end_time:
+            self.scene_finished = True
 
         # normally updates elements
         super().on_update(dt, active_keys)
