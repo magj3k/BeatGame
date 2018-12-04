@@ -345,8 +345,8 @@ class Scene(InstructionGroup):
             if self.game_camera != None:
                 self.game_camera.on_update(dt)
 
-                camera_scalar = self.game_camera.zoom_factor
-                camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+(window_size[0]*0.5*retina_multiplier), -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+(window_size[1]*0.5*retina_multiplier))
+                camera_scalar = self.game_camera.zoom_factor * screen_dilation
+                camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+(actual_window_size[0]*0.5*retina_multiplier), -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+(actual_window_size[1]*0.5*retina_multiplier))
 
             # puzzle mode solving
             if self.audio_controller.solved == True:
@@ -577,8 +577,7 @@ class Scene(InstructionGroup):
 
             for j in range(len(self.UI_elements)):
                 element = self.UI_elements[j]
-                screen_dilation = window_size[1]/intended_window_size[1]
-                element.on_update(dt, screen_dilation, ((window_size[0]/2)*(1-screen_dilation), (window_size[1]/2)*(1-screen_dilation)))
+                element.on_update(dt, screen_dilation, (0, 0))
 
                 # removes gems if flagged to kill
                 if element.tag[:10] == "fight_gem_":

@@ -136,8 +136,8 @@ class Backdrop(object):
     # modifies camera-based scaling and offset depending on self.parallax_z
     def on_update(self, dt, cam_scalar, cam_offset):
         new_cam_scalar = cam_scalar*(1/(self.parallax_z+1))
-        new_cam_offset_parts = ((cam_offset[0]-(window_size[0]*0.5*retina_multiplier))/cam_scalar, (cam_offset[1]-(window_size[1]*0.5*retina_multiplier))/cam_scalar)
-        new_cam_offset = (new_cam_offset_parts[0]*new_cam_scalar + (window_size[0]*0.5*retina_multiplier), new_cam_offset_parts[1]*new_cam_scalar + (window_size[1]*0.5*retina_multiplier))
+        new_cam_offset_parts = ((cam_offset[0]-(actual_window_size[0]*0.5*retina_multiplier))/cam_scalar, (cam_offset[1]-(actual_window_size[1]*0.5*retina_multiplier))/cam_scalar)
+        new_cam_offset = (new_cam_offset_parts[0]*new_cam_scalar + (actual_window_size[0]*0.5*retina_multiplier), new_cam_offset_parts[1]*new_cam_scalar + (actual_window_size[1]*0.5*retina_multiplier))
         self.element.on_update(dt, cam_scalar, new_cam_offset)
 
 

@@ -18,9 +18,10 @@ from kivy.clock import Clock
 import traceback
 
 
-intended_window_size = (1340, 800)
-window_size = (1340, 800) # recommended width is >= 1340
-# window_size = (1150, 620)
+window_size = (1340, 800)
+# window_size = (1340, 800)
+actual_window_size = (1022, 610) # must have same width-to-height ration as intended_window_size
+screen_dilation = actual_window_size[1]/window_size[1]
 retina_multiplier = Window._density
 
 
@@ -100,7 +101,7 @@ def run(widget):
 
     try:
         # Window.fullscreen = True
-        Window.size = window_size
+        Window.size = actual_window_size
         MainApp().run()
     except:
         traceback.print_exc()
