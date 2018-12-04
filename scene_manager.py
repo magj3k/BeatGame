@@ -743,16 +743,16 @@ class Scene(InstructionGroup):
                         # removes and re-adds visual components to canvas
                         if z <= max_game_z:
                             obj = self.game_elements[ind]
-                            self.remove(obj.color)
-                            self.add(obj.color)
                             if obj.shape != None:
+                                self.remove(obj.color)
+                                self.add(obj.color)
                                 self.remove(obj.shape)
                                 self.add(obj.shape)
                         else:
                             obj = self.UI_elements[ind]
-                            self.remove(obj.color)
-                            self.add(obj.color)
                             if obj.shape != None:
+                                self.remove(obj.color)
+                                self.add(obj.color)
                                 self.remove(obj.shape)
                                 self.add(obj.shape)
             self.objs_by_z_order_old = objs_by_z_order
@@ -762,14 +762,16 @@ class Scene(InstructionGroup):
             # deletes objects
             for i in range(len(object_indices_to_remove)):
                 i_2 = len(object_indices_to_remove)-1-i
-                self.remove(self.game_elements[object_indices_to_remove[i_2]].color)
-                self.remove(self.game_elements[object_indices_to_remove[i_2]].shape)
-                del self.game_elements[object_indices_to_remove[i_2]]
+                if i_2 < len(object_indices_to_remove) and object_indices_to_remove[i_2] < len(self.game_elements):
+                    self.remove(self.game_elements[object_indices_to_remove[i_2]].color)
+                    self.remove(self.game_elements[object_indices_to_remove[i_2]].shape)
+                    del self.game_elements[object_indices_to_remove[i_2]]
             for i in range(len(UI_indices_to_remove)):
                 i_2 = len(UI_indices_to_remove)-1-i
-                self.remove(self.UI_elements[UI_indices_to_remove[i_2]].color)
-                self.remove(self.UI_elements[UI_indices_to_remove[i_2]].shape)
-                del self.UI_elements[UI_indices_to_remove[i_2]]
+                if i_2 < len(UI_indices_to_remove) and UI_indices_to_remove[i_2] < len(self.UI_elements):
+                    self.remove(self.UI_elements[UI_indices_to_remove[i_2]].color)
+                    self.remove(self.UI_elements[UI_indices_to_remove[i_2]].shape)
+                    del self.UI_elements[UI_indices_to_remove[i_2]]
 
             # updates player collisions
             override_x_velocity = None
