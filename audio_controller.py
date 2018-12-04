@@ -135,13 +135,13 @@ class AudioController(object):
         self.fight_lanes = self.level_fight['lanes']
         self.fight_gems = []
         self.fight_gem_data = [
-                                {'color': Color(0.1, 0.1, 1),
+                                {'color': Color(0.3, 0.3, 1),
                                  'size': 39,
                                  'y_pos': window_size[1]*0.7 + 0.07 * window_size[1]},
-                                {'color': Color(0.1, 1, 0.1),
+                                {'color': Color(0.3, 1, 0.3),
                                  'size': 39,
                                  'y_pos': window_size[1]*0.7},
-                                {'color': Color(1, 0.1, 0.1),
+                                {'color': Color(1, 0.3, 0.3),
                                  'size': 39,
                                  'y_pos': window_size[1]*0.7 - 0.07 * window_size[1]},
         ]
@@ -250,6 +250,7 @@ class AudioController(object):
         self.enemy = enemy
 
     def create_right_gem(self, lane):
+
         # visual
         ellipse = Ellipse(size=(0.01, 0.01))
         color = self.fight_gem_data[lane-1]['color']
@@ -258,6 +259,8 @@ class AudioController(object):
         gem_element = GeometricElement(pos=pos, tag = "right_gem_" + str(lane), color = color, z = 7, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
+
+        # FIX: callback to create gem in scene_manager, store unique gem id and track position in audio_controller, remove self.fight_gems
 
         # audio
         lane_sfx = WaveGenerator(WaveFile(self.level_fight['right_sfx'][lane-1]))
@@ -271,6 +274,8 @@ class AudioController(object):
         gem_element = GeometricElement(pos=pos, tag = "left_gem_" + str(lane), color = color, z = 6, size = (size, size), shape = ellipse)
         self.queue_ui_callback(gem_element)
         self.fight_gems.append(gem_element)
+
+        # FIX: callback to create gem in scene_manager, store unique gem id and track position in audio_controller, remove self.fight_gems
 
         # audio
         lane_sfx = WaveGenerator(WaveFile(self.level_fight['left_sfx'][lane-1]))
@@ -387,6 +392,8 @@ class AudioController(object):
                         if gem.pos[0] > window_size[0]/2 - gem.size[0]*3 and gem.pos[0] <= window_size[0]/2 + gem.size[0]:
                             now_gems.append(gem)
 
+                # FIX: replace self.fight_gems with uuid-based position tracking dict, append uuids to now_gems
+
                 # temporal miss
                 if len(now_gems) == 0:
                     self.missed_hit(int(keycode))
@@ -412,6 +419,8 @@ class AudioController(object):
                         to_remove.append(now_gem)
                         any_gem_hit = True
 
+                # FIX: clean up unnecessary code and handle now_gems uuids, hit scene_manager callback for gem hit animations
+
                 # lane miss
                 if not any_gem_hit:
                     if now_gems[0].tag[:10] == 'right_gem_':
@@ -421,8 +430,12 @@ class AudioController(object):
                     for now_gem in now_gems:
                         to_remove.append(now_gem)
 
+                # FIX: store lane in now_gems and use those to call missed_block and missed_hit
+
             for gem in to_remove:
                 self.fight_gems.remove(gem)
+
+            # FIX: add callback for scene_manager to delete gems by UUID
 
                     
     def get_song_time(self):
@@ -432,12 +445,14 @@ class AudioController(object):
         pass
 
     def on_update(self, dt, player, active_keys):
+
         # fading
         self.mixer_gain = self.mixer_gain + ((self.target_mixer_gain - self.mixer_gain) * dt * 3.25)
         self.mixer.set_gain(self.mixer_gain)
 
         self.audio.on_update()
         now = self.sched.get_tick()
+
         # callbacks/beat tracking
         new_beat = False
         self.song_time += dt
@@ -577,5 +592,10 @@ class AudioController(object):
                             self.missed_hit(int(gem.tag[9:]))
                             to_remove.append(gem)
 
+                # FIX: use uuid-based position gem tracking dict instead of self.fight_gems, add UUIDs to to_remove
+
                 for gem in to_remove:
                     self.fight_gems.remove(gem)
+
+                # FIX: add callback for scene_manager to delete gems by UUID
+

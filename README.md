@@ -10,4 +10,4 @@ To-Do:
 - Create first level
 - Create pre-first-level audio warning
 - Change colors of gems in fight mode
-- Fix z-ordering and coloring bug with gems in fight mode
+*- Fix z-ordering and coloring bug with gems in fight mode
