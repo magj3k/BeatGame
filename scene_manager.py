@@ -77,6 +77,11 @@ class SceneManager(InstructionGroup):
                     next_scene_index = self.scenes[self.current_scene_index].next_scene_index
                     if next_scene_index != -1:
                         self.switch_to_scene(next_scene_index)
+                elif isinstance(self.scenes[self.current_scene_index], Menu):
+                    next_scene_index = self.current_scene_index+1
+                    if next_scene_index >= len(self.scenes):
+                        next_scene_index = 0
+                    self.switch_to_scene(next_scene_index)
 
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]
@@ -90,7 +95,7 @@ class SceneManager(InstructionGroup):
 
 
 class Scene(InstructionGroup):
-    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None, num_keys = 3):
         super(Scene, self).__init__()
 
         # general setup
@@ -103,6 +108,7 @@ class Scene(InstructionGroup):
         self.game_mode = "explore" # also "puzzle" and "fight"
         self.scene_finished = False
         self.scene_cleared = False
+        self.num_keys = num_keys
 
         # sets up audio controller
         self.audio_controller = audio_controller
