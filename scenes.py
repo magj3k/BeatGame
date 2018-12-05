@@ -201,7 +201,13 @@ scene_1_game_elements = [   scene_1_door,
                                                         beats = [1, 3, 5, 7],
                                                         res = scene_resolution,
                                                         active = True,
-                                                        sound_path = "audio/platform_sfx.wav")
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    JumpPad(world_pos = (31, 7),
+                                                        z = 99,
+                                                        color = Color(0.2, 0.2, 0.2),
+                                                        beats = [0, 2],
+                                                        res = scene_resolution,
+                                                        sound_path = "")
                                                 ]
 scene_1_game_elements.extend(scene_1_enemies)
 scene_1_UI_elements = []
@@ -324,3 +330,4 @@ scene_2_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_2_player
 scene_2 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_2_camera, res = scene_resolution, audio_controller = scene_2_audio_controller, player = scene_2_player)
 
 scenes = [menu_1, panel_1, scene_1]
+# scenes = [scene_1]

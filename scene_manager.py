@@ -288,6 +288,14 @@ class Scene(InstructionGroup):
                 quant_beat = int(beat) % 2
                 if quant_beat == 0:
                     element.advance_moves()
+            elif isinstance(element, JumpPad):
+                quant_beat = int(beat) % 8
+                if quant_beat in element.beats:
+                    element.toggle_active_state()
+
+                    # boosts player upwards if close enough
+                    if element.active and self.player.world_pos[0] > element.world_pos[0]-0.9 and self.player.world_pos[0] < element.world_pos[0]+0.9 and self.player.world_pos[1] <= element.initial_world_pos[1]+1 and self.player.world_pos[1] > element.initial_world_pos[1]-0.15:
+                        self.player.world_vel = (self.player.world_vel[0], 36.0)
 
     def append_ui_element(self, element):
         self.queued_UI_elements.append(element)

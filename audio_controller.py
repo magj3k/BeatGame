@@ -557,40 +557,41 @@ class AudioController(object):
             # play game element music based on proximity of player
             player_pos = player.world_pos
             for index, element in enumerate(self.musical_elements):
-                cell_bounds = element.cell_bounds
-                x_dist = min(abs(player_pos[0] - cell_bounds[0][0]), abs(player_pos[0] - cell_bounds[1][0]))
-                y_dist = min(abs(player_pos[1] - cell_bounds[0][1]), abs(player_pos[1] - cell_bounds[1][1]))
-                dist = (x_dist**2 + y_dist**2)**0.5
-                dist = max(0, dist - 2)
-                # max gain 0.8
-                # you start hearing things when you're less than 16 dist away
-                gain = 0.2 * max(0, (16 - dist)) / 16
-                obj_sound = element.sound_path
+                if isinstance(element, Platform):
+                    cell_bounds = element.cell_bounds
+                    x_dist = min(abs(player_pos[0] - cell_bounds[0][0]), abs(player_pos[0] - cell_bounds[1][0]))
+                    y_dist = min(abs(player_pos[1] - cell_bounds[0][1]), abs(player_pos[1] - cell_bounds[1][1]))
+                    dist = (x_dist**2 + y_dist**2)**0.5
+                    dist = max(0, dist - 2)
+                    # max gain 0.8
+                    # you start hearing things when you're less than 16 dist away
+                    gain = 0.2 * max(0, (16 - dist)) / 16
+                    obj_sound = element.sound_path
 
-                # find closest beat to now
-                beats = element.beats
-                prev_beat = quantize_tick_up(now, self.note_grid*4) - self.note_grid*4
-                next_tick = prev_beat + 8*self.note_grid
-                for beat_num in beats:
-                    beat_num = beat_num / 2
+                    # find closest beat to now
+                    beats = element.beats
+                    prev_beat = quantize_tick_up(now, self.note_grid*4) - self.note_grid*4
+                    next_tick = prev_beat + 8*self.note_grid
+                    for beat_num in beats:
+                        beat_num = beat_num / 2
 
-                    tick = prev_beat + self.note_grid * (beat_num)
-                    if tick > now:
-                        if tick < next_tick:
-                            next_tick = tick
-                    else:
-                        tick += 4*self.note_grid
-                        if tick < next_tick:
-                            next_tick = tick
+                        tick = prev_beat + self.note_grid * (beat_num)
+                        if tick > now:
+                            if tick < next_tick:
+                                next_tick = tick
+                        else:
+                            tick += 4*self.note_grid
+                            if tick < next_tick:
+                                next_tick = tick
 
-                if next_tick < prev_beat + 8*self.note_grid:
-                    if index not in self.object_ticks:
-                        self.object_ticks[index] = {}
+                    if next_tick < prev_beat + 8*self.note_grid:
+                        if index not in self.object_ticks:
+                            self.object_ticks[index] = {}
 
-                    if next_tick not in self.object_ticks[index]:
-                        self.sched.post_at_tick(self.object_sound, next_tick, (index, obj_sound))
+                        if next_tick not in self.object_ticks[index]:
+                            self.sched.post_at_tick(self.object_sound, next_tick, (index, obj_sound))
 
-                    self.object_ticks[index][next_tick] = gain
+                        self.object_ticks[index][next_tick] = gain
 
         # Puzzle Mode
         #############

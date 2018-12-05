@@ -277,6 +277,50 @@ class Platform(object):
             self.shape.vertices = processed_vertices
 
 
+class JumpPad(object):
+    def __init__(self, world_pos = (2, 6), z = 0, color = None, beats = [1, 3], res = 20.0, tag = "", sound_path = ""):
+        self.world_pos = world_pos
+        self.initial_world_pos = world_pos
+        self.target_world_pos = world_pos
+        self.musical = True
+        self.beats = beats # measured in half-beats
+        self.z = z
+        self.color = color
+        if self.color == None:
+            self.color = Color(1, 0, 0)
+        self.res = res
+        self.tag = tag
+        self.active = False
+        self.sound_path = sound_path
+
+        # musical elements
+        self.t = 0
+        self.anim_t = 0
+
+        # creates element for jump pad
+        self.element = TexturedElement(color = self.color, size = (146*0.3, 420*0.3), texture_path = "graphics/jump_pad.png")
+        self.shape = self.element.shape
+
+    def toggle_active_state(self):
+        self.active = not self.active
+        self.anim_t = 0
+        if not self.active:
+            self.target_world_pos = self.initial_world_pos
+
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
+        self.t += dt
+
+        # manages world_pos
+        self.world_pos = (self.world_pos[0] + ((self.target_world_pos[0] - self.world_pos[0]) * dt * 30.0), self.world_pos[1] + ((self.target_world_pos[1] - self.world_pos[1]) * dt * 30.0))
+        if self.active:
+            self.anim_t += dt
+            self.target_world_pos = (self.initial_world_pos[0], self.initial_world_pos[1] + 1.0 + (np.sin(self.anim_t*30.0)*0.1*max(0, (1.0-self.anim_t)/1.0)))
+
+        # updates element with correct position
+        self.element.pos = (self.world_pos[0]*self.res, (self.world_pos[1]-1)*self.res - (self.element.size[1]*0.5))
+        self.element.on_update(dt, ref_cam_scalar, cam_scalar, cam_offset)
+
+
 class Pickup(object):
     def __init__(self, element, z = 10, radius = 10, musical = False, tag = ""): # self.z, self.shape, self.color, self.on_update(), self.musical
         self.element = element
