@@ -12,7 +12,7 @@ class SceneManager(InstructionGroup):
     def __init__(self, scenes = [], initial_scene_index = 0):
         super(SceneManager, self).__init__()
         self.fade_rect_added = False
-        self.fade_rect = Rectangle(size = (window_size[0]*retina_multiplier, window_size[1]*retina_multiplier), pos = (0, 0))
+        self.fade_rect = Rectangle(size = (actual_window_size[0]*retina_multiplier, actual_window_size[1]*retina_multiplier), pos = (0, 0))
         self.fade_color = Color(0, 0, 0)
         self.fading = "in" # or "out"
 

@@ -139,6 +139,7 @@ class AudioController(object):
         self.fight_gem_margin = 40
         self.last_gem_uuid = 0
         self.fight_keys = {'1': False, '2': False, '3': False}
+        self.fight_keys_timer = 0
         self.fight_gem_data = [
                                 {'color': [0.3, 0.3, 1],
                                  'size': 39,
@@ -332,14 +333,15 @@ class AudioController(object):
             self.player.hit()
 
     # miss left gem
-    def missed_hit(self, lane):
+    def missed_hit(self, lane, animate = True):
         if self.fighting_enabled:
             # sfx
             miss_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
             self.mixer.add(miss_sfx)
             # graphics
-            self.player.attack()
-            self.enemy.block()
+            if animate:
+                self.player.attack()
+                self.enemy.block()
 
     #############
     # All Modes #
@@ -402,8 +404,9 @@ class AudioController(object):
 
         if self.mode == 'fight':
             to_remove = []
-            if keycode in ['1', '2', '3'] and self.fight_keys[keycode] == False:
+            if keycode in ['1', '2', '3'] and self.fight_keys[keycode] == False and self.fight_keys_timer <= 0:
                 self.fight_keys[keycode] = True
+                self.fight_keys_timer = 0.15
 
                 now_gems = []
                 # for gem in self.fight_gems:
@@ -616,6 +619,11 @@ class AudioController(object):
         ############
         if self.mode == 'fight' and self.fighting_enabled == True:
 
+            # fight key timeouts
+            self.fight_keys_timer += -dt
+            if self.fight_keys_timer < 0:
+                self.fight_keys_timer = 0
+
             # advances fight_gem_tracking
             song_length = 16 * 60 / self.bpm
             for gem_uuid in self.fight_gem_tracking.keys():
@@ -660,7 +668,7 @@ class AudioController(object):
                         to_remove.append((gem_uuid, "shoot_left"))
                 elif gem_uuid[-5:] == "right":
                     if gem_pos > window_size[0]/2 + self.fight_gem_margin:
-                        self.missed_hit(self.fight_gem_tracking[gem_uuid][1])
+                        self.missed_hit(self.fight_gem_tracking[gem_uuid][1], False)
                         to_remove.append((gem_uuid, "shoot_right"))
 
             for gem_data in to_remove:
