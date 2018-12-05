@@ -59,7 +59,7 @@ class TexturedElement(Element):
             if self.texture_path != "":
                 self.shape.texture = Image(self.texture_path).texture
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         if self.target_pos != None:
             self.pos = (self.pos[0] + ((self.target_pos[0] - self.pos[0])*dt*10.0), self.pos[1] + ((self.target_pos[1] - self.pos[1])*dt*10.0))
         if self.target_size != None:
@@ -88,7 +88,7 @@ class GeometricElement(Element):
     def change_shape(self, new_shape):
         self.shape = new_shape
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         super().on_update(dt)
         self.shape.pos = (((self.pos[0]-(self.size[0]/2))*retina_multiplier)*cam_scalar + cam_offset[0], ((self.pos[1]-(self.size[1]/2))*retina_multiplier)*cam_scalar + cam_offset[1])
 
@@ -115,7 +115,7 @@ class ElementGroup(object):
         for element in self.elements:
             self.shape.add(element)
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         for element in self.elements:
             element.on_update(dt)
 
@@ -134,11 +134,12 @@ class Backdrop(object):
         self.musical = musical
 
     # modifies camera-based scaling and offset depending on self.parallax_z
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         new_cam_scalar = cam_scalar*(1/(self.parallax_z+1))
         new_cam_offset_parts = ((cam_offset[0]-(actual_window_size[0]*0.5*retina_multiplier))/cam_scalar, (cam_offset[1]-(actual_window_size[1]*0.5*retina_multiplier))/cam_scalar)
         new_cam_offset = (new_cam_offset_parts[0]*new_cam_scalar + (actual_window_size[0]*0.5*retina_multiplier), new_cam_offset_parts[1]*new_cam_scalar + (actual_window_size[1]*0.5*retina_multiplier))
-        self.element.on_update(dt, cam_scalar, new_cam_offset)
+
+        self.element.on_update(dt, ref_cam_scalar, cam_scalar, new_cam_offset)
 
 
 class Terrain(object): # mesh-based representation of a ground map
@@ -204,7 +205,7 @@ class Terrain(object): # mesh-based representation of a ground map
                 self.meshes.append(Mesh(vertices=self.mesh_vertices[-1], indices=[0, 1, 2, 3, 4, 5], mode="triangle_fan"))
                 self.shape.add(self.meshes[-1])
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         for i in range(len(self.meshes)):
             processed_vertices = self.mesh_vertices[i][:]
             for j in [0, 4, 8, 12, 16, 20]:
@@ -263,10 +264,10 @@ class Platform(object):
             if self.type == "dirt":
                 self.shape.mode="line_loop"
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         self.t += dt
         if self.type != "dirt":
-            self.element.on_update(dt, cam_scalar, cam_offset)
+            self.element.on_update(dt, ref_cam_scalar, cam_scalar, cam_offset)
         else:
             processed_vertices = self.vertices[:]
             for j in [0, 4, 8, 12, 16, 20, 24, 28]:
@@ -289,10 +290,10 @@ class Pickup(object):
         self.musical = musical
         self.tag = tag
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         self.t += dt
         self.element.pos = (self.initial_pos[0], self.initial_pos[1] + (np.sin(self.t*6.5)*2*retina_multiplier))
-        self.element.on_update(dt, cam_scalar, cam_offset)
+        self.element.on_update(dt, ref_cam_scalar, cam_scalar, cam_offset)
 
 
 class Particle(object):
@@ -311,7 +312,7 @@ class Particle(object):
         self.t = random.random()*0.35
         self.resize_period = resize_period
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
         self.t += dt
 
         # updates size
@@ -320,7 +321,7 @@ class Particle(object):
         if coeff <= 0.01 and self.t/self.resize_period >= 1.0:
             self.kill_me = True
 
-        self.element.on_update(dt, cam_scalar, cam_offset)
+        self.element.on_update(dt, ref_cam_scalar, cam_scalar, cam_offset)
 
 
 # element-substitute world-coordinated objects, 
@@ -784,7 +785,7 @@ class Enemy(object):
         else:
             self.current_move_index = 0
 
-    def on_update(self, dt, cam_scalar, cam_offset):
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
 
         # fight hit animation
         if self.hidden == False:
@@ -810,4 +811,4 @@ class Enemy(object):
             self.world_vel = (self.world_vel[0]+((self.target_velocity[0] - self.world_vel[0])*18.0*dt), self.world_vel[1]+((self.target_velocity[1] - self.world_vel[1])*18.0*dt))
         self.world_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
         self.element.pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res)
-        self.element.on_update(dt, cam_scalar, cam_offset)
+        self.element.on_update(dt, ref_cam_scalar, cam_scalar, cam_offset)

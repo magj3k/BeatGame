@@ -342,11 +342,13 @@ class Scene(InstructionGroup):
 
             # gets important camera information
             camera_scalar = None
+            ref_camera_scalar = None
             camera_offset = None # in world units
             if self.game_camera != None:
                 self.game_camera.on_update(dt)
 
                 camera_scalar = self.game_camera.zoom_factor * screen_dilation
+                ref_camera_scalar = self.game_camera.initial_target_zoom_factor * screen_dilation
                 camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+(actual_window_size[0]*0.5*retina_multiplier), -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+(actual_window_size[1]*0.5*retina_multiplier))
 
             # puzzle mode solving
@@ -495,7 +497,7 @@ class Scene(InstructionGroup):
             door_warning = None
             for k in range(len(self.game_elements)):
                 element = self.game_elements[k]
-                element.on_update(dt, camera_scalar, camera_offset)
+                element.on_update(dt, ref_camera_scalar, camera_scalar, camera_offset)
 
                 # collisions w/ pickups and enemies
                 if isinstance(element, Pickup) or isinstance(element, Enemy):
@@ -578,7 +580,7 @@ class Scene(InstructionGroup):
 
             for j in range(len(self.UI_elements)):
                 element = self.UI_elements[j]
-                element.on_update(dt, screen_dilation, (0, 0))
+                element.on_update(dt, 1.0, screen_dilation, (0, 0))
 
                 # removes gems if flagged to kill
                 if element.tag[:10] == "fight_gem_":
