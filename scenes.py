@@ -203,8 +203,14 @@ scene_0_game_elements = [   scene_0_door,
                                                         sound_path = "audio/platform_sfx.wav"),
                                                     JumpPad(world_pos = (31, 7),
                                                         z = 99,
-                                                        color = Color(0.2, 0.2, 0.2),
-                                                        beats = [0, 2],
+                                                        color = Color(0, 0, 0),
+                                                        beats = [4, 2],
+                                                        res = scene_resolution,
+                                                        sound_path = ""),
+                                                    Spikes(world_pos = (33, 7),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [1, 3],
                                                         res = scene_resolution,
                                                         sound_path = "")
                                                 ]
@@ -474,4 +480,4 @@ panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed 
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = 2)
 
 # scenes = [menu_1, panel_1, scene_1, scene_0]
-scenes = [scene_1]
+scenes = [scene_0]

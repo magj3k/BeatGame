@@ -314,7 +314,51 @@ class JumpPad(object):
         self.world_pos = (self.world_pos[0] + ((self.target_world_pos[0] - self.world_pos[0]) * dt * 30.0), self.world_pos[1] + ((self.target_world_pos[1] - self.world_pos[1]) * dt * 30.0))
         if self.active:
             self.anim_t += dt
-            self.target_world_pos = (self.initial_world_pos[0], self.initial_world_pos[1] + 1.0 + (np.sin(self.anim_t*30.0)*0.1*max(0, (1.0-self.anim_t)/1.0)))
+            self.target_world_pos = (self.initial_world_pos[0], self.initial_world_pos[1] + 1.0 + (np.sin(self.anim_t*30.0)*0.1*max(0, (0.75-self.anim_t)/0.75)))
+
+        # updates element with correct position
+        self.element.pos = (self.world_pos[0]*self.res, (self.world_pos[1]-1)*self.res - (self.element.size[1]*0.5))
+        self.element.on_update(dt, ref_cam_scalar, cam_scalar, cam_offset)
+
+
+class Spikes(object):
+    def __init__(self, world_pos = (2, 6), z = 0, color = None, beats = [1, 3], res = 20.0, tag = "", sound_path = ""):
+        self.world_pos = world_pos
+        self.initial_world_pos = world_pos
+        self.target_world_pos = world_pos
+        self.musical = True
+        self.beats = beats # measured in half-beats
+        self.z = z
+        self.color = color
+        if self.color == None:
+            self.color = Color(1, 0, 0)
+        self.res = res
+        self.tag = tag
+        self.active = False
+        self.sound_path = sound_path
+
+        # musical elements
+        self.t = 0
+        self.anim_t = 0
+
+        # creates element for jump pad
+        self.element = TexturedElement(color = self.color, size = (146*0.3, 420*0.3), texture_path = "graphics/spikes.png")
+        self.shape = self.element.shape
+
+    def toggle_active_state(self):
+        self.active = not self.active
+        self.anim_t = 0
+        if not self.active:
+            self.target_world_pos = self.initial_world_pos
+
+    def on_update(self, dt, ref_cam_scalar, cam_scalar, cam_offset):
+        self.t += dt
+
+        # manages world_pos
+        self.world_pos = (self.world_pos[0] + ((self.target_world_pos[0] - self.world_pos[0]) * dt * 30.0), self.world_pos[1] + ((self.target_world_pos[1] - self.world_pos[1]) * dt * 30.0))
+        if self.active:
+            self.anim_t += dt
+            self.target_world_pos = (self.initial_world_pos[0], self.initial_world_pos[1] + 1.0 + (np.sin(self.anim_t*30.0)*0.1*max(0, (0.75-self.anim_t)/0.75)))
 
         # updates element with correct position
         self.element.pos = (self.world_pos[0]*self.res, (self.world_pos[1]-1)*self.res - (self.element.size[1]*0.5))
@@ -379,6 +423,7 @@ class Player(object):
         self.world_pos = initial_world_pos # world units are measured by res
         self.target_world_pos = None
         self.world_vel = (0, 0)
+        self.world_vel_temp = (0, 0)
         self.z = z
         self.musical = False
         self.on_ground = True
@@ -467,8 +512,9 @@ class Player(object):
             self.sword.misc_t = 0.6
             self.sword.change_texture("graphics/sword_1_right_down.png")
 
-    def hit(self):
-        self.world_pos = (self.fight_pos[0]-0.25, self.fight_pos[1])
+    def hit(self, move = True):
+        if move:
+            self.world_pos = (self.fight_pos[0]-0.25, self.fight_pos[1])
         self.health += -1
         self.fight_hit_animation_t = 1.0
 
@@ -502,8 +548,10 @@ class Player(object):
         if self.collisions_enabled == False:
             accel = 0
             self.world_vel = (self.world_vel[0], 0)
+
+        self.world_vel_temp = (self.world_vel_temp[0] * 0.91, self.world_vel_temp[1] * 0.91)
         next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] + accel)
-        next_pos = (self.world_pos[0] + self.world_vel[0]*dt, self.world_pos[1] + self.world_vel[1]*dt)
+        next_pos = (self.world_pos[0] + self.world_vel[0]*dt + self.world_vel_temp[0]*dt, self.world_pos[1] + self.world_vel[1]*dt + self.world_vel_temp[1]*dt)
 
         # ground & wall collisions
         if self.collisions_enabled == True:
@@ -555,9 +603,11 @@ class Player(object):
             if left_side < next_player_x_index and current_player_height < left_height:
                 next_pos = (next_player_x_index+self.world_size[0]*0.5, next_pos[1])
                 next_vel = (0, next_vel[1])
+                self.world_vel_temp = (0, self.world_vel_temp[1])
             elif right_side > next_player_x_index+1 and current_player_height < right_height:
                 next_pos = (next_player_x_index+1-self.world_size[0]*0.5, next_pos[1])
                 next_vel = (0, next_vel[1])
+                self.world_vel_temp = (0, self.world_vel_temp[1])
 
             # falling/respawning
             if current_player_height <= 1.1:

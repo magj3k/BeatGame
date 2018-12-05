@@ -302,6 +302,38 @@ class Scene(InstructionGroup):
                     # boosts player upwards if close enough
                     if element.active and self.player.world_pos[0] > element.world_pos[0]-0.9 and self.player.world_pos[0] < element.world_pos[0]+0.9 and self.player.world_pos[1] <= element.initial_world_pos[1]+1 and self.player.world_pos[1] > element.initial_world_pos[1]-0.15:
                         self.player.world_vel = (self.player.world_vel[0], 36.0)
+            elif isinstance(element, Spikes):
+                quant_beat = int(beat) % 8
+                if quant_beat in element.beats:
+                    element.toggle_active_state()
+
+                    # damages player if nearby
+                    if self.player.fight_hit_animation_t <= 0 and element.active and self.player.world_pos[0] > element.world_pos[0]-0.9 and self.player.world_pos[0] < element.world_pos[0]+0.9 and self.player.world_pos[1] <= element.initial_world_pos[1]+1 and self.player.world_pos[1] > element.initial_world_pos[1]-0.15:
+                        self.player.hit(False)
+
+                        if self.player.health <= 0:
+
+                            # creates particles
+                            for i in range(12):
+                                new_particle = Particle(GeometricElement(pos = self.player.element.pos,
+                                    vel = (random.random()*100.0 - 50.0, random.random()*65.0 - 15.0),
+                                    color = Color(0, 0, 0),
+                                    size = (30, 30),
+                                    shape = Ellipse(pos = self.player.element.pos, size = (0.01, 0.01))),
+                                    z = self.player.z,
+                                    resize_period = 0.5+(random.random()*1.6))
+                                self.game_elements.append(new_particle)
+
+                            self.player.world_pos = (self.player.initial_world_pos[0], 40.0)
+                            self.player.health = 3
+                            self.player.fight_hit_animation_t = 0
+
+                        else:
+                            x_vel = 15.0
+                            if self.player.world_pos[0] < element.world_pos[0]:
+                                x_vel = -15.0
+                            self.player.world_vel = (self.player.world_vel[0], 18.0)
+                            self.player.world_vel_temp = (x_vel, 0.0)
 
     def append_ui_element(self, element):
         self.queued_UI_elements.append(element)
