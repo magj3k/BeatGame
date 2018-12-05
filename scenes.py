@@ -479,5 +479,5 @@ panel_1_objects = [
 panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = 2)
 
-# scenes = [menu_1, panel_1, scene_1, scene_0]
-scenes = [scene_0]
+scenes = [menu_1, panel_1, scene_1, scene_0]
+# scenes = [scene_0]

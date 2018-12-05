@@ -77,7 +77,7 @@ class SceneManager(InstructionGroup):
                     next_scene_index = self.scenes[self.current_scene_index].next_scene_index
                     if next_scene_index != -1:
                         self.switch_to_scene(next_scene_index)
-                elif isinstance(self.scenes[self.current_scene_index], Menu):
+                else:
                     next_scene_index = self.current_scene_index+1
                     if next_scene_index >= len(self.scenes):
                         next_scene_index = 0
@@ -933,6 +933,11 @@ class Panel(Scene): # essentially just a timed story panel
 
     def on_update(self, dt, active_keys):
         self.t += dt
+
+        # skip button
+        for key in active_keys.keys():
+            if active_keys[key] == True and self.t > 0.15:
+                self.scene_finished = True
 
         # adds/removes timed objects
         for i in range(len(self.timed_objects)):

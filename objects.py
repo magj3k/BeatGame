@@ -549,7 +549,7 @@ class Player(object):
             accel = 0
             self.world_vel = (self.world_vel[0], 0)
 
-        self.world_vel_temp = (self.world_vel_temp[0] * 0.91, self.world_vel_temp[1] * 0.91)
+        self.world_vel_temp = (self.world_vel_temp[0] * 0.915, self.world_vel_temp[1] * 0.915)
         next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] + accel)
         next_pos = (self.world_pos[0] + self.world_vel[0]*dt + self.world_vel_temp[0]*dt, self.world_pos[1] + self.world_vel[1]*dt + self.world_vel_temp[1]*dt)
 
