@@ -21,6 +21,12 @@ class SceneManager(InstructionGroup):
         self.current_scene_index = -1
         self.switch_to_scene(initial_scene_index)
 
+    def on_multi_key_down(self, keys):
+        if len(self.scenes) > self.current_scene_index:
+            current_scene = self.scenes[self.current_scene_index]
+            if current_scene.audio_controller != None:
+                current_scene.audio_controller.on_multi_key_down(keys)
+
     def on_key_down(self, key): # for audio controller
         if len(self.scenes) > self.current_scene_index:
             current_scene = self.scenes[self.current_scene_index]

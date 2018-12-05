@@ -27,15 +27,29 @@ class MainWidget(BaseWidget):
         self.scene_manager = SceneManager(scenes)
         self.canvas.add(self.scene_manager)
 
+        # handling multiple keypresses
+        self.time = 0
+        self.timing_window = 0.015
+        self.current_keypresses = []
+
     def on_update(self):
         dt = kivyClock.frametime
+        self.time += dt
         self.scene_manager.on_update(dt, self.active_keys)
+
+        if self.current_keypresses:
+            if self.time > self.current_keypresses[-1][1] + self.timing_window:
+                self.scene_manager.on_multi_key_down([key[0] for key in self.current_keypresses])
+                self.current_keypresses = []
+
 
     def on_key_down(self, keycode, modifiers):
         key = keycode[1]
         self.scene_manager.on_key_down(key)
         if key in self.active_keys:
             self.active_keys[key] = True
+            self.current_keypresses.append((keycode[1], self.time))
+            
 
     def on_key_up(self, keycode):
         key = keycode[1]
