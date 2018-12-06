@@ -22,17 +22,17 @@ puzzle_map = [
                  'fg_music': ['audio/electro_support.wav', 'audio/electro_main.wav'],
                  'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_main_gems.txt', 'audio/electro_bg_gems.txt'],
                  'bpm': 110,
-                 'lanes': 2},
+                 'lanes': 2}, # number of moving lanes (not include background)
 ]
 fight_map = [
                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'],
                  'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
-                 'left_beats': [0, 4],
-                 'right_beats': [0, 4],
+                 'left_beats': [2, 6], # eighth notes in a measure
+                 'right_beats': [0, 4], # eighth notes in a measure
                  'miss_sfx': 'audio/error_sound.wav',
                  'hit_sfx': 'audio/snare.wav',
                  'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (6, 10),
+                 'gem_creation': (6, 10), # create if less than, out of
                  'lanes': 3},
 ]
 
@@ -308,6 +308,7 @@ class AudioController(object):
         if self.fighting_enabled:
             # sfx
             block_sfx = WaveGenerator(WaveFile(self.level_fight['left_sfx'][lane-1]))
+            block_sfx.set_gain(0.8)
             self.mixer.add(block_sfx)
             # graphics
             self.enemy.attack()
@@ -329,6 +330,8 @@ class AudioController(object):
             # sfx
             hit_sfx = WaveGenerator(WaveFile(self.level_fight['hit_sfx']))
             self.mixer.add(hit_sfx)
+            error_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
+            self.mixer.add(error_sfx)
             # graphics
             self.enemy.attack()
             self.player.hit()
@@ -338,7 +341,10 @@ class AudioController(object):
         if self.fighting_enabled:
             # sfx
             block_sfx = WaveGenerator(WaveFile(self.level_fight['block_sfx']))
+            block_sfx.set_gain(0.8)
             self.mixer.add(block_sfx)
+            error_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
+            self.mixer.add(error_sfx)
             # graphics
             if animate:
                 self.player.attack()
@@ -433,6 +439,7 @@ class AudioController(object):
                 # hit
                 gems_hit = {"right":0, "left":0}
                 gems_missed = {"right":0, "left":0}
+                lanes_in = set()
                 # for now_gem in now_gems:
                 #     gem_hit = False
                 #     if now_gem.tag[:10] == 'right_gem_':
@@ -453,6 +460,7 @@ class AudioController(object):
 
                 # FIX: clean up unnecessary code and handle now_gems uuids, hit scene_manager callback for gem hit animations
                 for gem_uuid in now_gems:
+                    lanes_in.add(str(self.fight_gem_tracking[gem_uuid][1]))
                     # gem_hit = False
                     if str(self.fight_gem_tracking[gem_uuid][1]) in keys: # correct lane
                         # gem_hit = True
@@ -475,11 +483,14 @@ class AudioController(object):
                             gems_missed["left"] += 1
                             to_remove.append((gem_uuid, "shoot_left"))
 
+                wrong_lane = True
+                if set(keys) <= lanes_in:
+                    wrong_lane = False
                 # calculate hit or miss precendence
                 # no left gems
                 if gems_hit["left"] + gems_missed["left"] == 0:
                     right_hit_proportion = gems_hit["right"]/(gems_hit["right"] + gems_missed["right"])
-                    if right_hit_proportion == 1:
+                    if right_hit_proportion == 1 and not wrong_lane:
                         self.hit(int(keys[0]))
                     else:
                         self.missed_hit(int(keys[0]))
@@ -496,11 +507,17 @@ class AudioController(object):
                     left_hit_proportion = gems_hit["left"]/(gems_hit["left"] + gems_missed["left"])
                     if right_hit_proportion == 1:
                         if left_hit_proportion == 1:
-                            self.hit(int(keys[0]))
+                            if not wrong_lane:
+                                self.hit(int(keys[0]))
+                            else:
+                                self.missed_hit(int(keys[0]))
                         else:
                             self.block(int(keys[0]))
                     else:
-                        self.missed_block(int(keys[0]))
+                        if left_hit_proportion == 1:
+                            self.block(int(keys[0]))
+                        else:
+                            self.missed_block(int(keys[0]))
 
 
                 # lane miss
@@ -694,8 +711,8 @@ class AudioController(object):
                 for attack in self.level_fight['left_beats']:
                     if self.half_beat % 8 == attack:
                         create_bool = random.randint(0, out_of) < create_if
-                        for lane in range(1, self.fight_lanes+1):
-                            use_lane = random.randint(1, self.fight_lanes+1) == 1
+                        for lane in range(1, self.fight_lanes + 1):
+                            use_lane = random.randint(1, self.fight_lanes) == 1
                             if create_bool and use_lane:
                                 self.create_left_gem(lane)
                                 used_lanes.append(lane)
@@ -703,8 +720,8 @@ class AudioController(object):
                 for attack in self.level_fight['right_beats']:
                     if self.half_beat % 8 == attack:
                         create_bool = random.randint(0, out_of) < create_if
-                        for lane in range(1, self.fight_lanes+1):
-                            use_lane = random.randint(1, self.fight_lanes+1) == 1
+                        for lane in range(1, self.fight_lanes + 1):
+                            use_lane = random.randint(1, self.fight_lanes) == 1
                             if create_bool and use_lane and lane not in used_lanes:
                                 self.create_right_gem(lane)
                 
