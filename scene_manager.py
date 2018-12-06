@@ -145,6 +145,35 @@ class Scene(InstructionGroup):
         self.fight_end_timer = -1
 
     def clear(self): # called when the scene is finished and faded out
+
+        # resets UI keys
+        for element in self.UI_elements:
+            if element.tag[:2] == "k_":
+                if element.tag[2] == '1':
+                    element.tag = "k_1"
+                    element.change_texture("graphics/key_outline.png")
+                    element.target_pos = None
+                    element.target_size = None
+                    element.z = 10
+                    element.size = (166*0.2, 400*0.2)
+                    element.pos = (window_size[0]-45, window_size[1]-65)
+                elif element.tag[2] == '2':
+                    element.tag = "k_2"
+                    element.change_texture("graphics/key_outline.png")
+                    element.target_pos = None
+                    element.target_size = None
+                    element.z = 10
+                    element.size = (166*0.2, 400*0.2)
+                    element.pos = (window_size[0]-95, window_size[1]-65)
+                elif element.tag[2] == '3':
+                    element.tag = "k_3"
+                    element.change_texture("graphics/key_outline.png")
+                    element.target_pos = None
+                    element.target_size = None
+                    element.z = 10
+                    element.size = (166*0.2, 400*0.2)
+                    element.pos = (window_size[0]-145, window_size[1]-65)
+
         self.scene_cleared = True
         self.player = None
         self.game_elements = []
