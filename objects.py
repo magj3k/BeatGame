@@ -434,10 +434,13 @@ class Player(object):
         self.jump_used = False
         self.collisions_enabled = True
         self.hidden = False
+        self.flight_enabled = False # dev only
+        self.flight_y_vel = 0
 
         # fighting
         self.fight_pos = None
-        self.health = 3
+        self.max_health = 8
+        self.health = self.max_health
         self.fight_hit_animation_state = -1
         self.fight_hit_animation_t = 0
         self.fight_keys_available = {"attack_1": True, "attack_2": True, "hit_1": True, "hit_2": True}
@@ -451,6 +454,9 @@ class Player(object):
         self.animation_frame_duration = 0.1
 
         self.element = TexturedElement(pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res), tag = "player", z = self.z, size = (self.res*2, self.res*2), texture_path = "graphics/player_stand.png")
+
+    def reset_health(self):
+        self.health = self.max_health
 
     def set_animation_state(self, new_state): # follow this call with self.process_animation()
         if new_state in self.valid_animation_states and new_state != self.animation_state:
@@ -515,7 +521,7 @@ class Player(object):
     def hit(self, move = True):
         if move:
             self.world_pos = (self.fight_pos[0]-0.25, self.fight_pos[1])
-        self.health += -1
+        self.health = max(self.health-1, 0)
         self.fight_hit_animation_t = 1.0
 
     def block(self):
@@ -527,8 +533,13 @@ class Player(object):
 
     def on_update(self, dt, ground_map, active_keys, cam_scalar, cam_offset, audio_controller, platforms = [], door = None, override_target_x_vel = None):
 
+        # dev
+        if active_keys["1"] == True:
+            print("PLAYER POS: "+str(self.world_pos))
+
         # position update
         target_x_vel = 0
+        target_y_vel = 0 # for flight only
         if audio_controller != None and audio_controller.solved == False:
             if self.controls_disabled == False and self.spawning_freeze == False:
                 if active_keys["right"] == True:
@@ -541,6 +552,10 @@ class Player(object):
                 self.set_animation_state("standing")
             if active_keys["spacebar"] == False:
                 self.jump_used = False
+            if active_keys["up"] == True:
+                target_y_vel += 0.12
+            if active_keys["down"] == True:
+                target_y_vel += -0.12
 
         accel = -72.0*dt
         if override_target_x_vel != None:
@@ -548,9 +563,17 @@ class Player(object):
         if self.collisions_enabled == False:
             accel = 0
             self.world_vel = (self.world_vel[0], 0)
+        if self.flight_enabled:
+            accel = 0
+
+        # flight mode
+        if target_y_vel != 0:
+            self.flight_y_vel = self.flight_y_vel + ((target_y_vel - self.flight_y_vel)*18.0*dt)
+        else:
+            self.flight_y_vel = self.flight_y_vel*0.91
 
         self.world_vel_temp = (self.world_vel_temp[0] * 0.915, self.world_vel_temp[1] * 0.915)
-        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] + accel)
+        next_vel = (self.world_vel[0]+((target_x_vel - self.world_vel[0])*18.0*dt), self.world_vel[1] + accel + self.flight_y_vel)
         next_pos = (self.world_pos[0] + self.world_vel[0]*dt + self.world_vel_temp[0]*dt, self.world_pos[1] + self.world_vel[1]*dt + self.world_vel_temp[1]*dt)
 
         # ground & wall collisions
@@ -787,8 +810,8 @@ class Enemy(object):
         self.target_velocity = (0, 0)
 
         # fighting
-        self.max_health = 3
-        self.health = 3
+        self.max_health = 5
+        self.health = self.max_health
         self.in_fight = False
         self.fight_pos = None
         self.fight_hit_animation_state = -1
@@ -805,6 +828,9 @@ class Enemy(object):
         self.element = TexturedElement(pos = (self.world_pos[0]*self.res, self.world_pos[1]*self.res), tag = "enemy", z = self.z, size = (self.res*2, self.res*2), texture_path = "graphics/enemy_stand.png")
         self.shape = self.element.shape
 
+    def reset_health(self):
+        self.health = self.max_health
+
     def attack(self):
         self.world_pos = (self.fight_pos[0]-0.5, self.fight_pos[1])
 
@@ -814,7 +840,7 @@ class Enemy(object):
 
     def hit(self):
         self.world_pos = (self.fight_pos[0]+0.25, self.fight_pos[1])
-        self.health += -1
+        self.health = max(self.health-1, 0)
         self.fight_hit_animation_t = 1.0
 
     def block(self):

@@ -376,8 +376,9 @@ class Scene(InstructionGroup):
                                 self.game_elements.append(new_particle)
 
                             self.player.world_pos = (self.player.initial_world_pos[0], 40.0)
-                            self.player.health = 3
+                            self.player.reset_health()
                             self.player.fight_hit_animation_t = 0
+                            self.spawning_freeze = True
 
                         else:
                             x_vel = 15.0
@@ -560,7 +561,7 @@ class Scene(InstructionGroup):
                         # respawns player if necessary
                         if self.player.health <= 0:
                             self.player.world_pos = self.player.initial_world_pos
-                            self.player.health = 3
+                            self.player.reset_health()
                             self.player.fight_hit_animation_t = 0
 
                             # resets enemy
@@ -714,7 +715,7 @@ class Scene(InstructionGroup):
                                     element.target_size = (element.initial_size[0]*health_coeff, element.initial_size[1])
                                     element.target_pos = (element.initial_pos[0]+((1-health_coeff)*element.initial_size[0]*0.5), element.initial_pos[1])
                                 else: # player health
-                                    health_coeff = (self.player.health/3)
+                                    health_coeff = (self.player.health/self.player.max_health)
                                     element.target_size = (element.initial_size[0]*health_coeff, element.initial_size[1])
                                     element.target_pos = (element.initial_pos[0]-((1-health_coeff)*element.initial_size[0]*0.5), element.initial_pos[1])
                     else:
