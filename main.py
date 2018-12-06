@@ -38,7 +38,7 @@ class MainWidget(BaseWidget):
         self.scene_manager.on_update(dt, self.active_keys)
 
         if self.current_keypresses:
-            if self.time > self.current_keypresses[-1][1] + self.timing_window:
+            if self.time > self.current_keypresses[-1][1] + self.timing_window or len(self.current_keypresses) == 3:
                 self.scene_manager.on_multi_key_down([key[0] for key in self.current_keypresses])
                 self.current_keypresses = []
 
