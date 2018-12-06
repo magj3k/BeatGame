@@ -604,16 +604,29 @@ class AudioController(object):
                     y_dist = min(abs(player_pos[1] - cell_bounds[0][1]), abs(player_pos[1] - cell_bounds[1][1]))
                     dist = (x_dist**2 + y_dist**2)**0.5
                     dist = max(0, dist - 2)
-                    # max gain 0.8
+                    # max gain 0.2
                     # you start hearing things when you're less than 16 dist away
                     gain = 0.2 * max(0, (16 - dist)) / 16
                     obj_sound = element.sound_path
+                else:
+                    element_pos = element.initial_world_pos
+                    x_dist = abs(player_pos[0] - element_pos[0])
+                    y_dist = abs(player_pos[1] - element_pos[1])
+                    dist = (x_dist**2 + y_dist**2)**0.5
+                    dist = max(0, dist - 2)
+                    # max gain 0.3
+                    # you start hearing things when you're less than 16 dist away
+                    gain = 0.3 * max(0, (16 - dist)) / 16
+                    obj_sound = element.sound_path
 
+                if gain > 0 and obj_sound:
                     # find closest beat to now
                     beats = element.beats
                     prev_beat = quantize_tick_up(now, self.note_grid*4) - self.note_grid*4
                     next_tick = prev_beat + 8*self.note_grid
-                    for beat_num in beats:
+                    for i, beat_num in enumerate(beats):
+                        if isinstance(element, JumpPad) and i != 0:
+                            continue
                         beat_num = beat_num / 2
 
                         tick = prev_beat + self.note_grid * (beat_num)
