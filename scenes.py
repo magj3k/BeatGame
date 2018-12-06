@@ -376,6 +376,240 @@ scene_1_camera_bounds = ((25, 6.5), (77, 9.5))
 scene_1_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_1_player.world_pos, speed = 1.05, bounds = scene_1_camera_bounds)
 scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player, puzzle_mode_supported = False)
 
+# scene 2
+
+scene_2_water_map_1 = [0]*155
+scene_2_water_map_2 = [0]*155
+scene_2_ground_map = [0+scene_elevation_offset]*155
+scene_2_ground_map[0:22] = [4+scene_elevation_offset]*22
+scene_2_ground_map[0:18] = [6+scene_elevation_offset]*18
+scene_2_ground_map[0:14] = [8+scene_elevation_offset]*14
+scene_2_ground_map[28:31] = [-1+scene_elevation_offset]*3
+scene_2_ground_map[34:36] = [1+scene_elevation_offset]*2
+scene_2_ground_map[49:51] = [1+scene_elevation_offset]*2
+scene_2_ground_map[36:49] = [-5+scene_elevation_offset]*13
+scene_2_water_map_1[36:49] = [-1+scene_elevation_offset]*13
+scene_2_ground_map[65:73] = [1+scene_elevation_offset]*8
+scene_2_ground_map[66:72] = [2+scene_elevation_offset]*6
+scene_2_ground_map[67:71] = [3+scene_elevation_offset]*4
+scene_2_ground_map[68:70] = [4+scene_elevation_offset]*2
+scene_2_ground_map[74:77] = [-1+scene_elevation_offset]*3
+scene_2_ground_map[79:81] = [1+scene_elevation_offset]*2
+scene_2_ground_map[81:99] = [-5+scene_elevation_offset]*18
+scene_2_water_map_2[81:99] = [-1+scene_elevation_offset]*18
+scene_2_ground_map[99:101] = [1+scene_elevation_offset]*2
+scene_2_ground_map[108:125] = [2+scene_elevation_offset]*17
+scene_2_ground_map[110:122] = [4+scene_elevation_offset]*12
+scene_2_ground_map[122] = 3+scene_elevation_offset
+scene_2_ground_map[125] = 1+scene_elevation_offset
+scene_2_ground_map[131:150] = [4+scene_elevation_offset]*19
+scene_2_player = Player(res = scene_resolution, initial_world_pos = (25, 7.5), z = 110)
+# scene_2_player.flight_enabled = True
+scene_2_door_offset = scene_resolution*51
+scene_2_door = TexturedElement(pos = (2445 + scene_2_door_offset, 213),
+                                z = 101,
+                                size = (500*0.13, 500*0.13),
+                                texture_path = "graphics/door_closed.png",
+                                tag = "door")
+
+scene_2_game_elements = [   scene_2_door,
+                                                    TexturedElement(pos = (615, 213),
+                                                        z = 101,
+                                                        size = (500*0.13, 500*0.13),
+                                                        texture_path = "graphics/door_closed.png"),
+                                                    TexturedElement(pos = (2350+scene_2_door_offset, 280),
+                                                        z = 99,
+                                                        size = (458*0.17, 490*0.17),
+                                                        texture_path = "graphics/not_enough_keys.png",
+                                                        tag = "door_warning"),
+                                                    Backdrop(element = TexturedElement(pos = (0, 0),
+                                                        z = 0,
+                                                        size = (window_size[0]*3.0, window_size[1]*1.2),
+                                                        texture_path = "graphics/bg_1.png"),
+                                                        parallax_z = far_z),
+                                                    Backdrop(element = TexturedElement(pos = (0, -300),
+                                                        z = 11,
+                                                        size = (window_size[0]*3.0, window_size[1]*0.8),
+                                                        texture_path = "graphics/bg_2.png",
+                                                        color = Color(0.2, 0.4, 0.15)),
+                                                        parallax_z = 60),
+                                                    Backdrop(element = TexturedElement(pos = (1100, 80),
+                                                        z = 46,
+                                                        size = (1414*0.8, 370*0.8),
+                                                        texture_path = "graphics/hill_2.png",
+                                                        color = Color(0.35, 0.55, 0.3)),
+                                                        parallax_z = 0.4),
+                                                    Backdrop(element = TexturedElement(pos = (1100, 80),
+                                                        z = 46,
+                                                        size = (1414*0.8, 370*0.8),
+                                                        texture_path = "graphics/hill_2_water.png",
+                                                        color = Color(0.3, 0.3, 0.9)),
+                                                        parallax_z = 0.4),
+                                                    Backdrop(element = TexturedElement(pos = (500, 75),
+                                                        z = 44,
+                                                        size = (-1414*0.55, 370*0.55),
+                                                        texture_path = "graphics/hill_2.png",
+                                                        color = Color(0.3, 0.5, 0.25)),
+                                                        parallax_z = 1.4),
+                                                    Backdrop(element = TexturedElement(pos = (500, 75),
+                                                        z = 44,
+                                                        size = (-1414*0.55, 370*0.55),
+                                                        texture_path = "graphics/hill_2_water.png",
+                                                        color = Color(0.2, 0.2, 0.8)),
+                                                        parallax_z = 1.4),
+                                                    Backdrop(element = TexturedElement(pos = (240, 61),
+                                                        z = 40,
+                                                        size = (1414*0.4, 370*0.4),
+                                                        texture_path = "graphics/hill_2.png",
+                                                        color = Color(0.25, 0.45, 0.2)),
+                                                        parallax_z = 3.0),
+                                                    Backdrop(element = TexturedElement(pos = (240, 61),
+                                                        z = 40,
+                                                        size = (1414*0.4, 370*0.4),
+                                                        texture_path = "graphics/hill_2_water.png",
+                                                        color = Color(0.15, 0.15, 0.75)),
+                                                        parallax_z = 3.0),
+                                                    Backdrop(element = TexturedElement(pos = (2100, 70),
+                                                        z = 45,
+                                                        size = (1414*0.9, 370*0.9),
+                                                        texture_path = "graphics/hill_2.png",
+                                                        color = Color(0.35, 0.55, 0.3)),
+                                                        parallax_z = 0.5),
+                                                    Backdrop(element = TexturedElement(pos = (2100, 70),
+                                                        z = 45,
+                                                        size = (1414*0.9, 370*0.9),
+                                                        texture_path = "graphics/hill_2_water.png",
+                                                        color = Color(0.3, 0.3, 0.9)),
+                                                        parallax_z = 0.5),
+                                                    Backdrop(element = TexturedElement(pos = (1400, 70),
+                                                        z = 43,
+                                                        size = (1414*0.55, 370*0.55),
+                                                        texture_path = "graphics/hill_2.png",
+                                                        color = Color(0.3, 0.5, 0.25)),
+                                                        parallax_z = 1.6),
+                                                    Backdrop(element = TexturedElement(pos = (1400, 70),
+                                                        z = 43,
+                                                        size = (1414*0.55, 370*0.55),
+                                                        texture_path = "graphics/hill_2_water.png",
+                                                        color = Color(0.25, 0.25, 0.85)),
+                                                        parallax_z = 1.6),
+                                                    Backdrop(element = TexturedElement(pos = (1050, 60),
+                                                        z = 40,
+                                                        size = (1414*0.3, 370*0.3),
+                                                        texture_path = "graphics/hill_2.png",
+                                                        color = Color(0.25, 0.45, 0.2)),
+                                                        parallax_z = 3.4),
+                                                    Backdrop(element = TexturedElement(pos = (1050, 60),
+                                                        z = 40,
+                                                        size = (1414*0.3, 370*0.3),
+                                                        texture_path = "graphics/hill_2_water.png",
+                                                        color = Color(0.2, 0.2, 0.8)),
+                                                        parallax_z = 3.4),
+                                                    Backdrop(element = TexturedElement(pos = (70-300, -80),
+                                                        z = 5,
+                                                        size = (532*1.4, 266*1.4),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
+                                                        parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (240-300, 30),
+                                                        z = 9,
+                                                        size = (532*1.0, 266*1.0),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
+                                                        parallax_z = 150),
+                                                    Backdrop(element = TexturedElement(pos = (240-300, 30),
+                                                        z = 9,
+                                                        size = (532*1.0, 266*1.0),
+                                                        texture_path = "graphics/mountain_cap.png",
+                                                        color = Color(1, 1, 1)),
+                                                        parallax_z = 150),
+                                                    Backdrop(element = TexturedElement(pos = (445-300, -80),
+                                                        z = 5,
+                                                        size = (532*1.2, 266*1.2),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
+                                                        parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (595, -80),
+                                                        z = 5,
+                                                        size = (532*1.3, 266*1.3),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
+                                                        parallax_z = 200),
+                                                    Terrain(scene_2_ground_map,
+                                                        z = 100,
+                                                        color = Color(0, 0, 0),
+                                                        res = scene_resolution),
+                                                    Terrain(scene_2_water_map_1,
+                                                        z = 111,
+                                                        color = Color(0.35, 0.35, 0.95),
+                                                        res = scene_resolution,
+                                                        type = "water"),
+                                                    Terrain(scene_2_water_map_2,
+                                                        z = 111,
+                                                        color = Color(0.35, 0.35, 0.95),
+                                                        res = scene_resolution,
+                                                        type = "water"),
+                                                    Pickup(TexturedElement(pos = (42.75*scene_resolution, 300),
+                                                        size = (166*0.091, 400*0.091),
+                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
+                                                    Pickup(TexturedElement(pos = (69*scene_resolution, 14*scene_resolution),
+                                                        size = (166*0.091, 400*0.091),
+                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
+                                                    Platform(((39, 6), (40, 6)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [1, 3, 5, 7],
+                                                        res = scene_resolution,
+                                                        active = False,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((44.5, 6), (45.5, 6)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [1, 3, 5, 7],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((84, 6), (85, 6)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [1, 3, 5, 7],
+                                                        res = scene_resolution,
+                                                        active = False,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((89, 6), (90, 6)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [1, 3, 5, 7],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((94, 6), (95, 6)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [1, 3, 5, 7],
+                                                        res = scene_resolution,
+                                                        active = False,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                ]
+scene_2_enemies = [
+    Enemy(res = scene_resolution, initial_world_pos = (58, 7), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right", "stop", "right", "stop", "left"], has_key = False),
+    Enemy(res = scene_resolution, initial_world_pos = (113, 11), radius = 40, z = 110, moves_per_beat = ["stop", "right", "stop", "right", "stop", "right", "stop", "left", "stop", "left", "stop", "left"], has_key = True)
+]
+scene_2_game_elements.extend(scene_2_enemies)
+scene_2_UI_elements = []
+scene_2_UI_elements.extend(keys_UI)
+scene_2_UI_elements.extend(fight_UI)
+
+scene_2_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_2_game_elements)
+scene_2_camera_bounds = ((26, 6.5), (121, 9.5))
+scene_2_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_2_player.world_pos, speed = 1.05, bounds = scene_2_camera_bounds)
+scene_2 = Scene(initial_game_elements = scene_2_game_elements, initial_UI_elements = scene_2_UI_elements, ground_map = scene_2_ground_map, game_camera = scene_2_camera, res = scene_resolution, audio_controller = scene_2_audio_controller, player = scene_2_player)
+
 # menu 1
 
 menu_1_water_map = [0]*95
@@ -479,5 +713,5 @@ panel_1_objects = [
 panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = 2)
 
-scenes = [menu_1, panel_1, scene_1, scene_0]
-# scenes = [scene_0]
+scenes = [menu_1, panel_1, scene_1, scene_2, scene_0]
+# scenes = [scene_2]
