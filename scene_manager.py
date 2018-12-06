@@ -101,7 +101,7 @@ class SceneManager(InstructionGroup):
 
 
 class Scene(InstructionGroup):
-    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None, num_keys = 3):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None, num_keys = 3, puzzle_mode_supported = True):
         super(Scene, self).__init__()
 
         # general setup
@@ -115,6 +115,7 @@ class Scene(InstructionGroup):
         self.scene_finished = False
         self.scene_cleared = False
         self.num_keys = num_keys
+        self.puzzle_mode_supported = puzzle_mode_supported
 
         # sets up audio controller
         self.audio_controller = audio_controller
@@ -207,6 +208,21 @@ class Scene(InstructionGroup):
                 if self.fight_enemy_sword != None:
                     self.fight_enemy_sword.target_alpha = 0.0
                     self.fight_enemy_sword = None
+            elif new_mode == "puzzle_skip" and self.game_mode == "explore":
+                self.game_mode = new_mode
+
+                self.game_camera.bounds_enabled = False
+                self.player.controls_disabled = True
+                self.player.set_animation_state("standing")
+
+                # updates camera
+                for i in range(len(self.game_elements)):
+                    element = self.game_elements[i]
+                    if element.tag == "door":
+                        self.game_camera.update_target((element.pos[0]/self.res, element.pos[1]/self.res))
+                        self.game_camera.target_zoom_factor = 2.5
+                        self.game_camera.speed = 1.4
+
             elif new_mode == "puzzle" and self.game_mode == "explore":
                 self.audio_controller.change_game_modes(new_mode)
                 self.game_mode = new_mode
@@ -433,7 +449,7 @@ class Scene(InstructionGroup):
                 camera_offset = (-self.game_camera.world_focus[0]*camera_scalar*retina_multiplier*self.res+(actual_window_size[0]*0.5*retina_multiplier), -self.game_camera.world_focus[1]*camera_scalar*retina_multiplier*self.res+(actual_window_size[1]*0.5*retina_multiplier))
 
             # puzzle mode solving
-            if self.audio_controller != None and self.audio_controller.solved == True:
+            if (self.audio_controller != None and self.audio_controller.solved == True) or self.game_mode == "puzzle_skip":
                 self.puzzle_solved_timer += dt
                 if self.puzzle_solved_started != True:
                     self.puzzle_solved_started = True
@@ -441,22 +457,28 @@ class Scene(InstructionGroup):
                     self.player.collisions_enabled = False
 
                     # creates particle effects
-                    for i in range(len(self.UI_elements)):
-                        element = self.UI_elements[i]
-                        if element.tag[:2] == "k_":
-                            for i in range(7):
-                                new_particle = Particle(GeometricElement(pos = element.target_pos,
-                                    vel = (random.random()*300.0 - 150.0, random.random()*300.0 - 150.0),
-                                    color = Color(1, 1, 1, 0.75),
-                                    size = (45, 45),
-                                    shape = Ellipse(pos = element.target_pos, size = (0.01, 0.01))),
-                                    z = 11,
-                                    resize_period = 0.8+(random.random()*1.4))
-                                self.UI_elements.append(new_particle)
+                    if self.game_mode == "puzzle":
+                        for i in range(len(self.UI_elements)):
+                            element = self.UI_elements[i]
+                            if element.tag[:2] == "k_":
+                                for i in range(7):
+                                    new_particle = Particle(GeometricElement(pos = element.target_pos,
+                                        vel = (random.random()*300.0 - 150.0, random.random()*300.0 - 150.0),
+                                        color = Color(1, 1, 1, 0.75),
+                                        size = (45, 45),
+                                        shape = Ellipse(pos = element.target_pos, size = (0.01, 0.01))),
+                                        z = 11,
+                                        resize_period = 0.8+(random.random()*1.4))
+                                    self.UI_elements.append(new_particle)
+                    else:
+                        self.puzzle_solved_animation_duration = 1.5
 
                 if self.puzzle_solved_timer >= self.puzzle_solved_animation_duration:
                     self.player.set_animation_state("run_right")
-                    self.puzzle_gems.create_gems = False
+                    if self.game_mode == "puzzle":
+                        self.puzzle_gems.create_gems = False
+                    else:
+                        self.audio_controller.solved = True
                     if self.puzzle_solved_timer >= self.puzzle_solved_animation_duration+1.5:
                         self.scene_finished = True
 
@@ -875,8 +897,11 @@ class Scene(InstructionGroup):
                     if self.num_keys_collected < 3: # should always be < 3
                         target_warning_alpha = 1.0
                     else:
-                        # enters puzzle mode
-                        self.change_game_modes("puzzle")
+                        # enters puzzle mode if puzzle mode supported
+                        if self.puzzle_mode_supported:
+                            self.change_game_modes("puzzle")
+                        else:
+                            self.change_game_modes("puzzle_skip")
                 door_warning.color.a = door_warning.color.a + ((target_warning_alpha - door_warning.color.a)*dt*8.0)
 
             # audio controller update

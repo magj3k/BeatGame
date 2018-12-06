@@ -374,7 +374,7 @@ scene_1_UI_elements.extend(fight_UI)
 scene_1_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_1_game_elements)
 scene_1_camera_bounds = ((25, 6.5), (77, 9.5))
 scene_1_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_1_player.world_pos, speed = 1.05, bounds = scene_1_camera_bounds)
-scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player)
+scene_1 = Scene(initial_game_elements = scene_1_game_elements, initial_UI_elements = scene_1_UI_elements, ground_map = scene_1_ground_map, game_camera = scene_1_camera, res = scene_resolution, audio_controller = scene_1_audio_controller, player = scene_1_player, puzzle_mode_supported = False)
 
 # menu 1
 
