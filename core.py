@@ -20,8 +20,8 @@ import traceback
 
 window_size = (1340, 800)
 # actual_window_size = (1440, 860) # must have same width-to-height ration as intended_window_size
-# actual_window_size = (1022, 610) # must have same width-to-height ration as intended_window_size
-actual_window_size = (1340, 800) # must have same width-to-height ration as intended_window_size
+actual_window_size = (1022, 610) # must have same width-to-height ration as intended_window_size
+# actual_window_size = (1340, 800) # must have same width-to-height ration as intended_window_size
 screen_dilation = actual_window_size[1]/window_size[1]
 retina_multiplier = Window._density
 
