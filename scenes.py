@@ -204,15 +204,15 @@ scene_0_game_elements = [   scene_0_door,
                                                     JumpPad(world_pos = (31, 7),
                                                         z = 99,
                                                         color = Color(0, 0, 0),
-                                                        beats = [4, 2],
+                                                        beats = [2, 4],
                                                         res = scene_resolution,
-                                                        sound_path = ""),
+                                                        sound_path = "audio/jumppad.wav"),
                                                     Spikes(world_pos = (33, 7),
                                                         z = 99,
                                                         color = Color(0, 0, 0),
                                                         beats = [1, 3],
                                                         res = scene_resolution,
-                                                        sound_path = "")
+                                                        sound_path = "audio/spike.wav")
                                                 ]
 scene_0_game_elements.extend(scene_0_enemies)
 scene_0_UI_elements = []

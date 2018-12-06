@@ -406,7 +406,7 @@ class AudioController(object):
     def on_multi_key_down(self, keys):
         if self.mode == 'fight':
             to_remove = []
-            if set(keys) < {'1', '2', '3'} and self.fight_keys_timer <= 0:
+            if set(keys) <= {'1', '2', '3'} and self.fight_keys_timer <= 0:
                 # self.fight_keys[keycode] = True
                 self.fight_keys_timer = 0.15
 
@@ -479,14 +479,14 @@ class AudioController(object):
                 # no left gems
                 if gems_hit["left"] + gems_missed["left"] == 0:
                     right_hit_proportion = gems_hit["right"]/(gems_hit["right"] + gems_missed["right"])
-                    if right_hit_proportion > 0.5:
+                    if right_hit_proportion == 1:
                         self.hit(int(keys[0]))
                     else:
                         self.missed_hit(int(keys[0]))
                 # no right gems
                 elif gems_hit["right"] + gems_missed["right"] == 0:
                     left_hit_proportion = gems_hit["left"]/(gems_hit["left"] + gems_missed["left"])
-                    if left_hit_proportion > 0.5:
+                    if left_hit_proportion == 1:
                         self.block(int(keys[0]))
                     else:
                         self.missed_block(int(keys[0]))
@@ -494,8 +494,8 @@ class AudioController(object):
                 else:
                     right_hit_proportion = gems_hit["right"]/(gems_hit["right"] + gems_missed["right"])
                     left_hit_proportion = gems_hit["left"]/(gems_hit["left"] + gems_missed["left"])
-                    if right_hit_proportion > 0.5:
-                        if left_hit_proportion > 0.5:
+                    if right_hit_proportion == 1:
+                        if left_hit_proportion == 1:
                             self.hit(int(keys[0]))
                         else:
                             self.block(int(keys[0]))
@@ -604,16 +604,29 @@ class AudioController(object):
                     y_dist = min(abs(player_pos[1] - cell_bounds[0][1]), abs(player_pos[1] - cell_bounds[1][1]))
                     dist = (x_dist**2 + y_dist**2)**0.5
                     dist = max(0, dist - 2)
-                    # max gain 0.8
+                    # max gain 0.2
                     # you start hearing things when you're less than 16 dist away
                     gain = 0.2 * max(0, (16 - dist)) / 16
                     obj_sound = element.sound_path
+                else:
+                    element_pos = element.initial_world_pos
+                    x_dist = abs(player_pos[0] - element_pos[0])
+                    y_dist = abs(player_pos[1] - element_pos[1])
+                    dist = (x_dist**2 + y_dist**2)**0.5
+                    dist = max(0, dist - 2)
+                    # max gain 0.3
+                    # you start hearing things when you're less than 16 dist away
+                    gain = 0.3 * max(0, (16 - dist)) / 16
+                    obj_sound = element.sound_path
 
+                if gain > 0 and obj_sound:
                     # find closest beat to now
                     beats = element.beats
                     prev_beat = quantize_tick_up(now, self.note_grid*4) - self.note_grid*4
                     next_tick = prev_beat + 8*self.note_grid
-                    for beat_num in beats:
+                    for i, beat_num in enumerate(beats):
+                        if isinstance(element, JumpPad) and i != 0:
+                            continue
                         beat_num = beat_num / 2
 
                         tick = prev_beat + self.note_grid * (beat_num)
@@ -682,7 +695,7 @@ class AudioController(object):
                     if self.half_beat % 8 == attack:
                         create_bool = random.randint(0, out_of) < create_if
                         for lane in range(1, self.fight_lanes+1):
-                            use_lane = random.randint(1, self.fight_lanes) == 1
+                            use_lane = random.randint(1, self.fight_lanes+1) == 1
                             if create_bool and use_lane:
                                 self.create_left_gem(lane)
                                 used_lanes.append(lane)
@@ -691,7 +704,7 @@ class AudioController(object):
                     if self.half_beat % 8 == attack:
                         create_bool = random.randint(0, out_of) < create_if
                         for lane in range(1, self.fight_lanes+1):
-                            use_lane = random.randint(1, self.fight_lanes) == 1
+                            use_lane = random.randint(1, self.fight_lanes+1) == 1
                             if create_bool and use_lane and lane not in used_lanes:
                                 self.create_right_gem(lane)
                 
