@@ -715,7 +715,7 @@ class Scene(InstructionGroup):
                                     element.target_size = (element.initial_size[0]*health_coeff, element.initial_size[1])
                                     element.target_pos = (element.initial_pos[0]+((1-health_coeff)*element.initial_size[0]*0.5), element.initial_pos[1])
                                 else: # player health
-                                    health_coeff = (self.player.health/3)
+                                    health_coeff = (self.player.health/self.player.max_health)
                                     element.target_size = (element.initial_size[0]*health_coeff, element.initial_size[1])
                                     element.target_pos = (element.initial_pos[0]-((1-health_coeff)*element.initial_size[0]*0.5), element.initial_pos[1])
                     else:

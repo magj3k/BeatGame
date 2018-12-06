@@ -439,7 +439,7 @@ class Player(object):
 
         # fighting
         self.fight_pos = None
-        self.max_health = 3
+        self.max_health = 8
         self.health = self.max_health
         self.fight_hit_animation_state = -1
         self.fight_hit_animation_t = 0
@@ -810,7 +810,7 @@ class Enemy(object):
         self.target_velocity = (0, 0)
 
         # fighting
-        self.max_health = 3
+        self.max_health = 5
         self.health = self.max_health
         self.in_fight = False
         self.fight_pos = None
