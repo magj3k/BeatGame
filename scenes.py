@@ -649,7 +649,7 @@ scene_3_ground_map[108] = 1+scene_elevation_offset
 scene_3_ground_map[110] = -1+scene_elevation_offset
 scene_3_ground_map[123:155] = [4+scene_elevation_offset]*32
 scene_3_player = Player(res = scene_resolution, initial_world_pos = (25, 7.5), z = 110)
-scene_3_player.flight_enabled = True
+# scene_3_player.flight_enabled = True
 scene_3_door_offset = scene_resolution*43
 scene_3_door = TexturedElement(pos = (2445 + scene_3_door_offset, 213),
                                 z = 101,
