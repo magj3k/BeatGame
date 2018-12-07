@@ -609,8 +609,12 @@ class Player(object):
 
             # platforms
             for platform in platforms:
-                if platform.active == True and right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
-                    highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
+                if platform.active == True and right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1:
+                    if current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
+                        highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
+
+                    if fabs(current_player_height - ((2+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)) < 0.05:
+                        self.spawning_freeze = False
 
             if next_player_height < highest_ground: # is true whenever resting on ground
                 next_pos = (next_pos[0], highest_ground+self.world_size[1])
