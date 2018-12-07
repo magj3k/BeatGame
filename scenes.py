@@ -535,6 +535,24 @@ scene_2_game_elements = [   scene_2_door,
                                                         texture_path = "graphics/mountain.png",
                                                         color = Color(0.35, 0.35, 0.35)),
                                                         parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (-10, 60),
+                                                        z = 43,
+                                                        size = (1466*0.6, 519*0.6),
+                                                        texture_path = "graphics/hill_1.png",
+                                                        color = Color(0.275, 0.475, 0.225)),
+                                                        parallax_z = 2),
+                                                    Backdrop(element = TexturedElement(pos = (800, 65),
+                                                        z = 42,
+                                                        size = (-1466*0.58, 519*0.58),
+                                                        texture_path = "graphics/hill_1.png",
+                                                        color = Color(0.275, 0.475, 0.225)),
+                                                        parallax_z = 2.1),
+                                                    Backdrop(element = TexturedElement(pos = (1750, 70),
+                                                        z = 42,
+                                                        size = (1466*0.62, 519*0.62),
+                                                        texture_path = "graphics/hill_1.png",
+                                                        color = Color(0.275, 0.475, 0.225)),
+                                                        parallax_z = 2.15),
                                                     Terrain(scene_2_ground_map,
                                                         z = 100,
                                                         color = Color(0, 0, 0),
@@ -713,5 +731,5 @@ panel_1_objects = [
 panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = 2)
 
-scenes = [menu_1, panel_1, scene_1, scene_2, scene_0]
-# scenes = [scene_2]
+# scenes = [menu_1, panel_1, scene_1, scene_2, scene_0]
+scenes = [scene_2]
