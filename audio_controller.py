@@ -8,24 +8,31 @@ from objects import *
 import random
 
 level_map = [
-                {'bg_music': 'audio/electro_bg.wav',
+                {'bg_music': 'audio/electro_bg.wav', # scene 0
                  'fg_music': 'audio/electro_fg.wav',
-                 'fg_track_1': 'audio/electro_main.wav',
-                 'fg_track_2': 'audio/electro_support.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
                  'key_sfx': 'audio/key_sfx.wav',
                  'bpm': 110},
+
+                 {'bg_music': 'audio/min_bg.wav', # scene 1
+                 'fg_music': 'audio/silence.wav',
+                 'jump_sfx': 'audio/jump_sound.wav',
+                 'walk_sfx': 'audio/walk_sound_soft.wav',
+                 'key_sfx': 'audio/key_c_sfx.wav',
+                 'bpm': 90},
 ]
 puzzle_map = [
-                {'bg_music': 'audio/electro_bg.wav',
+                {'bg_music': 'audio/electro_bg.wav', # scene 0
                  'fg_music': ['audio/electro_support.wav', 'audio/electro_main.wav'],
                  'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_main_gems.txt', 'audio/electro_bg_gems.txt'],
                  'bpm': 110,
                  'lanes': 2}, # number of moving lanes (not include background)
+
+                 {'bg_music': 'audio/min_bg.wav'}, # scene 1
 ]
 fight_map = [
-                {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'],
+                {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 0
                  'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
                  'left_beats': [2, 6], # eighth notes in a measure
                  'right_beats': [0, 4], # eighth notes in a measure
@@ -34,6 +41,8 @@ fight_map = [
                  'block_sfx': 'audio/sword.wav',
                  'gem_creation': (6, 10), # create if less than, out of
                  'lanes': 3},
+
+                 {}, # scene 1
 ]
 
 class AudioController(object):
@@ -690,6 +699,9 @@ class AudioController(object):
         # Fight Mode
         ############
         if self.mode == 'fight' and self.fighting_enabled == True:
+            # foreground music should turn off
+            fg_gain = self.fg_gen.get_gain() + ((0 - self.fg_gen.get_gain()) * dt * 0.9)
+            self.fg_gen.set_gain(fg_gain)
 
             # fight key timeouts
             self.fight_keys_timer += -dt
