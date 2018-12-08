@@ -6,6 +6,7 @@ To Play:
 To-Do:
 - add instructions for controls (space left right for explore, arrow keys for puzzle?)
 - fix y-coord when entering puzzle mode
+- fix bug where moving keys before gems appear messes up audio offset
 
 Story:
 - WHERE ARE YOU
