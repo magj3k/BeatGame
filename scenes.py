@@ -987,7 +987,7 @@ scene_4_ground_map[96:112] = [-5+scene_elevation_offset]*16
 scene_4_water_map_2[96:112] = [-1+scene_elevation_offset]*16
 scene_4_ground_map[100:108] = [1+scene_elevation_offset]*8
 scene_4_player = Player(res = scene_resolution, initial_world_pos = (25, 7.5), z = 110)
-scene_4_player.flight_enabled = True
+# scene_4_player.flight_enabled = True
 scene_4_door_offset = scene_resolution*43
 scene_4_door = TexturedElement(pos = (2445 + scene_4_door_offset, 213),
                                 z = 101,
@@ -1033,6 +1033,18 @@ scene_4_game_elements = [   scene_4_door,
                                                         size = (532*1.25, 266*1.25),
                                                         texture_path = "graphics/mountain_cap.png",
                                                         color = Color(1, 1, 1)),
+                                                        parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (130, -10),
+                                                        z = 5,
+                                                        size = (532*0.9, 266*0.9),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
+                                                        parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (240, -10),
+                                                        z = 5,
+                                                        size = (532*0.5, 266*0.5),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
                                                         parallax_z = 200),
                                                     Backdrop(element = TexturedElement(pos = (-145, -40),
                                                         z = 12,
@@ -1336,8 +1348,8 @@ panel_1_objects = [
     (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
 ]
 panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
-panel_1_next_scene_index = 1 # should be 2
+panel_1_next_scene_index = 2 # should be 2
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = panel_1_next_scene_index)
 
-# scenes = [menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
-scenes = [panel_1, scene_4]
+scenes = [menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
+# scenes = [panel_1, scene_4]
