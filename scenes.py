@@ -964,6 +964,277 @@ scene_3_camera_bounds = ((31.5, 6.5), (111, 11.5))
 scene_3_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_3_player.world_pos, speed = 1.05, bounds = scene_3_camera_bounds)
 scene_3 = Scene(initial_game_elements = scene_3_game_elements, initial_UI_elements = scene_3_UI_elements, ground_map = scene_3_ground_map, game_camera = scene_3_camera, res = scene_resolution, audio_controller = scene_3_audio_controller, player = scene_3_player)
 
+# scene 4
+
+scene_4_water_map_1 = [0]*155
+scene_4_water_map_2 = [0]*155
+scene_4_ground_map = [0+scene_elevation_offset]*155
+scene_4_ground_map[0:22] = [4+scene_elevation_offset]*22
+scene_4_ground_map[32:34] = [1+scene_elevation_offset]*2
+scene_4_ground_map[34:36] = [2+scene_elevation_offset]*2
+scene_4_ground_map[54:56] = [2+scene_elevation_offset]*2
+scene_4_ground_map[56:58] = [1+scene_elevation_offset]*2
+scene_4_ground_map[36:54] = [-5+scene_elevation_offset]*19
+scene_4_water_map_1[36:54] = [-1+scene_elevation_offset]*19
+scene_4_ground_map[42:49] = [2+scene_elevation_offset]*7
+scene_4_ground_map[123:155] = [4+scene_elevation_offset]*32
+scene_4_ground_map[72:82] = [1+scene_elevation_offset]*10
+scene_4_ground_map[73:81] = [2+scene_elevation_offset]*8
+scene_4_ground_map[74:80] = [12+scene_elevation_offset]*6
+scene_4_ground_map[92:116] = [1+scene_elevation_offset]*24
+scene_4_ground_map[94:114] = [2+scene_elevation_offset]*20
+scene_4_ground_map[96:112] = [-5+scene_elevation_offset]*16
+scene_4_water_map_2[96:112] = [-1+scene_elevation_offset]*16
+scene_4_ground_map[100:108] = [1+scene_elevation_offset]*8
+scene_4_player = Player(res = scene_resolution, initial_world_pos = (25, 7.5), z = 110)
+scene_4_player.flight_enabled = True
+scene_4_door_offset = scene_resolution*43
+scene_4_door = TexturedElement(pos = (2445 + scene_4_door_offset, 213),
+                                z = 101,
+                                size = (500*0.13, 500*0.13),
+                                texture_path = "graphics/door_closed.png",
+                                tag = "door")
+
+scene_4_game_elements = [   scene_4_door,
+                                                    TexturedElement(pos = (615, 213),
+                                                        z = 101,
+                                                        size = (500*0.13, 500*0.13),
+                                                        texture_path = "graphics/door_closed.png"),
+                                                    TexturedElement(pos = (2350+scene_4_door_offset, 280),
+                                                        z = 99,
+                                                        size = (458*0.17, 490*0.17),
+                                                        texture_path = "graphics/not_enough_keys.png",
+                                                        tag = "door_warning"),
+                                                    Backdrop(element = TexturedElement(pos = (0, 0),
+                                                        z = 0,
+                                                        size = (window_size[0]*3.0, window_size[1]*1.2),
+                                                        texture_path = "graphics/bg_1.png"),
+                                                        parallax_z = far_z),
+                                                    Backdrop(element = TexturedElement(pos = (0, -300),
+                                                        z = 11,
+                                                        size = (window_size[0]*3.0, window_size[1]*0.8),
+                                                        texture_path = "graphics/bg_2.png",
+                                                        color = Color(0.2, 0.4, 0.15)),
+                                                        parallax_z = 60),
+                                                    Backdrop(element = TexturedElement(pos = (-220, -10),
+                                                        z = 5,
+                                                        size = (532*0.7, 266*0.7),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
+                                                        parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (-60, -10),
+                                                        z = 5,
+                                                        size = (532*1.25, 266*1.25),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.35, 0.35, 0.35)),
+                                                        parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (-60, -10),
+                                                        z = 5,
+                                                        size = (532*1.25, 266*1.25),
+                                                        texture_path = "graphics/mountain_cap.png",
+                                                        color = Color(1, 1, 1)),
+                                                        parallax_z = 200),
+                                                    Backdrop(element = TexturedElement(pos = (-145, -40),
+                                                        z = 12,
+                                                        size = (532*1.0, 266*1.0),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.375, 0.375, 0.375)),
+                                                        parallax_z = 50),
+                                                    Backdrop(element = TexturedElement(pos = (-20, -40),
+                                                        z = 13,
+                                                        size = (532*1.1, 266*1.1),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.4, 0.4, 0.4)),
+                                                        parallax_z = 25),
+                                                    Backdrop(element = TexturedElement(pos = (-130, -90),
+                                                        z = 14,
+                                                        size = (532*1.15, 266*1.15),
+                                                        texture_path = "graphics/mountain.png",
+                                                        color = Color(0.425, 0.425, 0.425)),
+                                                        parallax_z = 15),
+                                                    Terrain(scene_4_ground_map,
+                                                        z = 100,
+                                                        color = Color(0, 0, 0),
+                                                        res = scene_resolution),
+                                                    Terrain(scene_4_water_map_1,
+                                                        z = 111,
+                                                        color = Color(0.35, 0.35, 0.95),
+                                                        res = scene_resolution,
+                                                        type = "water"),
+                                                    Terrain(scene_4_water_map_2,
+                                                        z = 111,
+                                                        color = Color(1.0, 0.2, 0.2),
+                                                        res = scene_resolution,
+                                                        type = "water"),
+                                                    Pickup(TexturedElement(pos = (77*scene_resolution, 24.25*scene_resolution),
+                                                        size = (166*0.091, 400*0.091),
+                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
+                                                    Platform(((38, 7), (39, 7)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [0, 4],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((51, 7), (52, 7)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [0, 4],
+                                                        res = scene_resolution,
+                                                        active = False,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Spikes(world_pos = (44, 9),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [1, 5],
+                                                        res = scene_resolution,
+                                                        sound_path = "audio/spike.wav"),
+                                                    Spikes(world_pos = (45.5, 9),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [2, 6],
+                                                        res = scene_resolution,
+                                                        sound_path = "audio/spike.wav"),
+                                                    Spikes(world_pos = (47, 9),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [3, 7],
+                                                        res = scene_resolution,
+                                                        sound_path = "audio/spike.wav"),
+                                                    Platform(((72, 15), (81, 15)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = False,
+                                                        beats = [],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((72, 20), (81, 20)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = False,
+                                                        beats = [],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((72, 20.35), (73, 20.35)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = False,
+                                                        beats = [],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((76, 20.35), (77, 20.35)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = False,
+                                                        beats = [],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((80, 20.35), (81, 20.35)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = False,
+                                                        beats = [],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    TexturedElement(pos = (77*scene_resolution, 18*scene_resolution),
+                                                        z = 100,
+                                                        size = (10.0*scene_resolution, 5.0*scene_resolution),
+                                                        texture_path = "graphics/bg_2.png",
+                                                        color = Color(0, 0, 0)),
+                                                    JumpPad(world_pos = (69, 7),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [2, 4],
+                                                        res = scene_resolution,
+                                                        sound_path = "audio/jumppad.wav"),
+                                                    JumpPad(world_pos = (85, 7),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [2, 4],
+                                                        res = scene_resolution,
+                                                        sound_path = "audio/jumppad.wav"),
+                                                    Platform(((68, 14), (69, 14)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [2, 4],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((65, 16), (66, 16)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [4, 6],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((68, 18), (69, 18)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [0, 6],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((84, 14), (85, 14)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [2, 4],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((87, 16), (88, 16)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [4, 6],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Platform(((84, 18), (85, 18)),
+                                                        type = "dirt",
+                                                        z = 100,
+                                                        musical = True,
+                                                        beats = [0, 6],
+                                                        res = scene_resolution,
+                                                        active = True,
+                                                        sound_path = "audio/platform_sfx.wav"),
+                                                    Spikes(world_pos = (95, 9),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [1, 3, 5, 7],
+                                                        res = scene_resolution,
+                                                        sound_path = "audio/spike.wav"),
+                                                    Spikes(world_pos = (113, 9),
+                                                        z = 99,
+                                                        color = Color(0, 0, 0),
+                                                        beats = [1, 3, 5, 7],
+                                                        res = scene_resolution,
+                                                        sound_path = "audio/spike.wav"),
+                                                ]
+scene_4_enemies = [
+    Enemy(res = scene_resolution, initial_world_pos = (62, 7), radius = 40, z = 110, moves_per_beat = ["stop", "right", "stop", "left", "stop", "right", "stop", "right", "stop", "left", "stop", "left"], has_key = True),
+    Enemy(res = scene_resolution, initial_world_pos = (102.25, 8), radius = 40, z = 110, moves_per_beat = ["stop", "right", "stop", "left"], has_key = True)
+]
+scene_4_game_elements.extend(scene_4_enemies)
+scene_4_UI_elements = []
+scene_4_UI_elements.extend(keys_UI)
+scene_4_UI_elements.extend(fight_UI)
+
+scene_4_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_4_game_elements)
+scene_4_camera_bounds = ((31.5, 6.5), (111, 13.5))
+scene_4_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_4_player.world_pos, speed = 1.05, bounds = scene_4_camera_bounds)
+scene_4 = Scene(initial_game_elements = scene_4_game_elements, initial_UI_elements = scene_4_UI_elements, ground_map = scene_4_ground_map, game_camera = scene_4_camera, res = scene_resolution, audio_controller = scene_4_audio_controller, player = scene_4_player)
+
 # menu 1
 
 menu_1_water_map = [0]*95
@@ -1065,7 +1336,8 @@ panel_1_objects = [
     (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
 ]
 panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
-panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = 2)
+panel_1_next_scene_index = 1 # should be 2
+panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = panel_1_next_scene_index)
 
-scenes = [menu_1, panel_1, scene_1, scene_2, scene_3, scene_0]
-# scenes = [scene_3]
+# scenes = [menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
+scenes = [panel_1, scene_4]

@@ -505,6 +505,7 @@ class Player(object):
         # platforms
         left_side = next_pos[0] - self.world_size[0]*0.5
         right_side = next_pos[0] + self.world_size[0]*0.5
+        current_player_height = self.world_pos[1]-self.world_size[1]
         for platform in platforms:
             if platform.active == True and right_side > platform.cell_bounds[0][0] and left_side < platform.cell_bounds[1][0]+1 and current_player_height > (1+platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2:
                 highest_ground = max(highest_ground, 1+(platform.cell_bounds[0][1]+platform.cell_bounds[1][1])/2)
