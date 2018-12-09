@@ -683,6 +683,7 @@ class SongData(object):
     # read the gems and song data. You may want to add a secondary filepath
     # argument if your barline data is stored in a different txt file.
     def read_data(self, filepath):
+        print("READ: "+str(filepath))
         solo_file = open(filepath)
         solo_file_lines = solo_file.readlines()
         for line in range(len(solo_file_lines)):
@@ -793,7 +794,7 @@ class PuzzleGems(InstructionGroup):
   
 
 class Enemy(object):
-    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "enemy", moves_per_beat = ["stop"], color = None, radius = 25.0, has_key = False):
+    def __init__(self, res = 20.0, initial_world_pos = (0, 0), z = 10, tag = "enemy", moves_per_beat = ["stop"], color = None, radius = 25.0, has_key = False, health = 5):
         self.world_size = (0.9, 1.0)
         self.res = res
         self.world_pos = initial_world_pos # world units are measured by res
@@ -815,7 +816,7 @@ class Enemy(object):
         self.target_velocity = (0, 0)
 
         # fighting
-        self.max_health = 5
+        self.max_health = health
         self.health = self.max_health
         self.in_fight = False
         self.fight_pos = None
