@@ -959,7 +959,7 @@ scene_3_UI_elements = []
 scene_3_UI_elements.extend(keys_UI)
 scene_3_UI_elements.extend(fight_UI)
 
-scene_3_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_3_game_elements)
+scene_3_audio_controller = AudioController(level = 3, bpm = 120, elements = scene_3_game_elements)
 scene_3_camera_bounds = ((31.5, 6.5), (111, 11.5))
 scene_3_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_3_player.world_pos, speed = 1.05, bounds = scene_3_camera_bounds)
 scene_3 = Scene(initial_game_elements = scene_3_game_elements, initial_UI_elements = scene_3_UI_elements, ground_map = scene_3_ground_map, game_camera = scene_3_camera, res = scene_resolution, audio_controller = scene_3_audio_controller, player = scene_3_player)
@@ -1415,7 +1415,7 @@ menu_1_UI_elements = [
         tag = "option_2")
 ]
 
-menu_1_audio_controller = AudioController(level = 0, bpm = 120, elements = menu_1_game_elements)
+menu_1_audio_controller = AudioController(level = 1, bpm = 120, elements = menu_1_game_elements)
 menu_1_camera = Camera(zoom_factor = 0.85, initial_world_target = menu_1_player.world_pos, speed = 8.0)
 menu_1 = Menu(num_options = 2, option_actions = [["scene", 1], ["quit", -1]], initial_game_elements = menu_1_game_elements, initial_UI_elements = menu_1_UI_elements, ground_map = menu_1_ground_map, game_camera = menu_1_camera, res = scene_resolution, audio_controller = menu_1_audio_controller, player = menu_1_player)
 

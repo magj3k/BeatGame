@@ -265,7 +265,7 @@ class Scene(InstructionGroup):
 
                 # adds lines to BG and stores key offsets
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
-                for i in range(3):
+                for i in range(len(self.audio_controller.get_offsets())+1):
                     offset_y = 176*(-i+1) + 40 
                     new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.43 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
@@ -395,6 +395,7 @@ class Scene(InstructionGroup):
             if left_or_right == "left":
                 pos = (window_size[0], fight_gem_data[lane-1]['y_pos'])
                 z = 6
+            print(pos)
             gem_element = GeometricElement(pos=pos, tag = gem_uuid, color = color, z = z, size = (size, size), shape = ellipse)
             self.queued_UI_elements.append(gem_element)
 
@@ -432,7 +433,7 @@ class Scene(InstructionGroup):
                     if self.game_mode == "puzzle":
                         for i in range(len(self.UI_elements)):
                             element = self.UI_elements[i]
-                            if element.tag[:2] == "k_":
+                            if element.tag[:2] == "k_" and element.target_pos != None:
                                 for i in range(7):
                                     new_particle = Particle(GeometricElement(pos = element.target_pos,
                                         vel = (random.random()*300.0 - 150.0, random.random()*300.0 - 150.0),
@@ -743,18 +744,28 @@ class Scene(InstructionGroup):
                         else:
                             element.target_alpha = 1.0
 
-                    if element.tag == "k_1x":
-                        offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 + 176)
-                        element.target_size = (166*0.34, 400*0.34)
-                    elif element.tag == "k_2x":
-                        offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]/16
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43)
-                        element.target_size = (166*0.34, 400*0.34)
-                    elif element.tag == "k_3x":
-                        offset = 0
-                        element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 - 176)
-                        element.target_size = (166*0.34, 400*0.34)
+                    if len(self.audio_controller.get_offsets()) == 2:
+                        if element.tag == "k_1x":
+                            offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
+                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 + 176)
+                            element.target_size = (166*0.34, 400*0.34)
+                        elif element.tag == "k_2x":
+                            offset = (self.audio_controller.get_offsets()[1] - self.puzzle_key_initial_offsets[1]) * window_size[0]/16
+                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43)
+                            element.target_size = (166*0.34, 400*0.34)
+                        elif element.tag == "k_3x":
+                            offset = 0
+                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 - 176)
+                            element.target_size = (166*0.34, 400*0.34)
+                    elif len(self.audio_controller.get_offsets()) == 1:
+                        if element.tag == "k_1x":
+                            offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
+                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 + 176)
+                            element.target_size = (166*0.34, 400*0.34)
+                        elif element.tag == "k_2x":
+                            offset = 0
+                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43)
+                            element.target_size = (166*0.34, 400*0.34)
                     
                     if self.audio_controller.solved == False:
                         if element.tag == "keys_bg":
@@ -895,7 +906,7 @@ class Scene(InstructionGroup):
                 self.fight_enemy_sword.pos = ((self.fight_enemy.world_pos[0]-0.5)*self.res, self.fight_enemy.world_pos[1]*self.res)
 
             # door proximity & updates
-            if door_warning != None and self.game_mode != "puzzle":
+            if door_warning != None and self.game_mode != "puzzle" and self.player.on_ground:
                 target_warning_alpha = 0.0
                 if fabs(door.pos[0] - (self.player.world_pos[0]*self.player.res)) < 105.0:
                     if self.num_keys_collected < 3: # should always be < 3

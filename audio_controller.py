@@ -16,12 +16,20 @@ level_map = [
                  'fg_gain': 0.5,
                  'bpm': 110},
 
-                 {'bg_music': 'audio/electro_bg.wav', # scene 1
+                 {'bg_music': 'audio/hiphop_bg.wav', # scene 1
                  'fg_music': 'audio/silence_12s.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
-                 'key_sfx': 'audio/key_sfx.wav',
-                 'fg_gain': 0.5,
+                 'key_sfx': 'audio/key_a_sfx.wav',
+                 'fg_gain': 0,
+                 'bpm': 110},
+
+                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
+                 'fg_music': 'audio/hiphop_main.wav',
+                 'jump_sfx': 'audio/jump_sound.wav',
+                 'walk_sfx': 'audio/walk_sound_soft.wav',
+                 'key_sfx': 'audio/key_a_sfx.wav',
+                 'fg_gain': 0.25,
                  'bpm': 110},
 
                  {'bg_music': 'audio/hiphop_bg.wav', # scene 2
@@ -44,32 +52,48 @@ puzzle_map = [
                  'lanes': 0},
 
                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
-                'fg_music': ['audio/hiphop_main.wav', 'audio/hiphop_support.wav'],
-                 'fg_gems': ['audio/hiphop_main_gems.txt', 'audio/hiphop_support_gems.txt', 'audio/hiphop_bg_gems.txt'],
+                 'fg_music': ['audio/hiphop_main.wav'],
+                 'fg_gems': ['audio/hiphop_main_gems.txt', 'audio/hiphop_bg_gems.txt'],
                  'bpm': 110,
-                 'lanes': 2}, # number of moving lanes (not include background)
+                 'lanes': 1}, # number of moving lanes (not include background)
+
+                {'bg_music': 'audio/hiphop_bg.wav', # scene 2
+                 'fg_music': ['audio/hiphop_main.wav', 'audio/hiphop_support.wav'],
+                 'fg_gems': ['audio/hiphop_main_gems.txt', 'audo/hiphop_support.wav', 'audio/hiphop_bg_gems.txt'],
+                 'bpm': 110,
+                 'lanes': 1}, # number of moving lanes (not include background)
 ]
 fight_map = [
                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 0
                  'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
-                 'left_beats': [2, 6], # eighth notes in a measure
-                 'right_beats': [0, 4], # eighth notes in a measure
+                 'left_beats': [4], # eighth notes in a measure
+                 'right_beats': [0], # eighth notes in a measure
                  'miss_sfx': 'audio/error_sound.wav',
                  'hit_sfx': 'audio/snare.wav',
                  'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (6, 10), # create if less than, out of
+                 'gem_creation': (2, 10), # create if less than, out of
                  'lanes': 3},
 
                  {'lanes': 0}, # scene 1
 
                  {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 2
                  'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
+                 'left_beats': [4], # eighth notes in a measure
+                 'right_beats': [0], # eighth notes in a measure
+                 'miss_sfx': 'audio/error_sound.wav',
+                 'hit_sfx': 'audio/snare.wav',
+                 'block_sfx': 'audio/sword.wav',
+                 'gem_creation': (8, 10), # create if less than, out of
+                 'lanes': 3},
+
+                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 3
+                 'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
                  'left_beats': [2, 6], # eighth notes in a measure
                  'right_beats': [0, 4], # eighth notes in a measure
                  'miss_sfx': 'audio/error_sound.wav',
                  'hit_sfx': 'audio/snare.wav',
                  'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (6, 10), # create if less than, out of
+                 'gem_creation': (2, 10), # create if less than, out of
                  'lanes': 3},
 ]
 
@@ -360,10 +384,11 @@ class AudioController(object):
             self.enemy.hit()
 
     # miss right gem
-    def missed_block(self, lane):
+    def missed_block(self, lane, gain=1):
         if self.fighting_enabled:
             # sfx
             hit_sfx = WaveGenerator(WaveFile(self.level_fight['hit_sfx']))
+            hit_sfx.set_gain(gain)
             self.mixer.add(hit_sfx)
             error_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
             self.mixer.add(error_sfx)
@@ -372,11 +397,11 @@ class AudioController(object):
             self.player.hit()
 
     # miss left gem
-    def missed_hit(self, lane, animate = True):
+    def missed_hit(self, lane, animate = True, gain=1):
         if self.fighting_enabled:
             # sfx
             block_sfx = WaveGenerator(WaveFile(self.level_fight['block_sfx']))
-            block_sfx.set_gain(0.8)
+            block_sfx.set_gain(0.6 * gain)
             self.mixer.add(block_sfx)
             error_sfx = WaveGenerator(WaveFile(self.level_fight['miss_sfx']))
             self.mixer.add(error_sfx)
@@ -776,16 +801,23 @@ class AudioController(object):
             #             to_remove.append(gem)
 
             # FIX: use uuid-based position gem tracking dict instead of self.fight_gems, add UUIDs to to_remove
+            missed_hits = []
+            missed_blocks = []
             for gem_uuid in self.fight_gem_tracking.keys():
                 gem_pos = self.fight_gem_tracking[gem_uuid][0]
                 if gem_uuid[-4:] == "left":
                     if gem_pos < window_size[0]/2 - self.fight_gem_margin:
-                        self.missed_block(self.fight_gem_tracking[gem_uuid][1])
+                        missed_blocks.append(self.fight_gem_tracking[gem_uuid][1])
                         to_remove.append((gem_uuid, "shoot_left"))
                 elif gem_uuid[-5:] == "right":
                     if gem_pos > window_size[0]/2 + self.fight_gem_margin:
-                        self.missed_hit(self.fight_gem_tracking[gem_uuid][1], True)
+                        missed_hits.append(self.fight_gem_tracking[gem_uuid][1])
                         to_remove.append((gem_uuid, "shoot_right"))
+
+            if len(missed_hits) > 0:
+                self.missed_hit(missed_hits[0], True)
+            if len(missed_blocks):
+                self.missed_block(missed_blocks[0])
 
             for gem_data in to_remove:
                 gem_uuid = gem_data[0]
