@@ -1429,5 +1429,5 @@ panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed 
 panel_1_next_scene_index = 2 # should be 2
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = panel_1_next_scene_index)
 
-scenes = [menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
+scenes = [scene_4, menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
 # scenes = [panel_1, scene_4]
