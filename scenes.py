@@ -1320,7 +1320,7 @@ scene_4_UI_elements = []
 scene_4_UI_elements.extend(keys_UI)
 scene_4_UI_elements.extend(fight_UI)
 
-scene_4_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_4_game_elements)
+scene_4_audio_controller = AudioController(level = 4, bpm = 120, elements = scene_4_game_elements)
 scene_4_camera_bounds = ((31.5, 6.5), (111, 13.5))
 scene_4_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_4_player.world_pos, speed = 1.05, bounds = scene_4_camera_bounds)
 scene_4 = Scene(initial_game_elements = scene_4_game_elements, initial_UI_elements = scene_4_UI_elements, ground_map = scene_4_ground_map, game_camera = scene_4_camera, res = scene_resolution, audio_controller = scene_4_audio_controller, player = scene_4_player)
@@ -1429,5 +1429,5 @@ panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed 
 panel_1_next_scene_index = 2 # should be 2
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = panel_1_next_scene_index)
 
-scenes = [scene_3, menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
+scenes = [scene_4, menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
 # scenes = [panel_1, scene_4]
