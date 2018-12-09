@@ -16,7 +16,7 @@ level_map = [
                  'fg_gain': 0.5,
                  'bpm': 110},
 
-                 {'bg_music': 'audio/hiphop_bg.wav', # scene 1
+                {'bg_music': 'audio/hiphop_bg.wav', # scene 1
                  'fg_music': 'audio/silence_12s.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
@@ -24,7 +24,7 @@ level_map = [
                  'fg_gain': 0,
                  'bpm': 110},
 
-                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
+                {'bg_music': 'audio/hiphop_bg.wav', # scene 2
                  'fg_music': 'audio/hiphop_main.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
@@ -32,11 +32,19 @@ level_map = [
                  'fg_gain': 0.25,
                  'bpm': 110},
 
-                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
+                {'bg_music': 'audio/hiphop_bg.wav', # scene 3
                  'fg_music': 'audio/hiphop_fg.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
                  'key_sfx': 'audio/key_a_sfx.wav',
+                 'fg_gain': 0.25,
+                 'bpm': 110},
+
+                {'bg_music': 'audio/electro_bg.wav', # scene 3
+                 'fg_music': 'audio/electro_fg.wav',
+                 'jump_sfx': 'audio/jump_sound.wav',
+                 'walk_sfx': 'audio/walk_sound_soft.wav',
+                 'key_sfx': 'audio/key_sfx.wav',
                  'fg_gain': 0.25,
                  'bpm': 110},
 ]
@@ -57,11 +65,11 @@ puzzle_map = [
                  'bpm': 110,
                  'lanes': 1}, # number of moving lanes (not include background)
 
-                {'bg_music': 'audio/hiphop_bg.wav', # scene 2
+                {'bg_music': 'audio/hiphop_bg.wav', # scene 3
                  'fg_music': ['audio/hiphop_main.wav', 'audio/hiphop_support.wav'],
                  'fg_gems': ['audio/hiphop_main_gems.txt', 'audio/hiphop_support_gems.txt', 'audio/hiphop_bg_gems.txt'],
                  'bpm': 110,
-                 'lanes': 1}, # number of moving lanes (not include background)
+                 'lanes': 2}, # number of moving lanes (not include background)
 ]
 fight_map = [
                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 0
