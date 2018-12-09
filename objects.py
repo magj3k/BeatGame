@@ -683,6 +683,7 @@ class SongData(object):
     # read the gems and song data. You may want to add a secondary filepath
     # argument if your barline data is stored in a different txt file.
     def read_data(self, filepath):
+        print("READ: "+str(filepath))
         solo_file = open(filepath)
         solo_file_lines = solo_file.readlines()
         for line in range(len(solo_file_lines)):
