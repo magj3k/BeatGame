@@ -59,7 +59,7 @@ puzzle_map = [
 
                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
                  'fg_music': ['audio/hiphop_main.wav', 'audio/hiphop_support.wav'],
-                 'fg_gems': ['audio/hiphop_main_gems.txt', 'audo/hiphop_support.wav', 'audio/hiphop_bg_gems.txt'],
+                 'fg_gems': ['audio/hiphop_main_gems.txt', 'audio/hiphop_support.wav', 'audio/hiphop_bg_gems.txt'],
                  'bpm': 110,
                  'lanes': 1}, # number of moving lanes (not include background)
 ]
