@@ -4,14 +4,16 @@ To Play:
 `python main.py`
 
 To-Do:
-- add instructions for controls (space left right for explore, arrow keys for puzzle?)
-- fix puzzle mode UI for 2-lane puzzle
-- fix bug where moving keys before gems appear messes up audio offset
-- Level 5
-- End game (white background, trippy, "you are here"), credits
-- New music for both menu & end game (using square waves?)
-- 3-min presentation + 2-min next steps
 - Make enemies more difficult
+- fix puzzle mode UI for 2-lane puzzle
+- 3-min presentation + 2-min next steps
+- add audio maps for other levels
+- fix bug where moving keys before gems appear messes up audio offset
+- End game (white background, trippy, "you are here"), credits
+- Level 5
+- New music for both menu & end game (using square waves?)
+- add instructions for controls (space left right for explore, arrow keys for puzzle?)
+- Panels for beginning of each level (WHERE ARE YOU, LISTEN CLOSELY, WHERE ARE YOU GOING, WHAT'S GOING ON, , YOU ARE HERE)
 
 Suggestions:
 - make background key graphically different to indicate that it can't be moved
