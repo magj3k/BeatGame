@@ -580,7 +580,7 @@ scene_2_game_elements = [   scene_2_door,
                                                         beats = [1, 3, 5, 7],
                                                         res = scene_resolution,
                                                         active = False,
-                                                        sound_path = "audio/platform_sfx.wav"),
+                                                        sound_path = "audio/platform_sfx_fs.wav"),
                                                     Platform(((44.5, 6), (45.5, 6)),
                                                         type = "dirt",
                                                         z = 100,
@@ -588,7 +588,7 @@ scene_2_game_elements = [   scene_2_door,
                                                         beats = [1, 3, 5, 7],
                                                         res = scene_resolution,
                                                         active = True,
-                                                        sound_path = "audio/platform_sfx.wav"),
+                                                        sound_path = "audio/platform_sfx_fs.wav"),
                                                     Platform(((84, 6), (85, 6)),
                                                         type = "dirt",
                                                         z = 100,
@@ -596,7 +596,7 @@ scene_2_game_elements = [   scene_2_door,
                                                         beats = [1, 3, 5, 7],
                                                         res = scene_resolution,
                                                         active = False,
-                                                        sound_path = "audio/platform_sfx.wav"),
+                                                        sound_path = "audio/platform_sfx_fs.wav"),
                                                     Platform(((89, 6), (90, 6)),
                                                         type = "dirt",
                                                         z = 100,
@@ -604,7 +604,7 @@ scene_2_game_elements = [   scene_2_door,
                                                         beats = [1, 3, 5, 7],
                                                         res = scene_resolution,
                                                         active = True,
-                                                        sound_path = "audio/platform_sfx.wav"),
+                                                        sound_path = "audio/platform_sfx_fs.wav"),
                                                     Platform(((94, 6), (95, 6)),
                                                         type = "dirt",
                                                         z = 100,
@@ -612,7 +612,7 @@ scene_2_game_elements = [   scene_2_door,
                                                         beats = [1, 3, 5, 7],
                                                         res = scene_resolution,
                                                         active = False,
-                                                        sound_path = "audio/platform_sfx.wav"),
+                                                        sound_path = "audio/platform_sfx_fs.wav"),
                                                 ]
 scene_2_enemies = [
     Enemy(res = scene_resolution, initial_world_pos = (58, 7), radius = 40, z = 110, moves_per_beat = ["stop", "left", "stop", "right", "stop", "right", "stop", "left"], has_key = False),
@@ -623,7 +623,7 @@ scene_2_UI_elements = []
 scene_2_UI_elements.extend(keys_UI)
 scene_2_UI_elements.extend(fight_UI)
 
-scene_2_audio_controller = AudioController(level = 0, bpm = 120, elements = scene_2_game_elements)
+scene_2_audio_controller = AudioController(level = 2, bpm = 120, elements = scene_2_game_elements)
 scene_2_camera_bounds = ((26, 6.5), (121, 9.5))
 scene_2_camera = Camera(zoom_factor = 1.1, initial_world_target = scene_2_player.world_pos, speed = 1.05, bounds = scene_2_camera_bounds)
 scene_2 = Scene(initial_game_elements = scene_2_game_elements, initial_UI_elements = scene_2_UI_elements, ground_map = scene_2_ground_map, game_camera = scene_2_camera, res = scene_resolution, audio_controller = scene_2_audio_controller, player = scene_2_player)

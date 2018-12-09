@@ -13,14 +13,24 @@ level_map = [
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
                  'key_sfx': 'audio/key_sfx.wav',
+                 'fg_gain': 0.5,
                  'bpm': 110},
 
-                 {'bg_music': 'audio/min_bg.wav', # scene 1
-                 'fg_music': 'audio/silence.wav',
+                 {'bg_music': 'audio/electro_bg.wav', # scene 1
+                 'fg_music': 'audio/silence_12s.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
-                 'key_sfx': 'audio/key_c_sfx.wav',
-                 'bpm': 90},
+                 'key_sfx': 'audio/key_sfx.wav',
+                 'fg_gain': 0.5,
+                 'bpm': 110},
+
+                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
+                 'fg_music': 'audio/hiphop_fg.wav',
+                 'jump_sfx': 'audio/jump_sound.wav',
+                 'walk_sfx': 'audio/walk_sound_soft.wav',
+                 'key_sfx': 'audio/key_a_sfx.wav',
+                 'fg_gain': 0.25,
+                 'bpm': 110},
 ]
 puzzle_map = [
                 {'bg_music': 'audio/electro_bg.wav', # scene 0
@@ -29,7 +39,15 @@ puzzle_map = [
                  'bpm': 110,
                  'lanes': 2}, # number of moving lanes (not include background)
 
-                 {'bg_music': 'audio/min_bg.wav'}, # scene 1
+                {'bg_music': 'audio/min_bg.wav', # scene 1
+                 'fg_music': ['audio/silence_12s.wav'],
+                 'lanes': 0},
+
+                {'bg_music': 'audio/hiphop_bg.wav', # scene 2
+                'fg_music': ['audio/hiphop_main.wav', 'audio/hiphop_support.wav'],
+                 'fg_gems': ['audio/hiphop_main_gems.txt', 'audio/hiphop_support_gems.txt', 'audio/hiphop_bg_gems.txt'],
+                 'bpm': 110,
+                 'lanes': 2}, # number of moving lanes (not include background)
 ]
 fight_map = [
                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 0
@@ -42,7 +60,17 @@ fight_map = [
                  'gem_creation': (6, 10), # create if less than, out of
                  'lanes': 3},
 
-                 {}, # scene 1
+                 {'lanes': 0}, # scene 1
+
+                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 2
+                 'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
+                 'left_beats': [2, 6], # eighth notes in a measure
+                 'right_beats': [0, 4], # eighth notes in a measure
+                 'miss_sfx': 'audio/error_sound.wav',
+                 'hit_sfx': 'audio/snare.wav',
+                 'block_sfx': 'audio/sword.wav',
+                 'gem_creation': (6, 10), # create if less than, out of
+                 'lanes': 3},
 ]
 
 class AudioController(object):
@@ -107,7 +135,7 @@ class AudioController(object):
 
         # times of player moves
         self.move_times = []
-        self.fg_gain = 0.5
+        self.fg_gain = self.level_music['fg_gain']
 
         # Puzzle
         ########
@@ -213,8 +241,6 @@ class AudioController(object):
         if mode == 'fight':
             self.fighting_enabled = True
             self.fight_gem_tracking = {}
-            if self.fg_gen in self.mixer.generators:
-                self.fg_gen.set_gain(0)
 
 
     ####################

@@ -14,6 +14,8 @@ Story:
 - 
 
 Suggestions:
+- make background key graphically different to indicate that it can't be moved
+- maybe start puzzle mode in melody mode?
 - add countdown into fight mode
 - moving projectiles
 - make it so that you can't walk through a raised jumppad
