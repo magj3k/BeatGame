@@ -2001,7 +2001,8 @@ lvl_2_panel_objects = [
     # (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
 ]
 lvl_2_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
-lvl_2_panel_next_scene_index = 5
+# lvl_2_panel_next_scene_index = 5
+lvl_2_panel_next_scene_index = 2
 lvl_2_panel = Panel(game_camera = lvl_2_panel_camera, timed_objects = lvl_2_panel_objects, res = scene_resolution, end_time = 3.2, next_scene_index = lvl_2_panel_next_scene_index)
 
 # level 3 panel
@@ -2031,7 +2032,8 @@ lvl_5_panel_objects = [
     # (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
 ]
 lvl_5_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
-lvl_5_panel_next_scene_index = 11
+# lvl_5_panel_next_scene_index = 11
+lvl_5_panel_next_scene_index = 4
 lvl_5_panel = Panel(game_camera = lvl_5_panel_camera, timed_objects = lvl_5_panel_objects, res = scene_resolution, end_time = 3.2, next_scene_index = lvl_5_panel_next_scene_index)
 
 # end game panel
@@ -2069,5 +2071,5 @@ end_game_audio_controller = AudioController(level = 6, bpm = 120)
 end_game_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
 end_game_panel = Panel(game_camera = end_game_panel_camera, audio_controller = end_game_audio_controller, timed_objects = end_game_panel_objects, res = scene_resolution, end_time = 18.5, next_scene_index = -1, allow_key_skip = False)
 
-scenes = [menu_1, panel_1, lvl_1_panel, scene_1, lvl_2_panel, scene_2, lvl_3_panel, scene_3, lvl_4_panel, scene_4, lvl_5_panel, scene_5, end_game_panel]
-# scenes = [panel_1, scene_4]
+# scenes = [menu_1, panel_1, lvl_1_panel, scene_1, lvl_2_panel, scene_2, lvl_3_panel, scene_3, lvl_4_panel, scene_4, lvl_5_panel, scene_5, end_game_panel]
+scenes = [menu_1, lvl_2_panel, scene_2, lvl_5_panel, scene_5, end_game_panel]
