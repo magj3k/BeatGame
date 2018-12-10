@@ -56,6 +56,14 @@ level_map = [
                  'fg_gain': 0.25,
                  'bpm': 110},
 
+
+                {'bg_music': 'audio/menu_track.wav', # scene 6 (menu and last scene)
+                 'fg_music': 'audio/silence_12s.wav',
+                 'jump_sfx': 'audio/jump_sound.wav',
+                 'walk_sfx': 'audio/walk_sound_soft.wav',
+                 'key_sfx': 'audio/key_sfx.wav',
+                 'fg_gain': 0,
+                 'bpm': 110},
 ]
 puzzle_map = [
                 {'bg_music': 'audio/electro_bg.wav', # scene 0
@@ -91,6 +99,10 @@ puzzle_map = [
                  'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_main_gems.txt', 'audio/electro_bg_gems.txt'],
                  'bpm': 110,
                  'lanes': 2}, # number of moving lanes (not include background)
+
+                {'bg_music': 'audio/menu_track.wav', # scene 6 (menu and last scene)
+                 'fg_music': ['audio/silence_12s.wav'],
+                 'lanes': 1},
 ]
 fight_map = [
                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 0
@@ -132,7 +144,7 @@ fight_map = [
                  'miss_sfx': 'audio/error_sound.wav',
                  'hit_sfx': 'audio/snare.wav',
                  'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (8, 10), # create if less than, out of
+                 'gem_creation': (7, 10), # create if less than, out of
                  'lanes': 3},
 
                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 5
@@ -142,8 +154,10 @@ fight_map = [
                  'miss_sfx': 'audio/error_sound.wav',
                  'hit_sfx': 'audio/snare.wav',
                  'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (7, 10), # create if less than, out of
+                 'gem_creation': (8, 10), # create if less than, out of
                  'lanes': 3},
+
+                {'lanes': 0}, # scene 6 (menu and last scene)
 ]
 
 class AudioController(object):

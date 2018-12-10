@@ -1970,7 +1970,7 @@ menu_1_UI_elements = [
         tag = "option_2")
 ]
 
-menu_1_audio_controller = AudioController(level = 1, bpm = 120, elements = menu_1_game_elements)
+menu_1_audio_controller = AudioController(level = 6, bpm = 120, elements = menu_1_game_elements)
 menu_1_camera = Camera(zoom_factor = 0.85, initial_world_target = menu_1_player.world_pos, speed = 8.0)
 menu_1 = Menu(num_options = 2, option_actions = [["scene", 1], ["quit", -1]], initial_game_elements = menu_1_game_elements, initial_UI_elements = menu_1_UI_elements, ground_map = menu_1_ground_map, game_camera = menu_1_camera, res = scene_resolution, audio_controller = menu_1_audio_controller, player = menu_1_player)
 
@@ -2064,8 +2064,10 @@ end_game_panel_objects = [
     (GeometricElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 21, color = Color(0, 0, 0), size = (window_size[0], window_size[1])), 13.2, None),
     (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 22, size = (1037*0.4, 149*0.4), texture_path = "graphics/text_4.png"), 15.0, None),
 ]
+
+end_game_audio_controller = AudioController(level = 6, bpm = 120)
 end_game_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
-end_game_panel = Panel(game_camera = end_game_panel_camera, timed_objects = end_game_panel_objects, res = scene_resolution, end_time = 18.5, next_scene_index = -1, allow_key_skip = False)
+end_game_panel = Panel(game_camera = end_game_panel_camera, audio_controller = end_game_audio_controller, timed_objects = end_game_panel_objects, res = scene_resolution, end_time = 18.5, next_scene_index = -1, allow_key_skip = False)
 
 scenes = [menu_1, panel_1, lvl_1_panel, scene_1, lvl_2_panel, scene_2, lvl_3_panel, scene_3, lvl_4_panel, scene_4, lvl_5_panel, scene_5, end_game_panel]
 # scenes = [panel_1, scene_4]
