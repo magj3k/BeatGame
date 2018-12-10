@@ -101,7 +101,7 @@ class SceneManager(InstructionGroup):
 
 
 class Scene(InstructionGroup):
-    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None, num_keys = 3, puzzle_mode_supported = True):
+    def __init__(self, initial_game_elements = [], initial_UI_elements = [], game_camera = None, ground_map = [], res = 20.0, audio_controller = None, player = None, num_keys = 3, puzzle_mode_supported = True, tag = 5):
         super(Scene, self).__init__()
 
         # general setup
@@ -116,6 +116,7 @@ class Scene(InstructionGroup):
         self.scene_cleared = False
         self.num_keys = num_keys
         self.puzzle_mode_supported = puzzle_mode_supported
+        self.tag = tag
 
         # sets up audio controller
         self.audio_controller = audio_controller
@@ -405,6 +406,10 @@ class Scene(InstructionGroup):
     def on_update(self, dt, active_keys):
         if self.scene_cleared == False:
 
+            # dev, flight mode
+            # if active_keys['4'] == True:
+            #     self.player.flight_enabled = not self.player.flight_enabled
+
             # adds queued objects
             for elm in self.queued_UI_elements:
                 self.UI_elements.append(elm)
@@ -597,7 +602,7 @@ class Scene(InstructionGroup):
                                     z = self.player.z-1,
                                     resize_period = 0.5+(random.random()*0.8))
                                 self.game_elements.append(new_particle)
-                        elif isinstance(element, Enemy) and self.player.on_ground == True: # enemies
+                        elif isinstance(element, Enemy) and self.player.world_vel[1] > -0.95 and self.player.world_vel[1] < 0.3: # enemies
                             # enters fight mode
                             self.fight_enemy = element
                             self.change_game_modes("fight")
@@ -878,6 +883,7 @@ class Scene(InstructionGroup):
             if len(self.objs_by_z_order_old.keys()) == 0: refresh_chained = True
             if self.num_game_elements_old != len(self.game_elements): refresh_chained = True
             if self.num_UI_elements_old != len(self.UI_elements): refresh_chained = True
+            if self.game_mode == "fight": refresh_chained = True
             for z in all_z_orders:
                 object_inds_at_z = objs_by_z_order[z]
 
@@ -923,6 +929,13 @@ class Scene(InstructionGroup):
             if self.audio_controller != None and self.audio_controller.solved and self.puzzle_solved_timer >= self.puzzle_solved_animation_duration: override_x_velocity = 3.5
             self.player.on_update(dt, self.ground_map, active_keys, camera_scalar, camera_offset, self.audio_controller, platforms, door, override_x_velocity)
             if self.game_camera != None and self.game_mode == "explore": self.game_camera.update_target(self.player.world_pos)
+
+            # if level 5, guards against bad respawnable_x
+            if self.tag == "5":
+                if self.player.last_respawnable_x in [50.5, 51.5]:
+                    self.player.last_respawnable_x += -3
+                elif self.player.last_respawnable_x in [67.5, 68.5]:
+                    self.player.last_respawnable_x += 3
 
             # swords
             if self.fight_player_sword != None:
