@@ -66,7 +66,7 @@ puzzle_map = [
 
                 {'bg_music': 'audio/min_bg.wav', # scene 1
                  'fg_music': ['audio/silence_12s.wav'],
-                 'lanes': 0},
+                 'lanes': 1},
 
                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
                  'fg_music': ['audio/hiphop_main.wav'],
