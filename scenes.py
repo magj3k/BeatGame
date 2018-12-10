@@ -2071,5 +2071,5 @@ end_game_audio_controller = AudioController(level = 6, bpm = 120)
 end_game_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
 end_game_panel = Panel(game_camera = end_game_panel_camera, audio_controller = end_game_audio_controller, timed_objects = end_game_panel_objects, res = scene_resolution, end_time = 18.5, next_scene_index = -1, allow_key_skip = False)
 
-# scenes = [menu_1, panel_1, lvl_1_panel, scene_1, lvl_2_panel, scene_2, lvl_3_panel, scene_3, lvl_4_panel, scene_4, lvl_5_panel, scene_5, end_game_panel]
-scenes = [menu_1, lvl_2_panel, scene_2, lvl_5_panel, scene_5, end_game_panel]
+scenes = [menu_1, panel_1, lvl_1_panel, scene_1, lvl_2_panel, scene_2, lvl_3_panel, scene_3, lvl_4_panel, scene_4, lvl_5_panel, scene_5, end_game_panel]
+# scenes = [menu_1, lvl_2_panel, scene_2, lvl_5_panel, scene_5, end_game_panel]
