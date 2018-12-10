@@ -40,13 +40,22 @@ level_map = [
                  'fg_gain': 0.25,
                  'bpm': 110},
 
-                {'bg_music': 'audio/electro_bg.wav', # scene 3
+                {'bg_music': 'audio/electro_bg.wav', # scene 4
                  'fg_music': 'audio/electro_fg.wav',
                  'jump_sfx': 'audio/jump_sound.wav',
                  'walk_sfx': 'audio/walk_sound_soft.wav',
                  'key_sfx': 'audio/key_sfx.wav',
                  'fg_gain': 0.25,
                  'bpm': 110},
+
+                {'bg_music': 'audio/electro_bg.wav', # scene 5
+                 'fg_music': 'audio/electro_fg.wav',
+                 'jump_sfx': 'audio/jump_sound.wav',
+                 'walk_sfx': 'audio/walk_sound_soft.wav',
+                 'key_sfx': 'audio/key_sfx.wav',
+                 'fg_gain': 0.25,
+                 'bpm': 110},
+
 ]
 puzzle_map = [
                 {'bg_music': 'audio/electro_bg.wav', # scene 0
@@ -57,7 +66,7 @@ puzzle_map = [
 
                 {'bg_music': 'audio/min_bg.wav', # scene 1
                  'fg_music': ['audio/silence_12s.wav'],
-                 'lanes': 0},
+                 'lanes': 1},
 
                 {'bg_music': 'audio/hiphop_bg.wav', # scene 2
                  'fg_music': ['audio/hiphop_main.wav'],
@@ -68,6 +77,18 @@ puzzle_map = [
                 {'bg_music': 'audio/hiphop_bg.wav', # scene 3
                  'fg_music': ['audio/hiphop_main.wav', 'audio/hiphop_support.wav'],
                  'fg_gems': ['audio/hiphop_main_gems.txt', 'audio/hiphop_support_gems.txt', 'audio/hiphop_bg_gems.txt'],
+                 'bpm': 110,
+                 'lanes': 2}, # number of moving lanes (not include background)
+
+                {'bg_music': 'audio/electro_bg.wav', # scene 4
+                 'fg_music': ['audio/electro_support.wav', 'audio/electro_main.wav'],
+                 'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_main_gems.txt', 'audio/electro_bg_gems.txt'],
+                 'bpm': 110,
+                 'lanes': 2}, # number of moving lanes (not include background)
+
+                {'bg_music': 'audio/electro_bg.wav', # scene 5
+                 'fg_music': ['audio/electro_support.wav', 'audio/electro_main.wav'],
+                 'fg_gems': ['audio/electro_support_gems.txt', 'audio/electro_main_gems.txt', 'audio/electro_bg_gems.txt'],
                  'bpm': 110,
                  'lanes': 2}, # number of moving lanes (not include background)
 ]
@@ -82,26 +103,46 @@ fight_map = [
                  'gem_creation': (2, 10), # create if less than, out of
                  'lanes': 3},
 
-                 {'lanes': 0}, # scene 1
+                {'lanes': 0}, # scene 1
 
-                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 2
-                 'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
-                 'left_beats': [4], # eighth notes in a measure
-                 'right_beats': [0], # eighth notes in a measure
-                 'miss_sfx': 'audio/error_sound.wav',
-                 'hit_sfx': 'audio/snare.wav',
-                 'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (8, 10), # create if less than, out of
-                 'lanes': 3},
-
-                 {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 3
+                {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 2
                  'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
                  'left_beats': [2, 6], # eighth notes in a measure
                  'right_beats': [0, 4], # eighth notes in a measure
                  'miss_sfx': 'audio/error_sound.wav',
                  'hit_sfx': 'audio/snare.wav',
                  'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (2, 10), # create if less than, out of
+                 'gem_creation': (5, 10), # create if less than, out of
+                 'lanes': 3},
+
+                {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 3
+                 'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
+                 'left_beats': [0, 4], # eighth notes in a measure
+                 'right_beats': [0, 4], # eighth notes in a measure
+                 'miss_sfx': 'audio/error_sound.wav',
+                 'hit_sfx': 'audio/snare.wav',
+                 'block_sfx': 'audio/sword.wav',
+                 'gem_creation': (8, 10), # create if less than, out of
+                 'lanes': 3},
+
+                {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 4
+                 'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
+                 'left_beats': [1, 3, 5, 7], # eighth notes in a measure
+                 'right_beats': [0, 2, 4, 6], # eighth notes in a measure
+                 'miss_sfx': 'audio/error_sound.wav',
+                 'hit_sfx': 'audio/snare.wav',
+                 'block_sfx': 'audio/sword.wav',
+                 'gem_creation': (8, 10), # create if less than, out of
+                 'lanes': 3},
+
+                {'right_sfx': ['audio/snare.wav', 'audio/snare.wav', 'audio/snare.wav'], # scene 5
+                 'left_sfx': ['audio/sword.wav', 'audio/sword.wav', 'audio/sword.wav'],
+                 'left_beats': [0, 2, 4, 6], # eighth notes in a measure
+                 'right_beats': [0, 2, 4, 6], # eighth notes in a measure
+                 'miss_sfx': 'audio/error_sound.wav',
+                 'hit_sfx': 'audio/snare.wav',
+                 'block_sfx': 'audio/sword.wav',
+                 'gem_creation': (7, 10), # create if less than, out of
                  'lanes': 3},
 ]
 
