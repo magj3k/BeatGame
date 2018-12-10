@@ -935,7 +935,7 @@ class Scene(InstructionGroup):
                 target_warning_alpha = 0.0
                 if fabs(door.pos[0] - (self.player.world_pos[0]*self.player.res)) < 105.0:
                     num_keys_required = 3
-                    if len(self.audio_controller.get_offsets()): num_keys_required = 2
+                    if len(self.audio_controller.get_offsets()) == 1: num_keys_required = 2
                     if self.num_keys_collected < num_keys_required:
                         target_warning_alpha = 1.0
                     else:

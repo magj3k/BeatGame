@@ -4,10 +4,7 @@ To Play:
 `python main.py`
 
 To-Do:
-- Make enemies more difficult
-- fix puzzle mode UI for 2-lane puzzle
 - 3-min presentation + 2-min next steps
-- add audio maps for other levels
 - fix bug where moving keys before gems appear messes up audio offset
 - End game (white background, trippy, "you are here"), credits
 - Level 5
