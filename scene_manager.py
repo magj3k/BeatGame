@@ -246,13 +246,16 @@ class Scene(InstructionGroup):
                 # adds gems
                 gem_data = []
                 colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
+                two_keys_offset = 0
+                if len(self.audio_controller.get_offsets()) == 1:
+                    two_keys_offset = -176/2
                 for index, gem_path in enumerate(self.audio_controller.level_puzzle['fg_gems']):
                     song_data = SongData(colors[index])
                     song_data.read_data(gem_path)
 
                     gem_props = {}
                     gem_props['gem_times'] = song_data.get_gem_data()
-                    offset_y = 176*(-index+1) + 40
+                    offset_y = 176*(-index+1) + 40 + two_keys_offset
                     gem_props['gem_y_pos'] = window_size[1]*0.43 + offset_y
                     if index == self.audio_controller.num_lanes:
                         gem_props['offset'] = 0
@@ -267,7 +270,7 @@ class Scene(InstructionGroup):
                 self.puzzle_key_initial_offsets = self.audio_controller.get_offsets()
                 for i in range(len(self.audio_controller.get_offsets())+1):
                     offset_y = 176*(-i+1) + 40 
-                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.43 + offset_y), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
+                    new_line = GeometricElement(pos = (window_size[0]*0.5, window_size[1]*0.43 + offset_y + two_keys_offset), tag = "puzzle_line_"+str(i), color = Color(0.35, 0.35, 0.35, 0.0), target_alpha = 1, z = 3, size = (window_size[0], 6))
                     self.queued_UI_elements.append(new_line)
 
                 # updates camera
@@ -700,6 +703,15 @@ class Scene(InstructionGroup):
                 if (element.tag == "k_1" and self.num_keys_collected >= 1) or (element.tag == "k_2" and self.num_keys_collected >= 2) or (element.tag == "k_3" and self.num_keys_collected >= 3):
                     element.change_texture("graphics/key.png")
                     element.tag = element.tag+"x"
+                if self.audio_controller != None and len(self.audio_controller.get_offsets()) == 1 and element.tag == "k_3":
+                    element.color.a = 0
+
+                # updates key bg
+                if element.tag == "keys_bg":
+                    if len(self.audio_controller.get_offsets()) == 1:
+                        element.pos = (window_size[0]-16, element.pos[1])
+                    else:
+                        element.pos = (window_size[0]-66, element.pos[1])
 
                 # particles
                 if element.tag == "particle":
@@ -744,7 +756,7 @@ class Scene(InstructionGroup):
                         else:
                             element.target_alpha = 1.0
 
-                    if len(self.audio_controller.get_offsets()) == 2:
+                    if self.audio_controller != None and len(self.audio_controller.get_offsets()) == 2:
                         if element.tag == "k_1x":
                             offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
                             element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 + 176)
@@ -757,14 +769,14 @@ class Scene(InstructionGroup):
                             offset = 0
                             element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 - 176)
                             element.target_size = (166*0.34, 400*0.34)
-                    elif len(self.audio_controller.get_offsets()) == 1:
+                    elif self.audio_controller != None and len(self.audio_controller.get_offsets()) == 1:
                         if element.tag == "k_1x":
                             offset = (self.audio_controller.get_offsets()[0] - self.puzzle_key_initial_offsets[0]) * window_size[0]/16
-                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 + 176)
+                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 + 176 - (176/2))
                             element.target_size = (166*0.34, 400*0.34)
                         elif element.tag == "k_2x":
                             offset = 0
-                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43)
+                            element.target_pos = (window_size[0]*0.25 + offset, window_size[1]*0.43 - (176/2))
                             element.target_size = (166*0.34, 400*0.34)
                     
                     if self.audio_controller.solved == False:
@@ -835,6 +847,19 @@ class Scene(InstructionGroup):
                 elif self.game_mode == "explore": # explore mode
                     if element.tag[:2] == "k_" and element.target_alpha != 1.0:
                         element.target_alpha = 1.0
+
+                        if self.audio_controller != None and len(self.audio_controller.get_offsets()) == 1:
+                            if element.tag[:3] == "k_1":
+                                element.pos = (window_size[0]-95, element.pos[1])
+                            elif element.tag[:3] == "k_2":
+                                element.pos = (window_size[0]-45, element.pos[1])
+                        else:
+                            if element.tag[:3] == "k_1":
+                                element.pos = (window_size[0]-145, element.pos[1])
+                            elif element.tag[:3] == "k_2":
+                                element.pos = (window_size[0]-95, element.pos[1])
+                            elif element.tag[:3] == "k_3":
+                                element.pos = (window_size[0]-45, element.pos[1])
                     elif element.tag == "keys_bg" and element.target_alpha != 0.5:
                         element.target_alpha = 0.5
                     elif "gem" in element.tag:
@@ -909,7 +934,9 @@ class Scene(InstructionGroup):
             if door_warning != None and self.game_mode != "puzzle" and self.player.on_ground:
                 target_warning_alpha = 0.0
                 if fabs(door.pos[0] - (self.player.world_pos[0]*self.player.res)) < 105.0:
-                    if self.num_keys_collected < 3: # should always be < 3
+                    num_keys_required = 3
+                    if len(self.audio_controller.get_offsets()): num_keys_required = 2
+                    if self.num_keys_collected < num_keys_required:
                         target_warning_alpha = 1.0
                     else:
                         # enters puzzle mode if puzzle mode supported

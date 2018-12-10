@@ -19,7 +19,7 @@ far_z = 100000000
 scene_resolution = 30.0
 scene_elevation_offset = 6
 
-keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
+keys_UI = [TexturedElement(pos = (window_size[0]-145, window_size[1]-65),
                         z = 10,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
@@ -29,7 +29,7 @@ keys_UI = [TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
                         tag = "k_2"),
-                    TexturedElement(pos = (window_size[0]-145, window_size[1]-65),
+                    TexturedElement(pos = (window_size[0]-45, window_size[1]-65),
                         z = 10,
                         size = (166*0.2, 400*0.2),
                         texture_path = "graphics/key_outline.png",
@@ -347,9 +347,9 @@ scene_1_game_elements = [   scene_1_door,
                                                     Pickup(TexturedElement(pos = (60.5*scene_resolution, 12*scene_resolution),
                                                         size = (166*0.091, 400*0.091),
                                                         texture_path = "graphics/key.png"), z = 110, radius = 20),
-                                                    Pickup(TexturedElement(pos = (81*scene_resolution, 288),
-                                                        size = (166*0.091, 400*0.091),
-                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
+                                                    # Pickup(TexturedElement(pos = (81*scene_resolution, 288),
+                                                    #     size = (166*0.091, 400*0.091),
+                                                    #     texture_path = "graphics/key.png"), z = 110, radius = 20),
                                                     Platform(((70.2, 6), (71.8, 6)),
                                                         type = "dirt",
                                                         z = 100,
@@ -567,9 +567,9 @@ scene_2_game_elements = [   scene_2_door,
                                                         color = Color(0.35, 0.35, 0.95),
                                                         res = scene_resolution,
                                                         type = "water"),
-                                                    Pickup(TexturedElement(pos = (42.75*scene_resolution, 300),
-                                                        size = (166*0.091, 400*0.091),
-                                                        texture_path = "graphics/key.png"), z = 110, radius = 20),
+                                                    # Pickup(TexturedElement(pos = (42.75*scene_resolution, 300),
+                                                    #     size = (166*0.091, 400*0.091),
+                                                    #     texture_path = "graphics/key.png"), z = 110, radius = 20),
                                                     Pickup(TexturedElement(pos = (69*scene_resolution, 14*scene_resolution),
                                                         size = (166*0.091, 400*0.091),
                                                         texture_path = "graphics/key.png"), z = 110, radius = 20),
@@ -952,6 +952,7 @@ scene_3_game_elements = [   scene_3_door,
                                                         texture_path = "graphics/key.png"), z = 110, radius = 20),
                                                 ]
 scene_3_enemies = [
+# TODO add enemy with no key
     Enemy(res = scene_resolution, initial_world_pos = (116, 7), radius = 40, z = 110, moves_per_beat = ["stop", "stop", "stop", "right", "stop", "stop", "stop", "left"], has_key = True)
 ]
 scene_3_game_elements.extend(scene_3_enemies)
@@ -1429,5 +1430,5 @@ panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed 
 panel_1_next_scene_index = 2 # should be 2
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = panel_1_next_scene_index)
 
-scenes = [scene_3, menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_0]
+scenes = [menu_1, panel_1, scene_1, scene_2, scene_3, scene_4]
 # scenes = [panel_1, scene_4]

@@ -98,6 +98,7 @@ def run(widget):
 
     class MainApp(App):
         def build(self):
+            self.title = 'Square Wave'
             return widget()
 
     try:
