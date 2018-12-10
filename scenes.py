@@ -1984,5 +1984,88 @@ panel_1_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed 
 panel_1_next_scene_index = 2 # should be 2
 panel_1 = Panel(game_camera = panel_1_camera, timed_objects = panel_1_objects, res = scene_resolution, end_time = 8.0, next_scene_index = panel_1_next_scene_index)
 
-scenes = [menu_1, panel_1, scene_1, scene_2, scene_3, scene_4, scene_5]
+# level 1 panel
+
+lvl_1_panel_objects = [
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 1, size = (1140*0.65, 160*0.65), texture_path = "graphics/text_level_1.png"), 0.1, None),
+    # (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
+]
+lvl_1_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
+lvl_1_panel_next_scene_index = 3
+lvl_1_panel = Panel(game_camera = lvl_1_panel_camera, timed_objects = lvl_1_panel_objects, res = scene_resolution, end_time = 3.2, next_scene_index = lvl_1_panel_next_scene_index)
+
+# level 2 panel
+
+lvl_2_panel_objects = [
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 1, size = (1185*0.65, 160*0.65), texture_path = "graphics/text_level_2.png"), 0.1, None),
+    # (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
+]
+lvl_2_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
+lvl_2_panel_next_scene_index = 5
+lvl_2_panel = Panel(game_camera = lvl_2_panel_camera, timed_objects = lvl_2_panel_objects, res = scene_resolution, end_time = 3.2, next_scene_index = lvl_2_panel_next_scene_index)
+
+# level 3 panel
+
+lvl_3_panel_objects = [
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 1, size = (1628*0.65, 160*0.65), texture_path = "graphics/text_level_3.png"), 0.1, None),
+    # (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
+]
+lvl_3_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
+lvl_3_panel_next_scene_index = 7
+lvl_3_panel = Panel(game_camera = lvl_3_panel_camera, timed_objects = lvl_3_panel_objects, res = scene_resolution, end_time = 3.2, next_scene_index = lvl_3_panel_next_scene_index)
+
+# level 4 panel
+
+lvl_4_panel_objects = [
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 1, size = (1240*0.65, 160*0.65), texture_path = "graphics/text_level_4.png"), 0.1, None),
+    # (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
+]
+lvl_4_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
+lvl_4_panel_next_scene_index = 9
+lvl_4_panel = Panel(game_camera = lvl_4_panel_camera, timed_objects = lvl_4_panel_objects, res = scene_resolution, end_time = 3.2, next_scene_index = lvl_4_panel_next_scene_index)
+
+# level 5 panel
+
+lvl_5_panel_objects = [
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 1, size = (1308*0.65, 160*0.65), texture_path = "graphics/text_level_5.png"), 0.1, None),
+    # (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)-30), z = 1, size = (1832*0.5, 69*0.5), texture_path = "graphics/text_2.png"), 3.6, None)
+]
+lvl_5_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
+lvl_5_panel_next_scene_index = 11
+lvl_5_panel = Panel(game_camera = lvl_5_panel_camera, timed_objects = lvl_5_panel_objects, res = scene_resolution, end_time = 3.2, next_scene_index = lvl_5_panel_next_scene_index)
+
+# end game panel
+
+end_game_panel_objects = [
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, size = (1037*0.75, 94*0.75), texture_path = "graphics/text_3.png"), 0.1, 8.1),
+    (GeometricElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 1, color = Color(1, 1, 1, 0.5), size = (window_size[0], window_size[1])), 0.1, 13.5),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.755, 94*0.755), texture_path = "graphics/text_3.png"), 4, 8.2),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.76, 94*0.76), texture_path = "graphics/text_3.png"), 6, 8.3),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.765, 94*0.765), texture_path = "graphics/text_3.png"), 7, 8.4),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.77, 94*0.77), texture_path = "graphics/text_3.png"), 7.5, 8.5),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.775, 94*0.775), texture_path = "graphics/text_3.png"), 7.75, 8.6),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.78, 94*0.78), texture_path = "graphics/text_3.png"), 7.875, 8.7),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.7825, 94*0.7825), texture_path = "graphics/text_3.png"), 8.0, 8.8),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.79, 94*0.79), texture_path = "graphics/text_3.png"), 8.125, 8.9),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.79, 94*0.79), texture_path = "graphics/text_3.png"), 8.25, 9.0),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.8, 94*0.8), texture_path = "graphics/text_3.png"), 8.375, 9.1),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.82, 94*0.82), texture_path = "graphics/text_3.png"), 8.5, 9.2),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.84, 94*0.84), texture_path = "graphics/text_3.png"), 8.625, 9.3),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.86, 94*0.86), texture_path = "graphics/text_3.png"), 8.75, 9.4),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.88, 94*0.88), texture_path = "graphics/text_3.png"), 8.875, 9.5),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.9, 94*0.9), texture_path = "graphics/text_3.png"), 9.0, 9.6),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.925, 94*0.925), texture_path = "graphics/text_3.png"), 9.125, 9.7),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.95, 94*0.95), texture_path = "graphics/text_3.png"), 9.25, 9.8),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*0.975, 94*0.975), texture_path = "graphics/text_3.png"), 9.375, 9.9),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 20, color = Color(1, 1, 1, 0.5), size = (1037*1.0, 94*1.0), texture_path = "graphics/text_3.png"), 9.5, 10.0),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 4, size = (window_size[0]*1.0, window_size[0]*1.0), texture_path = "graphics/sq_1.png"), 9.9, None),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 5, size = (window_size[0]*1.0, window_size[0]*1.0), texture_path = "graphics/sq_2.png"), 10.75, None),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 6, size = (window_size[0]*1.0, window_size[0]*1.0), texture_path = "graphics/sq_3.png"), 12.0, None),
+    (GeometricElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 21, color = Color(0, 0, 0), size = (window_size[0], window_size[1])), 13.2, None),
+    (TexturedElement(pos = (window_size[0]/2, (window_size[1]/2)), z = 22, size = (1037*0.4, 149*0.4), texture_path = "graphics/text_4.png"), 15.0, None),
+]
+end_game_panel_camera = Camera(zoom_factor = 1.0, initial_world_target = (0, 0), speed = 10.0)
+end_game_panel = Panel(game_camera = end_game_panel_camera, timed_objects = end_game_panel_objects, res = scene_resolution, end_time = 18.5, next_scene_index = -1, allow_key_skip = False)
+
+scenes = [menu_1, panel_1, lvl_1_panel, scene_1, lvl_2_panel, scene_2, lvl_3_panel, scene_3, lvl_4_panel, scene_4, lvl_5_panel, scene_5, end_game_panel]
 # scenes = [panel_1, scene_4]

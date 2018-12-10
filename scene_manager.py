@@ -83,6 +83,10 @@ class SceneManager(InstructionGroup):
                     next_scene_index = self.scenes[self.current_scene_index].next_scene_index
                     if next_scene_index != -1:
                         self.switch_to_scene(next_scene_index)
+                    elif next_scene_index == -1 or next_scene_index >= len(self.scenes):
+
+                        # kills python program
+                        sys.exit()
                 else:
                     next_scene_index = self.current_scene_index+1
                     if next_scene_index >= len(self.scenes):
@@ -1032,10 +1036,11 @@ class Menu(Scene):
         super().on_update(dt, active_keys)
 
 class Panel(Scene): # essentially just a timed story panel
-    def __init__(self, game_camera = None, res = 20.0, audio_controller = None, timed_objects = None, end_time = 30.0, next_scene_index = -1):
+    def __init__(self, game_camera = None, res = 20.0, audio_controller = None, timed_objects = None, end_time = 30.0, next_scene_index = -1, allow_key_skip = True):
         Scene.__init__(self, [], [], game_camera, None, res, audio_controller, None)
         self.player.controls_disabled = True
         self.player.collisions_enabled = False
+        self.allow_key_skip = allow_key_skip
 
         # panel elements
         self.timed_objects = timed_objects # e.g. self.timed_objects[0] = (object, time_created, time_destroyed)
@@ -1050,9 +1055,10 @@ class Panel(Scene): # essentially just a timed story panel
         self.t += dt
 
         # skip button
-        for key in active_keys.keys():
-            if active_keys[key] == True and self.t > 0.15:
-                self.scene_finished = True
+        if self.allow_key_skip == True:
+            for key in active_keys.keys():
+                if active_keys[key] == True and self.t > 0.15:
+                    self.scene_finished = True
 
         # adds/removes timed objects
         for i in range(len(self.timed_objects)):
@@ -1065,7 +1071,7 @@ class Panel(Scene): # essentially just a timed story panel
             elif self.t > obj_params[1] and self.timed_objects_created[i] != True: # creates objects
                 self.timed_objects_created[i] = True
                 new_object = obj_params[0]
-                new_object.color.a = 0
+                new_object.color.a = 0.0
                 new_object.target_alpha = 1.0
                 self.queued_UI_elements.append(new_object)
             elif self.t <= obj_params[1]: # object not yet created
