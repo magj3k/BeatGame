@@ -154,7 +154,7 @@ fight_map = [
                  'miss_sfx': 'audio/error_sound.wav',
                  'hit_sfx': 'audio/snare.wav',
                  'block_sfx': 'audio/sword.wav',
-                 'gem_creation': (8, 10), # create if less than, out of
+                 'gem_creation': (10, 10), # create if less than, out of
                  'lanes': 3},
 
                 {'lanes': 0}, # scene 6 (menu and last scene)
