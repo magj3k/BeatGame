@@ -1970,7 +1970,7 @@ menu_1_UI_elements = [
         tag = "option_2")
 ]
 
-menu_1_audio_controller = AudioController(level = 6, bpm = 120, elements = menu_1_game_elements)
+menu_1_audio_controller = AudioController(level = 1, bpm = 120, elements = menu_1_game_elements)
 menu_1_camera = Camera(zoom_factor = 0.85, initial_world_target = menu_1_player.world_pos, speed = 8.0)
 menu_1 = Menu(num_options = 2, option_actions = [["scene", 1], ["quit", -1]], initial_game_elements = menu_1_game_elements, initial_UI_elements = menu_1_UI_elements, ground_map = menu_1_ground_map, game_camera = menu_1_camera, res = scene_resolution, audio_controller = menu_1_audio_controller, player = menu_1_player)
 
