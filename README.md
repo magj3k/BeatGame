@@ -4,7 +4,7 @@ To Play:
 `python main.py`
 
 To-Do:
-*- fix bug where moving keys before gems appear messes up audio offset
+- fix bug where moving keys before gems appear messes up audio offset
 - add instructions for controls (space left right for explore, arrow keys for puzzle?)
 
 Suggestions:
